@@ -1,0 +1,22 @@
+{
+  "name": "cdkl5-conference-miniprogram",
+  "version": "1.0.0",
+  "description": "CDKL5罕见病诊疗进展研讨会小程序",
+  "main": "app.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "lint": "eslint . --ext .ts,.js"
+  },
+  "dependencies": {
+    "@vant/weapp": "^1.11.6"
+  },
+  "devDependencies": {
+    "@types/wechat-miniprogram": "^3.4.7",
+    "typescript": "^5.3.3",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "miniprogram-api-typings": "^3.12.2"
+  }
+}

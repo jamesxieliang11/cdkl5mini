@@ -1,0 +1,46 @@
+<view class="container">
+  <view class="header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="title">2025 CDKL5罕见病诊疗进展研讨会</view>
+    <view class="subtitle">请选择您的身份以获得个性化服务</view>
+  </view>
+
+  <view class="role-cards">
+    <view class="role-card" bindtap="selectRole" data-role="patient">
+      <van-icon name="user-o" size="60rpx" color="#1989fa" />
+      <view class="role-title">病友家庭</view>
+      <view class="role-desc">义诊预约、医保备案、紧急联系</view>
+      <view class="role-features">
+        <text>• 义诊时间查看</text>
+        <text>• 医保备案指南</text>
+        <text>• 紧急联系通道</text>
+      </view>
+    </view>
+
+    <view class="role-card" bindtap="selectRole" data-role="researcher">
+      <van-icon name="manager-o" size="60rpx" color="#07c160" />
+      <view class="role-title">科研人员</view>
+      <view class="role-desc">会议资料、专家联系、学术交流</view>
+      <view class="role-features">
+        <text>• 会议资料下载</text>
+        <text>• 专家联系方式</text>
+        <text>• 学术交流平台</text>
+      </view>
+    </view>
+
+    <view class="role-card" bindtap="selectRole" data-role="staff">
+      <van-icon name="service-o" size="60rpx" color="#ff976a" />
+      <view class="role-title">工作人员</view>
+      <view class="role-desc">签到管理、任务分配、后台管理</view>
+      <view class="role-features">
+        <text>• 签到管理后台</text>
+        <text>• 义工任务分配</text>
+        <text>• 现场协调管理</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="tip">您可以随时在个人中心修改身份设置</text>
+  </view>
+</view>

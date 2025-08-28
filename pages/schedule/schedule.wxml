@@ -1,0 +1,108 @@
+<view class="container">
+  <!-- 日期选择 -->
+  <view class="date-selector">
+    <van-row gutter="20">
+      <van-col span="24">
+        <view class="current-date">
+          <van-icon name="calendar-o" size="20" />
+          <text>{{currentDate}}</text>
+        </view>
+      </van-col>
+    </van-row>
+  </view>
+
+  <!-- 议程列表 -->
+  <view class="schedule-timeline">
+    <view class="timeline-item" wx:for="{{scheduleList}}" wx:key="id">
+      <view class="timeline-time">
+        <text class="time-text">{{item.time}}</text>
+        <view class="time-dot {{item.status}}"></view>
+      </view>
+      <view class="timeline-content">
+        <view class="content-card" bindtap="viewDetail" data-item="{{item}}">
+          <view class="card-header">
+            <view class="title">{{item.title}}</view>
+            <van-tag 
+              type="{{item.status === 'ongoing' ? 'primary' : item.status === 'upcoming' ? 'warning' : 'default'}}"
+              size="small"
+            >
+              {{item.statusText}}
+            </van-tag>
+          </view>
+          
+          <view class="card-body" wx:if="{{item.speaker}}">
+            <view class="speaker-info" bindtap="viewExpert" data-speaker="{{item.speaker}}" catchtap="true">
+              <van-icon name="contact" size="16" color="#1989fa" />
+              <text class="speaker-name">{{item.speaker}}</text>
+              <text class="speaker-title" wx:if="{{item.speakerTitle}}">{{item.speakerTitle}}</text>
+            </view>
+          </view>
+
+          <view class="card-body" wx:if="{{item.description}}">
+            <text class="description">{{item.description}}</text>
+          </view>
+
+          <view class="card-footer" wx:if="{{item.location}}">
+            <van-icon name="location-o" size="14" color="#969799" />
+            <text class="location">{{item.location}}</text>
+          </view>
+
+          <!-- 收藏按钮 -->
+          <view class="favorite-btn" bindtap="toggleFavorite" data-id="{{item.id}}" catchtap="true">
+            <van-icon 
+              name="{{item.isFavorite ? 'star' : 'star-o'}}" 
+              size="20" 
+              color="{{item.isFavorite ? '#ffd21e' : '#c8c9cc'}}"
+            />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="bottom-tip">
+    <van-icon name="info-o" size="16" color="#969799" />
+    <text>点击议程可查看详情，点击讲者姓名可查看专家信息</text>
+  </view>
+</view>
+
+<!-- 议程详情弹窗 -->
+<van-popup show="{{showDetail}}" position="bottom" round bind:close="closeDetail">
+  <view class="detail-popup">
+    <view class="popup-header">
+      <view class="popup-title">{{selectedItem.title}}</view>
+      <van-icon name="cross" size="20" bind:click="closeDetail" />
+    </view>
+    <view class="popup-content">
+      <view class="detail-item">
+        <text class="label">时间：</text>
+        <text class="value">{{selectedItem.time}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{selectedItem.speaker}}">
+        <text class="label">讲者：</text>
+        <text class="value">{{selectedItem.speaker}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{selectedItem.location}}">
+        <text class="label">地点：</text>
+        <text class="value">{{selectedItem.location}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{selectedItem.description}}">
+        <text class="label">简介：</text>
+        <text class="value">{{selectedItem.description}}</text>
+      </view>
+    </view>
+    <view class="popup-actions">
+      <van-button 
+        type="primary" 
+        size="large" 
+        bind:click="addToCalendar"
+        wx:if="{{selectedItem.status === 'upcoming'}}"
+      >
+        添加到日历
+      </van-button>
+    </view>
+  </view>
+</van-popup>
+
+<van-toast id="van-toast" />

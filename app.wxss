@@ -1,0 +1,157 @@
+/**app.wxss**/
+@import '@vant/weapp/common/index.wxss';
+
+page {
+  background-color: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 通用样式 */
+.text-primary {
+  color: #1989fa;
+}
+
+.text-secondary {
+  color: #969799;
+}
+
+.text-success {
+  color: #07c160;
+}
+
+.text-warning {
+  color: #ff976a;
+}
+
+.text-danger {
+  color: #ee0a24;
+}
+
+.bg-primary {
+  background-color: #1989fa;
+}
+
+.bg-light {
+  background-color: #f7f8fa;
+}
+
+.shadow {
+  box-shadow: 0 2rpx 12rpx rgba(100, 101, 102, 0.12);
+}
+
+.border-radius {
+  border-radius: 16rpx;
+}
+
+.margin-bottom {
+  margin-bottom: 20rpx;
+}
+
+.padding {
+  padding: 20rpx;
+}
+
+/* 卡片样式 */
+.card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(100, 101, 102, 0.12);
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #323233;
+  margin-bottom: 16rpx;
+}
+
+.card-content {
+  font-size: 28rpx;
+  color: #646566;
+  line-height: 1.6;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #1989fa 0%, #1296db 100%);
+  border: none;
+  border-radius: 12rpx;
+  color: white;
+  font-weight: 500;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2rpx solid #1989fa;
+  color: #1989fa;
+  border-radius: 12rpx;
+}
+
+/* 状态标签 */
+.status-tag {
+  display: inline-block;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.status-waiting {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.status-processing {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.status-completed {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+/* 专家卡片 */
+.expert-card {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  background: white;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.expert-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  background: #f0f0f0;
+}
+
+.expert-info {
+  flex: 1;
+}
+
+.expert-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #323233;
+  margin-bottom: 8rpx;
+}
+
+.expert-title {
+  font-size: 26rpx;
+  color: #969799;
+}

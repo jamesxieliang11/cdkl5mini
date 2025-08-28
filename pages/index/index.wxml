@@ -1,0 +1,156 @@
+<view class="container">
+  <!-- 公告通知 -->
+  <van-notice-bar
+    left-icon="volume-o"
+    text="{{noticeText}}"
+    scrollable
+    background="#fff7e6"
+    color="#fa8c16"
+  />
+
+  <!-- 角色相关快捷功能 -->
+  <view class="quick-actions">
+    <view class="section-title">快捷服务</view>
+    <van-grid column-num="{{userRole === 'patient' ? 3 : 4}}" border="{{false}}" gutter="20">
+      <van-grid-item 
+        wx:if="{{userRole === 'patient'}}"
+        icon="calendar-o" 
+        text="义诊预约" 
+        bind:click="goToAppointment"
+      />
+      <van-grid-item 
+        wx:if="{{userRole === 'patient'}}"
+        icon="guide-o" 
+        text="医保备案" 
+        bind:click="goToInsurance"
+      />
+      <van-grid-item 
+        wx:if="{{userRole === 'patient'}}"
+        icon="phone-o" 
+        text="紧急联系" 
+        bind:click="emergencyContact"
+      />
+      
+      <van-grid-item 
+        wx:if="{{userRole === 'researcher'}}"
+        icon="description" 
+        text="会议资料" 
+        bind:click="goToMaterials"
+      />
+      <van-grid-item 
+        wx:if="{{userRole === 'researcher'}}"
+        icon="contact" 
+        text="专家联系" 
+        bind:click="goToExperts"
+      />
+      <van-grid-item 
+        wx:if="{{userRole === 'researcher'}}"
+        icon="chat-o" 
+        text="学术交流" 
+        bind:click="goToDiscussion"
+      />
+      
+      <van-grid-item 
+        wx:if="{{userRole === 'staff'}}"
+        icon="manager-o" 
+        text="签到管理" 
+        bind:click="goToCheckin"
+      />
+      <van-grid-item 
+        wx:if="{{userRole === 'staff'}}"
+        icon="todo-list-o" 
+        text="任务分配" 
+        bind:click="goToTasks"
+      />
+      <van-grid-item 
+        wx:if="{{userRole === 'staff'}}"
+        icon="setting-o" 
+        text="后台管理" 
+        bind:click="goToAdmin"
+      />
+      
+      <!-- 通用功能 -->
+      <van-grid-item icon="clock-o" text="会议议程" bind:click="goToSchedule" />
+      <van-grid-item icon="location-o" text="院内导航" bind:click="goToNavigation" />
+    </van-grid>
+  </view>
+
+  <!-- 今日议程预览 -->
+  <view class="today-schedule">
+    <view class="section-title">
+      <text>今日议程</text>
+      <text class="more" bindtap="goToSchedule">查看全部</text>
+    </view>
+    <view class="schedule-list">
+      <view class="schedule-item" wx:for="{{todaySchedule}}" wx:key="id">
+        <view class="time">{{item.time}}</view>
+        <view class="content">
+          <view class="title">{{item.title}}</view>
+          <view class="speaker" wx:if="{{item.speaker}}">{{item.speaker}}</view>
+        </view>
+        <view class="status">
+          <van-tag 
+            type="{{item.status === 'ongoing' ? 'primary' : item.status === 'upcoming' ? 'warning' : 'default'}}"
+            size="small"
+          >
+            {{item.statusText}}
+          </van-tag>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 重要提醒 -->
+  <view class="important-tips" wx:if="{{userRole === 'patient'}}">
+    <view class="section-title">温馨提示</view>
+    <view class="tip-card">
+      <van-icon name="info-o" color="#1989fa" size="20" />
+      <view class="tip-content">
+        <view class="tip-title">脑电图检查</view>
+        <view class="tip-desc">义诊后可优先安排住院，需提前办理医保备案</view>
+      </view>
+    </view>
+    <view class="tip-card">
+      <van-icon name="medal-o" color="#07c160" size="20" />
+      <view class="tip-content">
+        <view class="tip-title">新药支持</view>
+        <view class="tip-desc">加奈索龙已纳入院内采购目录，符合条件者可用</view>
+      </view>
+    </view>
+    <view class="tip-card">
+      <van-icon name="service-o" color="#ff976a" size="20" />
+      <view class="tip-content">
+        <view class="tip-title">社工服务</view>
+        <view class="tip-desc">现场提供义工引导及转诊协调服务</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系信息 -->
+  <view class="contact-info">
+    <view class="section-title">联系我们</view>
+    <van-cell-group>
+      <van-cell 
+        title="会议咨询" 
+        value="点击联系" 
+        is-link 
+        bind:click="contactConference"
+      />
+      <van-cell 
+        title="技术支持" 
+        value="点击联系" 
+        is-link 
+        bind:click="contactSupport"
+      />
+      <van-cell 
+        title="紧急求助" 
+        value="一键拨打" 
+        is-link 
+        bind:click="emergencyCall"
+        wx:if="{{userRole === 'patient'}}"
+      />
+    </van-cell-group>
+  </view>
+</view>
+
+<van-toast id="van-toast" />

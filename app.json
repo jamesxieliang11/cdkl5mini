@@ -1,0 +1,79 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/role-select/role-select",
+    "pages/schedule/schedule",
+    "pages/appointment/appointment",
+    "pages/tools/tools",
+    "pages/messages/messages",
+    "pages/expert-detail/expert-detail",
+    "pages/queue-status/queue-status"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1989fa",
+    "navigationBarTitleText": "CDKL5大会",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f7f8fa"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#1989fa",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/schedule/schedule",
+        "iconPath": "images/schedule.png",
+        "selectedIconPath": "images/schedule-active.png",
+        "text": "议程"
+      },
+      {
+        "pagePath": "pages/appointment/appointment",
+        "iconPath": "images/appointment.png",
+        "selectedIconPath": "images/appointment-active.png",
+        "text": "义诊"
+      },
+      {
+        "pagePath": "pages/tools/tools",
+        "iconPath": "images/tools.png",
+        "selectedIconPath": "images/tools-active.png",
+        "text": "工具"
+      }
+    ]
+  },
+  "cloud": true,
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index",
+    "van-cell": "@vant/weapp/cell/index",
+    "van-cell-group": "@vant/weapp/cell-group/index",
+    "van-icon": "@vant/weapp/icon/index",
+    "van-row": "@vant/weapp/row/index",
+    "van-col": "@vant/weapp/col/index",
+    "van-card": "@vant/weapp/card/index",
+    "van-tag": "@vant/weapp/tag/index",
+    "van-divider": "@vant/weapp/divider/index",
+    "van-notice-bar": "@vant/weapp/notice-bar/index",
+    "van-grid": "@vant/weapp/grid/index",
+    "van-grid-item": "@vant/weapp/grid-item/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-picker": "@vant/weapp/picker/index",
+    "van-datetime-picker": "@vant/weapp/datetime-picker/index",
+    "van-steps": "@vant/weapp/steps/index",
+    "van-step": "@vant/weapp/step/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-toast": "@vant/weapp/toast/index"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于院内导航功能"
+    }
+  }
+}
