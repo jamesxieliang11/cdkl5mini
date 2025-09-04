@@ -116,6 +116,33 @@ Page({
 
     // 根据角色设置不同的通知内容
     this.setNoticeByRole(userRole)
+    
+    // 检查用户是否已完善信息（仅对病友家庭角色）
+    this.checkUserProfile(userRole)
+  },
+
+  // 检查用户信息完善状态
+  checkUserProfile: function(userRole) {
+    // 只对病友家庭角色检查信息完善状态
+    if (userRole === 'patient') {
+      const userInfo = app.globalData.userInfo
+      if (userInfo && userInfo.hasCompleteProfile === false) {
+        // 用户未完善信息，显示提示并跳转
+        wx.showModal({
+          title: '完善用户信息',
+          content: '为了更好地为您服务，请先完善宝宝和家长的基本信息',
+          showCancel: false,
+          confirmText: '去完善',
+          success: (res) => {
+            if (res.confirm) {
+              wx.navigateTo({
+                url: '/pages/user-profile/index'
+              })
+            }
+          }
+        })
+      }
+    }
   },
 
   // 获取角色文本
@@ -312,6 +339,13 @@ Page({
     wx.showToast({
       title: '任务详情功能开发中',
       icon: 'none'
+    })
+  },
+
+  // 完善用户信息
+  goToUserProfile: function() {
+    wx.navigateTo({
+      url: '/pages/user-profile/index'
     })
   }
 })

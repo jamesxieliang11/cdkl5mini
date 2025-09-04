@@ -6,6 +6,7 @@
     "pages/tools/index",
     "pages/messages/index",
     "pages/role-select/index",
+    "pages/user-profile/index",
     "pages/expert-detail/index",
     "pages/appointment-form/index",
     "pages/queue-status/index",

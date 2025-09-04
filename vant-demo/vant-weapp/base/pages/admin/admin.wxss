@@ -1,4 +1,4 @@
-/* 管理员页面样式 */
+/* 个人主页样式 */
 .container {
   padding: 32rpx;
   background-color: #f5f5f5;
@@ -7,7 +7,7 @@
 
 .header {
   text-align: center;
-  margin-bottom: 60rpx;
+  margin-bottom: 40rpx;
 }
 
 .title {
@@ -24,7 +24,57 @@
   color: #666;
 }
 
-.status-card {
+/* 用户信息卡片 */
+.info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.user-avatar {
+  margin-right: 30rpx;
+}
+
+.user-basic {
+  flex: 1;
+}
+
+.user-name {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.user-role {
+  display: block;
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 8rpx;
+}
+
+.profile-status {
+  display: inline-block;
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-status.complete {
+  background: rgba(82, 196, 26, 0.8);
+}
+
+.profile-status.incomplete {
+  background: rgba(250, 140, 22, 0.8);
+}
+
+/* 信息区域 */
+.profile-section {
   background: white;
   border-radius: 16rpx;
   padding: 32rpx;
@@ -32,50 +82,81 @@
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 }
 
-.status-item {
+.section-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 24rpx;
+  margin-bottom: 32rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
 }
 
-.status-item:last-child {
-  margin-bottom: 0;
+.section-title .van-icon {
+  margin-right: 12rpx;
+  color: #1989fa;
 }
 
-.label {
+.section-title text {
   font-size: 32rpx;
+  font-weight: bold;
   color: #333;
 }
 
+/* 信息列表 */
+.info-list {
+  margin-bottom: 32rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #666;
+  width: 200rpx;
+}
+
 .value {
-  font-size: 32rpx;
-  font-weight: bold;
+  font-size: 28rpx;
+  color: #333;
+  flex: 1;
+  text-align: right;
 }
 
-.value.success {
-  color: #52c41a;
+/* 编辑表单 */
+.edit-form {
+  margin-bottom: 32rpx;
 }
 
-.value.warning {
-  color: #fa8c16;
+.van-cell-group {
+  border-radius: 12rpx;
+  overflow: hidden;
 }
 
+/* 操作按钮 */
 .actions {
-  margin-bottom: 60rpx;
+  margin-top: 32rpx;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 20rpx;
 }
 
 .action-btn {
-  width: 100%;
   height: 88rpx;
   border-radius: 44rpx;
   font-size: 32rpx;
-  margin-bottom: 24rpx;
   border: none;
-}
-
-.action-btn:last-child {
-  margin-bottom: 0;
+  flex: 1;
 }
 
 .action-btn.primary {
@@ -100,29 +181,39 @@
   border-color: #f0f0f0;
 }
 
-.tips {
+/* 其他功能区域 */
+.other-section {
   background: white;
   border-radius: 16rpx;
   padding: 32rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 }
 
-.tip-title {
-  display: block;
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 16rpx;
+.function-list {
+  margin-top: 20rpx;
 }
 
-.tip-content {
-  display: block;
+.function-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.function-item:last-child {
+  border-bottom: none;
+}
+
+.function-item .van-icon:first-child {
+  margin-right: 20rpx;
+}
+
+.function-text {
+  flex: 1;
   font-size: 28rpx;
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 12rpx;
+  color: #333;
 }
 
-.tip-content:last-child {
-  margin-bottom: 0;
+.function-item .van-icon:last-child {
+  color: #c8c9cc;
 }

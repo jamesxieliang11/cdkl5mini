@@ -63,18 +63,25 @@ exports.main = async (event, context) => {
       
       console.log('用户信息更新成功:', result)
       
+      const existingUserData = existingUser.data[0]
+      const responseData = {
+        ...userData,
+        _id: existingUserData._id,
+        isNewUser: false,
+        hasCompleteProfile: !!(existingUserData.patientInfo && existingUserData.patientInfo.babyName),
+        patientInfo: existingUserData.patientInfo || null,
+        medicalFiles: existingUserData.medicalFiles || []
+      }
+      
       return {
         success: true,
         message: '登录成功',
-        data: {
-          ...userData,
-          _id: existingUser.data[0]._id,
-          isNewUser: false
-        }
+        data: responseData
       }
     } else {
       // 新用户，创建记录
       userData.createdAt = currentTime
+      userData.hasCompleteProfile = false
       result = await db.collection('users').add({
         data: userData
       })
@@ -87,7 +94,10 @@ exports.main = async (event, context) => {
         data: {
           ...userData,
           _id: result._id,
-          isNewUser: true
+          isNewUser: true,
+          hasCompleteProfile: false,
+          patientInfo: null,
+          medicalFiles: []
         }
       }
     }

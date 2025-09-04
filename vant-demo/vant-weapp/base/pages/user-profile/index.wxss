@@ -1,0 +1,172 @@
+/* 用户信息完善页面样式 */
+.container {
+  padding: 20rpx;
+  background-color: #f7f8fa;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding: 40rpx 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  color: white;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 0 20rpx;
+}
+
+.section-title .van-icon {
+  margin-right: 10rpx;
+  color: #1989fa;
+}
+
+.section-title text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #323233;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: #969799;
+  margin-left: auto;
+}
+
+.van-cell-group {
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(100, 101, 102, 0.08);
+}
+
+.file-upload {
+  padding: 20rpx;
+  text-align: center;
+}
+
+.file-list {
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(100, 101, 102, 0.08);
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #ebedf0;
+}
+
+.file-item:last-child {
+  border-bottom: none;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.file-icon {
+  margin-right: 20rpx;
+  color: #1989fa;
+  font-size: 40rpx;
+}
+
+.file-details {
+  flex: 1;
+}
+
+.file-name {
+  display: block;
+  font-size: 28rpx;
+  color: #323233;
+  margin-bottom: 8rpx;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 24rpx;
+  color: #969799;
+}
+
+.delete-icon {
+  color: #ee0a24;
+  font-size: 36rpx;
+  padding: 10rpx;
+}
+
+.actions {
+  margin-top: 60rpx;
+  padding: 0 20rpx;
+}
+
+.actions .van-button {
+  margin-bottom: 20rpx;
+  border-radius: 50rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+}
+
+.skip-btn {
+  color: #969799 !important;
+  border-color: #ebedf0 !important;
+}
+
+/* 表单样式优化 */
+.van-field__label {
+  color: #646566 !important;
+  font-weight: 500 !important;
+}
+
+.van-field__control {
+  color: #323233 !important;
+}
+
+.van-cell {
+  padding: 24rpx 32rpx !important;
+}
+
+.van-cell__title {
+  color: #646566 !important;
+  font-weight: 500 !important;
+}
+
+.van-cell__value {
+  color: #323233 !important;
+}
+
+/* 必填项标识 */
+.van-field[required] .van-field__label::after {
+  content: '*';
+  color: #ee0a24;
+  margin-left: 4rpx;
+}
+
+.van-cell[required] .van-cell__title::after {
+  content: '*';
+  color: #ee0a24;
+  margin-left: 4rpx;
+}
