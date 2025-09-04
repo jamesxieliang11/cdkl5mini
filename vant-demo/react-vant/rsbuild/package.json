@@ -1,0 +1,24 @@
+{
+  "name": "rsbuild-react-ts",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "rsbuild dev --open",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@react-vant/icons": "^0.0.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-vant": "^3.2.5"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^1.0.4",
+    "@rsbuild/plugin-react": "^1.0.2",
+    "@rsbuild/plugin-sass": "^1.0.1",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5.2.2"
+  }
+}

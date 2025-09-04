@@ -1,0 +1,52 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/schedule/index", 
+    "pages/appointment/index",
+    "pages/tools/index",
+    "pages/messages/index",
+    "pages/role-select/index",
+    "pages/expert-detail/index",
+    "pages/appointment-form/index",
+    "pages/queue-status/index",
+    "pages/admin/admin"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1989fa",
+    "navigationBarTitleText": "CDKL5大会",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#7A7E83",
+    "selectedColor": "#1989fa",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/schedule/index",
+        "text": "议程"
+      },
+      {
+        "pagePath": "pages/appointment/index",
+        "text": "义诊"
+      },
+      {
+        "pagePath": "pages/admin/admin",
+        "text": "管理"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": {
+    "van-tabbar": "/miniprogram_npm/@vant/weapp/tabbar/index",
+    "van-tabbar-item": "/miniprogram_npm/@vant/weapp/tabbar-item/index",
+    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index",
+    "custom-tabbar": "/components/custom-tabbar/index"
+  }
+}

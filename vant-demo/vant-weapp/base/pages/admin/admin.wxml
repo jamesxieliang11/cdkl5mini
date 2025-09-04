@@ -1,0 +1,60 @@
+<!--管理员页面-->
+<view class="container">
+  <view class="header">
+    <text class="title">数据库管理</text>
+    <text class="subtitle">CDKL5大会小程序后台管理</text>
+  </view>
+
+  <view class="status-card">
+    <view class="status-item">
+      <text class="label">数据库状态:</text>
+      <text class="value {{isInitialized ? 'success' : 'warning'}}">
+        {{isInitialized ? '已初始化' : '未初始化'}}
+      </text>
+    </view>
+    <view class="status-item">
+      <text class="label">数据记录数:</text>
+      <text class="value">{{recordCount}}</text>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button 
+      class="action-btn primary" 
+      bindtap="onInitDatabase"
+      disabled="{{loading || isInitialized}}"
+      loading="{{loading}}"
+    >
+      {{loading ? '初始化中...' : (isInitialized ? '已初始化' : '初始化数据库')}}
+    </button>
+    
+    <button 
+      class="action-btn secondary" 
+      bindtap="onRefreshStatus"
+      disabled="{{loading}}"
+    >
+      刷新状态
+    </button>
+    
+    <button 
+      class="action-btn secondary" 
+      bindtap="onViewLogs"
+      disabled="{{loading}}"
+    >
+      查看日志
+    </button>
+  </view>
+
+  <view class="tips">
+    <view class="tip-item">
+      <text class="tip-title">使用说明:</text>
+      <text class="tip-content">1. 首次使用需要点击"初始化数据库"按钮</text>
+      <text class="tip-content">2. 初始化会创建所有必要的数据表和基础数据</text>
+      <text class="tip-content">3. 如果已经初始化过，无需重复操作</text>
+      <text class="tip-content">4. 可以点击"刷新状态"检查当前数据库状态</text>
+    </view>
+  </view>
+</view>
+
+<!-- 自定义tabbar -->
+<custom-tabbar id="tabbar" />

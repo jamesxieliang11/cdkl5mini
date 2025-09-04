@@ -1,0 +1,42 @@
+<view class="role-select-container">
+  <view class="header">
+    <view class="logo">
+      <van-icon name="medical-o" size="60" color="#1989fa" />
+    </view>
+    <view class="title">CDKL5大会</view>
+    <view class="subtitle">请选择您的身份</view>
+  </view>
+
+  <view class="role-list">
+    <van-cell-group>
+      <van-cell 
+        title="病友家庭" 
+        label="查看义诊信息、预约挂号、医保备案"
+        is-link
+        bind:click="selectRole"
+        data-role="patient"
+        icon="friends-o"
+      />
+      <van-cell 
+        title="科研人员" 
+        label="下载会议资料、查看专家信息"
+        is-link
+        bind:click="selectRole"
+        data-role="researcher"
+        icon="manager-o"
+      />
+      <van-cell 
+        title="工作人员" 
+        label="签到管理、义工任务分配"
+        is-link
+        bind:click="selectRole"
+        data-role="staff"
+        icon="service-o"
+      />
+    </van-cell-group>
+  </view>
+
+  <view class="footer">
+    <view class="tip">选择身份后可在个人中心重新设置</view>
+  </view>
+</view>

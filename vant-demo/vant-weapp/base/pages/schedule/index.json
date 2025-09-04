@@ -1,0 +1,15 @@
+{
+  "navigationBarTitleText": "会议议程",
+  "usingComponents": {
+    "van-tabs": "/miniprogram_npm/@vant/weapp/tabs/index",
+    "van-tab": "/miniprogram_npm/@vant/weapp/tab/index",
+    "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
+    "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
+    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index",
+    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
+    "van-button": "/miniprogram_npm/@vant/weapp/button/index",
+    "van-search": "/miniprogram_npm/@vant/weapp/search/index",
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
+    "custom-tabbar": "/components/custom-tabbar/index"
+  }
+}

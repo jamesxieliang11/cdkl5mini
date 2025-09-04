@@ -1,0 +1,24 @@
+<van-tabbar active="{{ active }}" bind:change="onChange" fixed="{{ true }}">
+  <van-tabbar-item name="home">
+    <van-icon slot="icon" name="wap-home-o" />
+    <van-icon slot="icon-active" name="wap-home-o" color="#1989fa" />
+    首页
+  </van-tabbar-item>
+  
+  <van-tabbar-item name="schedule">
+    <van-icon slot="icon" name="calendar-o" />
+    <van-icon slot="icon-active" name="calendar-o" color="#1989fa" />
+    议程
+  </van-tabbar-item>
+  
+  <van-tabbar-item name="appointment">
+    <van-icon slot="icon" name="manager-o" />
+    <van-icon slot="icon-active" name="manager-o" color="#1989fa" />
+    义诊
+  </van-tabbar-item>
+  <van-tabbar-item name="admin">
+    <van-icon slot="icon" name="setting-o" />
+    <van-icon slot="icon-active" name="setting-o" color="#1989fa" />
+    管理
+  </van-tabbar-item>
+</van-tabbar>
