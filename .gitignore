@@ -17,3 +17,12 @@ build/
 
 # cursor 相关
 .cursorrules
+
+# macOS 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
