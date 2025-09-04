@@ -257,6 +257,16 @@ exports.main = async (event, context) => {
     })
     console.log('资源文件数据初始化完成:', resourceResult)
 
+    // 6. 初始化用户集合结构（不插入数据，仅创建集合）
+    // 用户数据将通过userLogin云函数动态创建
+    try {
+      const userCollectionExists = await db.collection('users').count()
+      console.log('用户集合检查完成，当前用户数:', userCollectionExists.total)
+    } catch (error) {
+      // 集合不存在时会报错，这是正常的
+      console.log('用户集合将在首次登录时自动创建')
+    }
+
     console.log('数据库初始化完成！')
     
     return {
@@ -268,6 +278,7 @@ exports.main = async (event, context) => {
         experts: expertResult && expertResult.ids ? expertResult.ids.length : (expertResult && expertResult._id ? 1 : 0),
         schedules: scheduleResult && scheduleResult.ids ? scheduleResult.ids.length : (scheduleResult && scheduleResult._id ? 1 : 0),
         resources: resourceResult && resourceResult.ids ? resourceResult.ids.length : (resourceResult && resourceResult._id ? 1 : 0),
+        users: 0, // 用户集合在首次登录时创建
         timestamp: new Date().toISOString()
       }
     }

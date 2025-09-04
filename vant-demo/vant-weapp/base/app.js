@@ -1,7 +1,10 @@
+const { wxLogin, getUserInfo, isLoggedIn } = require('./utils/user.js')
+
 App({
   globalData: {
     userRole: '', // 用户角色：patient（病友家庭）、staff（工作人员）、researcher（科研人员）
     userInfo: null,
+    openid: '', // 用户openid
     queueNumber: '', // 排队号
     favoriteSchedules: [], // 收藏的议程
     hasNewMessage: false // 是否有新消息
@@ -25,23 +28,8 @@ App({
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
 
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
-
-    // 检查用户是否已选择角色
-    const userRole = wx.getStorageSync('userRole')
-    if (userRole) {
-      this.globalData.userRole = userRole
-    } else {
-      // 首次进入，跳转到角色选择页面
-      wx.reLaunch({
-        url: '/pages/role-select/index'
-      })
-    }
+    // 初始化用户登录状态
+    this.initUserLogin()
 
     // 获取收藏的议程
     const favoriteSchedules = wx.getStorageSync('favoriteSchedules') || []
@@ -53,7 +41,64 @@ App({
     this.checkNewMessages()
   },
 
-  // 设置用户角色
+  // 初始化用户登录状态
+  async initUserLogin() {
+    try {
+      // 检查本地是否有用户信息
+      const localUserInfo = getUserInfo()
+      
+      if (localUserInfo.openid && localUserInfo.userRole) {
+        // 本地有用户信息，恢复到全局数据
+        this.globalData.userInfo = localUserInfo.userInfo
+        this.globalData.userRole = localUserInfo.userRole
+        this.globalData.openid = localUserInfo.openid
+        
+        console.log('用户已登录:', localUserInfo)
+      } else {
+        // 本地没有用户信息，需要登录
+        console.log('用户未登录，跳转到角色选择页面')
+        
+        // 检查用户是否已选择角色（兼容旧版本）
+        const userRole = wx.getStorageSync('userRole')
+        if (userRole) {
+          // 有角色但没有完整登录信息，执行登录
+          await this.performLogin(userRole)
+        } else {
+          // 首次进入，跳转到角色选择页面
+          wx.reLaunch({
+            url: '/pages/role-select/index'
+          })
+        }
+      }
+    } catch (error) {
+      console.error('初始化用户登录状态失败:', error)
+      // 出错时跳转到角色选择页面
+      wx.reLaunch({
+        url: '/pages/role-select/index'
+      })
+    }
+  },
+
+  // 执行登录
+  async performLogin(userRole = 'patient') {
+    try {
+      const loginResult = await wxLogin(userRole)
+      
+      // 更新全局数据
+      this.globalData.userInfo = loginResult.data
+      this.globalData.userRole = loginResult.data.userRole
+      this.globalData.openid = loginResult.data.openid
+      
+      console.log('登录成功:', loginResult)
+      
+      return loginResult
+    } catch (error) {
+      console.error('登录失败:', error)
+      throw error
+    }
+  },
+
+  // 设置用户角色（保持兼容性）
   setUserRole: function(role) {
     this.globalData.userRole = role
     wx.setStorageSync('userRole', role)
