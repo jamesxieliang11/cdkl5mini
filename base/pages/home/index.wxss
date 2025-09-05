@@ -14,7 +14,7 @@
 /* 角色头部优化 */
 .role-header {
   background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
-  padding: 40rpx 40rpx 50rpx;
+  padding: 20rpx 40rpx 20rpx; /* 增加底部padding，为切换身份按钮留出更多空间 */
   color: white;
   position: relative;
   overflow: hidden;
@@ -51,10 +51,10 @@
 
 .role-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   position: relative;
   z-index: 2;
+  margin-bottom: 20rpx; /* 增加底部边距，避免被小程序按钮遮挡 */
 }
 
 .change-role {
@@ -65,6 +65,8 @@
   border: 2rpx solid rgba(255, 255, 255, 0.3);
   border-radius: 50rpx;
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 10; /* 增加层级，确保不被遮挡 */
 }
 
 .change-role:active {
@@ -102,12 +104,13 @@
 .emergency-cell {
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
   color: white;
-  margin: 20rpx 40rpx;
+  margin: 20rpx 30rpx; /* 减少左右边距，避免在小屏幕上超出 */
   border-radius: 20rpx;
   overflow: hidden;
   box-shadow: 0 8rpx 32rpx rgba(255, 107, 107, 0.3);
   position: relative;
   transition: all 0.3s ease;
+  max-width: calc(100vw - 80rpx); /* 设置最大宽度，确保不超出屏幕 */
 }
 
 .emergency-cell::before {

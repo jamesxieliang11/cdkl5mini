@@ -5,8 +5,8 @@
   <!-- 用户角色标识 -->
   <view class="role-header">
     <view class="role-info">
-      <van-tag type="primary" size="large">{{roleText}}</van-tag>
       <text class="change-role" bind:tap="changeRole">切换身份</text>
+      <van-tag type="primary" size="large">{{roleText}}</van-tag>
     </view>
   </view>
 
