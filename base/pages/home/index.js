@@ -115,9 +115,18 @@ Page({
     this.initUserRole()
     // 检查新消息
     this.checkMessages()
-    // 设置自定义tabbar状态
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setActive('home')
+    // 通知tabbar组件更新状态（基于当前页面URL）
+    this.updateTabBarState()
+  },
+
+  // 更新tabbar状态
+  updateTabBarState: function() {
+    if (typeof this.getTabBar === 'function') {
+      const tabBar = this.getTabBar()
+      if (tabBar && typeof tabBar.updateState === 'function') {
+        // 触发tabbar组件根据当前页面更新状态
+        tabBar.updateState()
+      }
     }
   },
 

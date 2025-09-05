@@ -140,9 +140,18 @@ Page({
 
   onShow: function () {
     this.updateFavoriteStatus()
-    // 设置自定义tabbar状态
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setActive('schedule')
+    // 通知tabbar组件更新状态（基于当前页面URL）
+    this.updateTabBarState()
+  },
+
+  // 更新tabbar状态
+  updateTabBarState: function() {
+    if (typeof this.getTabBar === 'function') {
+      const tabBar = this.getTabBar()
+      if (tabBar && typeof tabBar.updateState === 'function') {
+        // 触发tabbar组件根据当前页面更新状态
+        tabBar.updateState()
+      }
     }
   },
 
@@ -249,97 +258,73 @@ Page({
     })
   },
 
-  // 切换收藏状态
+  // 收藏/取消收藏
   toggleFavorite: function(e) {
     const scheduleId = e.currentTarget.dataset.id
-    const schedule = this.findScheduleById(scheduleId)
+    const favoriteSchedules = app.globalData.favoriteSchedules || []
     
-    if (!schedule) return
-
-    if (schedule.isFavorite) {
+    if (favoriteSchedules.includes(scheduleId)) {
       // 取消收藏
       app.removeFavoriteSchedule(scheduleId)
       wx.showToast({
         title: '已取消收藏',
-        icon: 'none',
-        duration: 1000
+        icon: 'success'
       })
     } else {
       // 添加收藏
       app.addFavoriteSchedule(scheduleId)
       wx.showToast({
         title: '已添加收藏',
-        icon: 'success',
-        duration: 1000
+        icon: 'success'
       })
     }
-
+    
+    // 更新收藏状态
     this.updateFavoriteStatus()
-  },
-
-  // 根据ID查找议程
-  findScheduleById: function(id) {
-    for (let day of this.data.scheduleDays) {
-      for (let schedule of day.schedules) {
-        if (schedule.id === id) {
-          return schedule
-        }
-      }
-    }
-    return null
-  },
-
-  // 跳转到议程详情
-  goToDetail: function(e) {
-    const scheduleId = e.currentTarget.dataset.id
-    wx.navigateTo({
-      url: `/pages/expert-detail/index?scheduleId=${scheduleId}`
-    })
-  },
-
-  // 跳转到专家详情
-  goToExpertDetail: function(e) {
-    const expertName = e.currentTarget.dataset.expert
-    wx.navigateTo({
-      url: `/pages/expert-detail/index?expertName=${encodeURIComponent(expertName)}`
-    })
   },
 
   // 显示收藏列表
   showFavorites: function() {
-    if (this.data.favoriteCount === 0) {
+    const favoriteSchedules = app.globalData.favoriteSchedules || []
+    
+    if (favoriteSchedules.length === 0) {
       wx.showToast({
-        title: '暂无收藏内容',
+        title: '暂无收藏',
         icon: 'none'
       })
       return
     }
 
-    const favoriteSchedules = app.globalData.favoriteSchedules || []
-    const favoriteList = []
-    
+    // 收集收藏的议程
+    const allSchedules = []
     this.data.scheduleDays.forEach(day => {
       day.schedules.forEach(schedule => {
         if (favoriteSchedules.includes(schedule.id)) {
-          favoriteList.push(schedule)
+          allSchedules.push(schedule)
         }
       })
     })
 
-    // 显示收藏列表
-    const titles = favoriteList.map(item => item.title)
-    wx.showActionSheet({
-      itemList: titles,
-      success: (res) => {
-        const selectedSchedule = favoriteList[res.tapIndex]
-        this.goToDetail({
-          currentTarget: {
-            dataset: {
-              id: selectedSchedule.id
-            }
-          }
-        })
-      }
+    // 设置为搜索结果显示
+    this.setData({
+      searchKeyword: '我的收藏',
+      filteredSchedules: allSchedules
+    })
+  },
+
+  // 跳转到详情页
+  goToDetail: function(e) {
+    const scheduleId = e.currentTarget.dataset.id
+    wx.navigateTo({
+      url: `/pages/schedule-detail/index?id=${scheduleId}`
+    })
+  },
+
+  // 跳转到专家详情
+  goToExpertDetail: function(e) {
+    const expert = e.currentTarget.dataset.expert
+    wx.navigateTo({
+      url: `/pages/expert-detail/index?expert=${encodeURIComponent(expert)}`
     })
   }
 })

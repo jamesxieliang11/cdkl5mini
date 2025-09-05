@@ -29,12 +29,21 @@ Page({
   },
 
   onShow() {
-    // 设置自定义tabbar状态
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setActive('admin')
-    }
+    // 通知tabbar组件更新状态（基于当前页面URL）
+    this.updateTabBarState()
     // 每次显示时刷新用户信息
     this.initUserInfo()
+  },
+
+  // 更新tabbar状态
+  updateTabBarState: function() {
+    if (typeof this.getTabBar === 'function') {
+      const tabBar = this.getTabBar()
+      if (tabBar && typeof tabBar.updateState === 'function') {
+        // 触发tabbar组件根据当前页面更新状态
+        tabBar.updateState()
+      }
+    }
   },
 
   // 初始化用户信息
