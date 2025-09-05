@@ -1,2 +1,202 @@
+## here are the updates to merge: 
 <!--pages/tools/index.wxml-->
-<text>pages/tools/index.wxml</text>
+<view class="status-bar"></view>
+
+<view class="tools-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-content">
+      <text class="page-title">工具中心</text>
+      <text class="page-subtitle">便民服务，一站式解决</text>
+    </view>
+    <view class="header-decoration">
+      <view class="decoration-circle circle-1"></view>
+      <view class="decoration-circle circle-2"></view>
+      <view class="decoration-circle circle-3"></view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <van-loading type="spinner" color="#667eea" size="40rpx" vertical>
+      加载中...
+    </van-loading>
+  </view>
+
+  <!-- 主要内容 -->
+  <view wx:else class="main-content">
+    <!-- 功能卡片网格 -->
+    <view class="tool-cards-grid">
+      <view 
+        wx:for="{{toolCards}}" 
+        wx:key="id"
+        class="tool-card"
+        data-id="{{item.id}}"
+        bind:tap="onToolCardTap"
+      >
+        <view class="card-background" style="background: {{item.bgColor}}">
+          <view class="card-icon">
+            <van-icon name="{{item.icon}}" size="48" color="white" />
+          </view>
+          <view class="card-content">
+            <text class="card-title">{{item.title}}</text>
+            <text class="card-subtitle">{{item.subtitle}}</text>
+          </view>
+          <view class="card-arrow">
+            <van-icon name="arrow" size="16" color="rgba(255,255,255,0.8)" />
+          </view>
+        </view>
+        <view class="card-description">
+          <text>{{item.description}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快速操作区域 -->
+    <view class="quick-actions">
+      <view class="section-header">
+        <van-icon name="flash" size="20" color="#667eea" />
+        <text class="section-title">快速操作</text>
+      </view>
+
+      <!-- 医保备案快速操作 -->
+      <view class="quick-card insurance-quick">
+        <view class="quick-info">
+          <view class="quick-title">
+            <van-icon name="shield-o" size="20" color="#1989fa" />
+            <text>医保备案</text>
+          </view>
+          <view class="quick-status">
+            <text wx:if="{{!insuranceStatus.isSubmitted}}" class="status-text pending">
+              未备案
+            </text>
+            <text wx:else class="status-text {{insuranceStatus.status}}">
+              {{insuranceStatus.status === 'pending' ? '审核中' : insuranceStatus.status === 'approved' ? '已通过' : '已拒绝'}}
+            </text>
+          </view>
+        </view>
+        <van-button 
+          type="primary" 
+          size="small"
+          bind:click="quickInsuranceAction"
+        >
+          {{insuranceStatus.isSubmitted ? '查看状态' : '立即备案'}}
+        </van-button>
+      </view>
+    </view>
+
+    <!-- 专家推荐 -->
+    <view class="expert-section">
+      <view class="section-header">
+        <van-icon name="manager" size="20" color="#667eea" />
+        <text class="section-title">专家推荐</text>
+        <text class="section-more" bind:tap="navigateToExperts">查看全部</text>
+      </view>
+
+      <scroll-view class="experts-scroll" scroll-x>
+        <view class="experts-list">
+          <view 
+            wx:for="{{experts}}" 
+            wx:key="id"
+            wx:if="{{index < 3}}"
+            class="expert-card-mini"
+            data-expert="{{item}}"
+            bind:tap="contactExpert"
+          >
+            <view class="expert-avatar-mini">
+              <van-icon name="contact" size="32" color="#1989fa" />
+            </view>
+            <view class="expert-info-mini">
+              <text class="expert-name-mini">{{item.name}}</text>
+              <text class="expert-title-mini">{{item.title}}</text>
+              <view class="expert-rating">
+                <van-icon name="star" size="12" color="#ffa940" />
+                <text class="rating-text">{{item.rating}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 热门资料 -->
+    <view class="materials-section">
+      <view class="section-header">
+        <van-icon name="description" size="20" color="#667eea" />
+        <text class="section-title">热门资料</text>
+        <text class="section-more" bind:tap="navigateToMaterials">查看全部</text>
+      </view>
+
+      <view class="materials-list">
+        <view 
+          wx:for="{{materials}}" 
+          wx:key="id"
+          wx:if="{{item.featured}}"
+          class="material-card-mini"
+          data-material="{{item}}"
+          bind:tap="downloadMaterial"
+        >
+          <view class="material-icon-mini">
+            <van-icon name="description" size="28" color="#ff6b35" />
+          </view>
+          <view class="material-info-mini">
+            <text class="material-title-mini">{{item.title}}</text>
+            <view class="material-meta-mini">
+              <text class="material-size">{{item.size}}</text>
+              <text class="material-downloads">{{item.downloads}}次下载</text>
+            </view>
+          </view>
+          <view class="material-action-mini">
+            <van-icon name="down" size="16" color="#666" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 服务统计 -->
+    <view class="stats-section">
+      <view class="section-header">
+        <van-icon name="chart-trending-o" size="20" color="#667eea" />
+        <text class="section-title">服务统计</text>
+      </view>
+
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-number">1,580</text>
+          <text class="stat-label">资料下载</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">3,200</text>
+          <text class="stat-label">专家咨询</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">856</text>
+          <text class="stat-label">备案申请</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">98%</text>
+          <text class="stat-label">满意度</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 帮助提示 -->
+    <view class="help-section">
+      <view class="help-card">
+        <view class="help-icon">
+          <van-icon name="question-o" size="24" color="#1989fa" />
+        </view>
+        <view class="help-content">
+          <text class="help-title">需要帮助？</text>
+          <text class="help-text">如有疑问，请联系客服或查看使用指南</text>
+        </view>
+        <van-button type="info" size="small">
+          联系客服
+        </van-button>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 自定义tabbar -->
+<custom-tabbar id="tabbar" />

@@ -24,6 +24,11 @@ Page({
     }
   },
 
+  // 返回按钮点击处理
+  onBack: function() {
+    wx.navigateBack()
+  },
+
   // 根据专家姓名加载信息
   loadExpertByName: function(expertName) {
     const expertInfo = this.getExpertInfo(expertName)

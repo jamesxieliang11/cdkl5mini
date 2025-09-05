@@ -1,3 +1,11 @@
+<!-- 自定义导航栏 -->
+<van-nav-bar
+  title="{{isEdit ? '编辑用户信息' : '完善用户信息'}}"
+  left-arrow
+  bind:click-left="onBack"
+  custom-class="custom-nav-bar"
+/>
+
 <!--用户信息完善页面-->
 <view class="container">
   <view class="header">

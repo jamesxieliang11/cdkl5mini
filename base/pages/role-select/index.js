@@ -10,6 +10,11 @@ Page({
     console.log('角色选择页面加载')
   },
 
+  // 返回按钮点击处理
+  onBack: function() {
+    wx.navigateBack()
+  },
+
   // 选择角色
   async selectRole(e) {
     if (this.data.loading) return

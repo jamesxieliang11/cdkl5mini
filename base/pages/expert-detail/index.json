@@ -7,6 +7,7 @@
     "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
     "van-button": "/miniprogram_npm/@vant/weapp/button/index",
     "van-divider": "/miniprogram_npm/@vant/weapp/divider/index",
-    "van-image": "/miniprogram_npm/@vant/weapp/image/index"
+    "van-image": "/miniprogram_npm/@vant/weapp/image/index",
+    "van-nav-bar": "/miniprogram_npm/@vant/weapp/nav-bar/index"
   }
 }

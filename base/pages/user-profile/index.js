@@ -34,6 +34,11 @@ Page({
     this.loadUserProfile()
   },
 
+  // 返回按钮点击处理
+  onBack: function() {
+    wx.navigateBack()
+  },
+
   // 格式化文件大小
   formatFileSize: function(size) {
     if (size > 1024 * 1024) {

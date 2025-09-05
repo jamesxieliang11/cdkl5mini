@@ -4,6 +4,7 @@
     "van-button": "/miniprogram_npm/@vant/weapp/button/index",
     "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
     "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
-    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index"
+    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index",
+    "van-nav-bar": "/miniprogram_npm/@vant/weapp/nav-bar/index"
   }
 }
