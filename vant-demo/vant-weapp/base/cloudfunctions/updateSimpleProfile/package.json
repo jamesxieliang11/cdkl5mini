@@ -1,9 +1,0 @@
-{
-  "name": "updateSimpleProfile",
-  "version": "1.0.0",
-  "description": "更新简单用户信息（工作人员/科研人员）",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "~2.6.3"
-  }
-}
