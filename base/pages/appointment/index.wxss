@@ -1,23 +1,63 @@
+/* 状态栏区域 */
+.status-bar {
+  height: var(--status-bar-height);
+  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+}
+
 .appointment-container {
-  background-color: #f7f8fa;
+  background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 100%);
   min-height: 100vh;
-  padding-bottom: 40rpx;
+  padding-bottom: 140rpx;
 }
 
+/* 通知栏优化 */
 .van-notice-bar {
-  margin: 20rpx 40rpx;
-  border-radius: 12rpx;
+  margin: 30rpx 40rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(237, 106, 12, 0.2);
+  border: 2rpx solid rgba(237, 106, 12, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
+.van-notice-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* 我的预约区域优化 */
 .my-appointment {
-  margin: 30rpx 0;
+  margin: 40rpx 0;
 }
 
 .appointment-group {
   margin: 0 40rpx;
-  border-radius: 16rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.1);
+  background: white;
+  position: relative;
+}
+
+.appointment-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8rpx;
+  background: linear-gradient(90deg, #4caf50, #66bb6a, #81c784);
 }
 
 .appointment-status {
@@ -25,139 +65,277 @@
   align-items: center;
 }
 
+/* 预约操作按钮优化 */
 .appointment-actions {
   display: flex;
-  gap: 20rpx;
-  padding: 30rpx;
-  background: #f8f9fa;
+  gap: 24rpx;
+  padding: 40rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
+.appointment-actions .van-button {
+  border-radius: 50rpx;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.appointment-actions .van-button:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+/* 科室选择区域优化 */
 .departments-section {
-  margin: 30rpx 0;
+  margin: 50rpx 0;
 }
 
 .departments-group {
   margin: 0 40rpx;
-  border-radius: 16rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  background: white;
+  position: relative;
 }
 
+.departments-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #1989fa, #64b5f6, #42a5f5);
+}
+
+/* 科室卡片优化 */
 .department-item {
   background: white;
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-  margin: 10rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  margin: 16rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.department-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(25, 137, 250, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.department-item:active {
+  transform: translateY(-8rpx) scale(1.02);
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.15);
+}
+
+.department-item:active::before {
+  opacity: 1;
 }
 
 .department-content {
-  padding: 30rpx 20rpx;
+  padding: 40rpx 30rpx;
   text-align: center;
+  position: relative;
+  z-index: 2;
 }
 
 .department-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #323233;
-  margin: 16rpx 0 12rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 20rpx 0 16rpx;
 }
 
 .department-info {
-  font-size: 24rpx;
-  color: #646566;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
 }
 
 .doctor-info {
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
+  font-weight: 600;
+  color: #1989fa;
 }
 
 .time-info {
-  margin-bottom: 12rpx;
+  margin-bottom: 16rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(25, 137, 250, 0.1);
+  border-radius: 16rpx;
+  display: inline-block;
 }
 
 .queue-info {
   display: flex;
   justify-content: center;
+  margin-top: 12rpx;
 }
 
+/* 科室特色样式优化 */
+.department-item[data-department*="神经内科"] {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 2rpx solid rgba(33, 150, 243, 0.2);
+}
+
+.department-item[data-department*="脑电图"] {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border: 2rpx solid rgba(156, 39, 176, 0.2);
+}
+
+.department-item[data-department*="康复"] {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border: 2rpx solid rgba(76, 175, 80, 0.2);
+}
+
+.department-item[data-department*="遗传"] {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
+  border: 2rpx solid rgba(255, 193, 7, 0.2);
+}
+
+/* 通知区域优化 */
 .notice-section,
 .emergency-section,
 .location-section {
-  margin: 30rpx 0;
+  margin: 50rpx 0;
 }
 
 .notice-content {
-  padding: 0 40rpx;
   background: white;
   margin: 0 40rpx;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.notice-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #2196f3, #64b5f6);
+  border-radius: 24rpx 24rpx 0 0;
 }
 
 .notice-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 20rpx;
-  font-size: 26rpx;
-  color: #646566;
-  line-height: 1.5;
+  margin-bottom: 24rpx;
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.6;
+  padding: 16rpx 20rpx;
+  background: rgba(33, 150, 243, 0.05);
+  border-radius: 16rpx;
+  border-left: 4rpx solid #2196f3;
+  transition: all 0.3s ease;
 }
 
 .notice-item:last-child {
   margin-bottom: 0;
 }
 
-.notice-item .van-icon {
-  margin-right: 12rpx;
-  margin-top: 4rpx;
-  flex-shrink: 0;
+.notice-item:active {
+  background: rgba(33, 150, 243, 0.1);
+  transform: translateX(8rpx);
 }
 
+.notice-item .van-icon {
+  margin-right: 16rpx;
+  margin-top: 6rpx;
+  flex-shrink: 0;
+  color: #2196f3;
+}
+
+/* 紧急联系和地址导航优化 */
 .emergency-group,
 .location-group {
   margin: 0 40rpx;
-  border-radius: 16rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  background: white;
+  position: relative;
 }
 
-/* 科室特色样式 */
-.department-item[data-department*="神经内科"] {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+.emergency-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #ff5722, #ff7043);
 }
 
-.department-item[data-department*="脑电图"] {
-  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+.location-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
 }
 
-.department-item[data-department*="康复"] {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-}
-
-.department-item[data-department*="遗传"] {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
-}
-
-/* 分割线样式 */
+/* 分割线样式优化 */
 .van-divider {
-  margin: 40rpx 0 20rpx;
-  font-size: 28rpx;
-  color: #646566;
+  margin: 60rpx 0 30rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  position: relative;
 }
 
-/* 单元格样式调整 */
+.van-divider::after {
+  content: '';
+  position: absolute;
+  bottom: -8rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80rpx;
+  height: 4rpx;
+  background: linear-gradient(90deg, #1989fa, #64b5f6);
+  border-radius: 2px;
+}
+
+/* 单元格样式优化 */
+.van-cell {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.van-cell:active {
+  background: rgba(25, 137, 250, 0.05);
+  transform: translateX(8rpx);
+}
+
 .van-cell__title {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 30rpx;
 }
 
 .van-cell__value {
-  color: #323233;
+  color: #1989fa;
+  font-weight: 600;
 }
 
 .van-cell__label {
-  color: #969799;
-  font-size: 24rpx;
+  color: #666;
+  font-size: 26rpx;
+  line-height: 1.5;
 }
 
 /* 响应式调整 */
@@ -171,15 +349,38 @@
   
   .notice-content {
     margin: 0 30rpx;
-    padding: 25rpx;
+    padding: 30rpx;
   }
   
   .appointment-actions {
-    padding: 25rpx;
-    gap: 15rpx;
+    padding: 30rpx;
+    gap: 20rpx;
   }
   
   .department-content {
-    padding: 25rpx 15rpx;
+    padding: 30rpx 20rpx;
   }
+  
+  .van-notice-bar {
+    margin: 25rpx 30rpx;
+  }
+}
+
+/* 加载动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.departments-section,
+.notice-section,
+.emergency-section,
+.location-section {
+  animation: fadeInUp 0.6s ease-out;
 }

@@ -140,10 +140,10 @@ Page({
 
   onShow: function () {
     this.updateFavoriteStatus()
-    // // 设置自定义tabbar状态
-    // if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-    //   this.getTabBar().setActive('schedule')
-    // }
+    // 设置自定义tabbar状态
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setActive('schedule')
+    }
   },
 
   // 初始化数据

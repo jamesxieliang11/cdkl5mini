@@ -16,7 +16,8 @@
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#1989fa",
     "navigationBarTitleText": "CDKL5大会",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "white",
+    "navigationStyle": "custom"
   },
   "tabBar": {
     "custom": true,

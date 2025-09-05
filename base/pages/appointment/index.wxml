@@ -1,3 +1,6 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+
 <view class="appointment-container">
   <!-- 重要提示 -->
   <van-notice-bar

@@ -1,3 +1,6 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+
 <view class="schedule-container">
   <!-- 搜索栏 -->
   <view class="search-section">

@@ -5,6 +5,7 @@ Page({
     userRole: '',
     roleText: '',
     noticeText: '欢迎参加CDKL5大会！请关注最新议程安排。',
+    statusBarHeight: 44, // 默认状态栏高度
     
     // 病友家庭数据
     patientSchedule: [
@@ -84,7 +85,29 @@ Page({
 
   onLoad: function (options) {
     console.log('首页加载')
+    this.getSystemInfo()
     this.initUserRole()
+  },
+
+  // 获取系统信息，设置状态栏高度
+  getSystemInfo: function() {
+    const systemInfo = wx.getSystemInfoSync()
+    this.setData({
+      statusBarHeight: systemInfo.statusBarHeight
+    })
+    
+    // 动态设置CSS变量
+    wx.nextTick(() => {
+      const query = wx.createSelectorQuery()
+      query.select('.status-bar').boundingClientRect()
+      query.exec((res) => {
+        if (res[0]) {
+          // 设置CSS变量
+          const statusBarHeight = systemInfo.statusBarHeight
+          wx.setStorageSync('statusBarHeight', statusBarHeight)
+        }
+      })
+    })
   },
 
   onShow: function () {
@@ -94,7 +117,7 @@ Page({
     this.checkMessages()
     // 设置自定义tabbar状态
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      // this.getTabBar().setActive('home')
+      this.getTabBar().setActive('home')
     }
   },
 
