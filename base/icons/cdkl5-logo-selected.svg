@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 外圆环 - 选中状态，填充背景 -->
+  <circle cx="24" cy="24" r="22" fill="#1989fa" stroke="#1989fa" stroke-width="2"/>
+  
+  <!-- 内圆 - 选中状态，白色背景 -->
+  <circle cx="24" cy="24" r="16" fill="white" stroke="white" stroke-width="1"/>
+  
+  <!-- CDKL5 文字 - 选中状态，蓝色文字 -->
+  <text x="24" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#1989fa">CDKL5</text>
+  
+  <!-- DNA双螺旋结构 - 选中状态 -->
+  <path d="M16 28 Q20 26 24 28 Q28 30 32 28" stroke="#1989fa" stroke-width="1.5" fill="none"/>
+  <path d="M16 30 Q20 32 24 30 Q28 28 32 30" stroke="#1989fa" stroke-width="1.5" fill="none"/>
+  
+  <!-- 连接点 -->
+  <circle cx="18" cy="29" r="1" fill="#1989fa"/>
+  <circle cx="22" cy="29" r="1" fill="#1989fa"/>
+  <circle cx="26" cy="29" r="1" fill="#1989fa"/>
+  <circle cx="30" cy="29" r="1" fill="#1989fa"/>
+  
+  <!-- 基因标记点 - 选中状态，白色 -->
+  <circle cx="24" cy="12" r="2" fill="white"/>
+  <circle cx="12" cy="24" r="2" fill="white"/>
+  <circle cx="36" cy="24" r="2" fill="white"/>
+  <circle cx="24" cy="36" r="2" fill="white"/>
+</svg>
