@@ -1,0 +1,145 @@
+<!--个人主页-->
+<view class="container">
+  <view class="header">
+    <text class="title">个人中心</text>
+    <text class="subtitle">{{roleText}}</text>
+  </view>
+
+  <!-- 用户基本信息卡片 -->
+  <view class="info-card">
+    <view class="user-avatar">
+      <van-icon name="user-circle-o" size="60" color="#1989fa" />
+    </view>
+    <view class="user-basic">
+      <text class="user-name">{{userRole === 'patient' ? (patientInfo.parentName || '未设置') : (simpleInfo.name || '未设置')}}</text>
+      <text class="user-role">{{roleText}}</text>
+      <text class="profile-status {{hasCompleteProfile ? 'complete' : 'incomplete'}}">
+        {{hasCompleteProfile ? '信息已完善' : '信息待完善'}}
+      </text>
+    </view>
+  </view>
+
+  <!-- 病友家庭 - 完整信息 -->
+  <view wx:if="{{userRole === 'patient'}}" class="profile-section">
+    <view class="section-title">
+      <van-icon name="user-o" />
+      <text>家庭信息</text>
+    </view>
+    
+    <view class="info-list">
+      <view class="info-item">
+        <text class="label">宝宝姓名</text>
+        <text class="value">{{patientInfo.babyName || '未设置'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">宝宝生日</text>
+        <text class="value">{{patientInfo.babyBirthday || '未设置'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">家长姓名</text>
+        <text class="value">{{patientInfo.parentName || '未设置'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">联系电话</text>
+        <text class="value">{{patientInfo.parentPhone || '未设置'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">与宝宝关系</text>
+        <text class="value">{{patientInfo.relationship || '未设置'}}</text>
+      </view>
+    </view>
+
+    <view class="actions">
+      <button class="action-btn primary" bindtap="goToCompleteProfile">
+        {{hasCompleteProfile ? '编辑信息' : '完善信息'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 工作人员/科研人员 - 简单信息 -->
+  <view wx:if="{{userRole !== 'patient'}}" class="profile-section">
+    <view class="section-title">
+      <van-icon name="contact" />
+      <text>基本信息</text>
+    </view>
+    
+    <view wx:if="{{!editing}}" class="info-list">
+      <view class="info-item">
+        <text class="label">姓名</text>
+        <text class="value">{{simpleInfo.name || '未设置'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">联系电话</text>
+        <text class="value">{{simpleInfo.phone || '未设置'}}</text>
+      </view>
+    </view>
+
+    <!-- 编辑模式 -->
+    <view wx:if="{{editing}}" class="edit-form">
+      <van-cell-group>
+        <van-field
+          value="{{simpleInfo.name}}"
+          label="姓名"
+          placeholder="请输入您的姓名"
+          required
+          bind:change="onNameInput"
+        />
+        <van-field
+          value="{{simpleInfo.phone}}"
+          label="联系电话"
+          placeholder="请输入手机号码"
+          type="number"
+          required
+          bind:change="onPhoneInput"
+        />
+      </van-cell-group>
+    </view>
+
+    <view class="actions">
+      <button 
+        wx:if="{{!editing}}" 
+        class="action-btn primary" 
+        bindtap="startEdit"
+      >
+        {{hasCompleteProfile ? '编辑信息' : '完善信息'}}
+      </button>
+      
+      <view wx:if="{{editing}}" class="edit-actions">
+        <button 
+          class="action-btn secondary" 
+          bindtap="cancelEdit"
+          disabled="{{loading}}"
+        >
+          取消
+        </button>
+        <button 
+          class="action-btn primary" 
+          bindtap="saveSimpleInfo"
+          loading="{{loading}}"
+          disabled="{{loading}}"
+        >
+          {{loading ? '保存中...' : '保存'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 其他功能 -->
+  <view class="other-section">
+    <view class="section-title">
+      <van-icon name="setting-o" />
+      <text>其他功能</text>
+    </view>
+    
+    <view class="function-list">
+      <view class="function-item" bindtap="logout">
+        <van-icon name="sign-out" color="#ee0a24" />
+        <text class="function-text">退出登录</text>
+        <van-icon name="arrow" />
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 自定义tabbar -->
+<custom-tabbar id="tabbar" />

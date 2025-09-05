@@ -1,0 +1,201 @@
+.schedule-container {
+  background-color: #f7f8fa;
+  min-height: 100vh;
+}
+
+.search-section {
+  background: white;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.schedule-list {
+  padding: 0 40rpx 40rpx;
+}
+
+.schedule-item {
+  display: flex;
+  margin-bottom: 40rpx;
+  position: relative;
+}
+
+.timeline {
+  width: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 30rpx;
+}
+
+.time-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background-color: #c8c9cc;
+  border: 4rpx solid white;
+  box-shadow: 0 0 0 2rpx #c8c9cc;
+  z-index: 2;
+}
+
+.time-dot.active {
+  background-color: #1989fa;
+  box-shadow: 0 0 0 2rpx #1989fa;
+}
+
+.time-line {
+  width: 2rpx;
+  flex: 1;
+  background-color: #ebedf0;
+  margin-top: 10rpx;
+}
+
+.schedule-content {
+  flex: 1;
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.time-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.time {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1989fa;
+}
+
+.favorite-icon {
+  padding: 10rpx;
+  margin: -10rpx;
+}
+
+.schedule-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #323233;
+  line-height: 1.4;
+  margin-bottom: 20rpx;
+}
+
+.schedule-meta {
+  display: flex;
+  gap: 30rpx;
+  margin-bottom: 16rpx;
+}
+
+.speaker,
+.location {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 26rpx;
+  color: #646566;
+}
+
+.speaker {
+  color: #1989fa;
+  text-decoration: underline;
+}
+
+.schedule-desc {
+  font-size: 26rpx;
+  color: #969799;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+.highlight-mark {
+  margin-top: 16rpx;
+}
+
+.floating-btn {
+  position: fixed;
+  right: 40rpx;
+  bottom: 120rpx;
+  width: 120rpx;
+  height: 120rpx;
+  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(25, 137, 250, 0.3);
+  z-index: 1000;
+}
+
+.btn-text {
+  font-size: 20rpx;
+  color: white;
+  margin-top: 4rpx;
+}
+
+.badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #ee0a24;
+  color: white;
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
+  border-radius: 20rpx;
+  min-width: 32rpx;
+  text-align: center;
+  line-height: 1;
+}
+
+/* 标签页样式 */
+.van-tabs__nav {
+  background: white;
+}
+
+.van-tab {
+  font-weight: 500;
+}
+
+.van-tab--active {
+  color: #1989fa;
+  font-weight: 600;
+}
+
+/* 搜索结果高亮 */
+.search-highlight {
+  background-color: #fff3cd;
+  padding: 2rpx 4rpx;
+  border-radius: 4rpx;
+}
+
+/* 响应式调整 */
+@media (max-width: 375px) {
+  .schedule-list {
+    padding: 0 30rpx 30rpx;
+  }
+  
+  .schedule-content {
+    padding: 24rpx;
+  }
+  
+  .floating-btn {
+    right: 30rpx;
+    bottom: 100rpx;
+    width: 100rpx;
+    height: 100rpx;
+  }
+  
+  .schedule-meta {
+    flex-direction: column;
+    gap: 12rpx;
+  }
+}

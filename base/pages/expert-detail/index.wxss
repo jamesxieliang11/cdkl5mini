@@ -1,0 +1,177 @@
+.expert-detail-container {
+  background-color: #f7f8fa;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.expert-header {
+  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  padding: 60rpx 40rpx;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.expert-avatar {
+  margin-right: 40rpx;
+}
+
+.expert-basic {
+  flex: 1;
+}
+
+.expert-name {
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+}
+
+.expert-title {
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 8rpx;
+}
+
+.expert-hospital {
+  font-size: 26rpx;
+  opacity: 0.8;
+}
+
+.info-group,
+.clinic-group,
+.achievement-group,
+.schedule-group {
+  margin: 30rpx 40rpx 0;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.research-section {
+  margin: 30rpx 0;
+}
+
+.research-content {
+  padding: 0 40rpx;
+}
+
+.research-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 30rpx;
+}
+
+.research-tag {
+  margin: 0;
+}
+
+.research-desc {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #646566;
+  background: white;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.related-section {
+  margin: 30rpx 0;
+}
+
+.contact-section {
+  margin: 30rpx 0;
+}
+
+.contact-buttons {
+  display: flex;
+  gap: 20rpx;
+  padding: 0 40rpx;
+}
+
+.contact-btn {
+  flex: 1;
+}
+
+.tips-section {
+  margin: 30rpx 0;
+}
+
+.tips-content {
+  padding: 0 40rpx;
+  background: white;
+  margin: 0 40rpx;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+  font-size: 26rpx;
+  color: #646566;
+  line-height: 1.5;
+}
+
+.tip-item:last-child {
+  margin-bottom: 0;
+}
+
+.tip-item .van-icon {
+  margin-right: 12rpx;
+  margin-top: 4rpx;
+  flex-shrink: 0;
+}
+
+/* 单元格样式调整 */
+.van-cell__title {
+  font-weight: 500;
+}
+
+.van-cell__value {
+  color: #323233;
+}
+
+.van-cell__label {
+  color: #969799;
+  font-size: 24rpx;
+}
+
+/* 分割线样式 */
+.van-divider {
+  margin: 40rpx 0 20rpx;
+  font-size: 28rpx;
+  color: #646566;
+}
+
+/* 响应式调整 */
+@media (max-width: 375px) {
+  .expert-header {
+    padding: 50rpx 30rpx;
+  }
+  
+  .expert-name {
+    font-size: 36rpx;
+  }
+  
+  .info-group,
+  .clinic-group,
+  .achievement-group,
+  .schedule-group {
+    margin: 25rpx 30rpx 0;
+  }
+  
+  .research-content,
+  .contact-buttons,
+  .tips-content {
+    padding: 0 30rpx;
+  }
+  
+  .tips-content {
+    margin: 0 30rpx;
+    padding: 25rpx;
+  }
+}
