@@ -228,7 +228,7 @@ Page({
 
   // 导航到我的报告
   goToReports() {
-    wx.switchTab({
+    wx.navigateTo({
       url: '/pages/reports/index'
     })
   },

@@ -1,2 +1,231 @@
 <!--pages/reports/index.wxml-->
-<text>pages/reports/index.wxml</text>
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">我的报告</text>
+    <button class="home-btn" bindtap="goToHome">
+      <text class="home-icon">🏠</text>
+      <text class="home-text">主页</text>
+    </button>
+  </view>
+
+  <!-- 宝宝信息卡片 -->
+  <view class="baby-info-card">
+    <view class="card-header">
+      <text class="card-title">👶 宝宝信息</text>
+      <button class="edit-btn" bindtap="editBabyInfo">编辑</button>
+    </view>
+    <view class="baby-info-content">
+      <view class="info-row">
+        <text class="info-label">姓名：</text>
+        <text class="info-value">{{babyInfo.name || '未设置'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">年龄：</text>
+        <text class="info-value">{{babyInfo.age || '未设置'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">体重：</text>
+        <text class="info-value">{{babyInfo.weight || '未设置'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">第一次发作：</text>
+        <text class="info-value">{{babyInfo.firstSeizure || '未记录'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 整体概览 -->
+  <view class="overview-section">
+    <view class="section-header">
+      <text class="section-title">📊 整体概览</text>
+      <view class="time-filter">
+        <picker mode="selector" range="{{timeRangeOptions}}" value="{{selectedTimeRange}}" bindchange="onTimeRangeChange">
+          <view class="picker-display">
+            <text>{{timeRangeOptions[selectedTimeRange]}}</text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+    
+    <view class="overview-cards">
+      <view class="overview-card seizure">
+        <view class="card-icon">⚡</view>
+        <view class="card-content">
+          <text class="card-number">{{overview.seizureCount}}</text>
+          <text class="card-label">发作次数</text>
+        </view>
+      </view>
+      
+      <view class="overview-card medication">
+        <view class="card-icon">💊</view>
+        <view class="card-content">
+          <text class="card-number">{{overview.medicationCount}}</text>
+          <text class="card-label">调药次数</text>
+        </view>
+      </view>
+      
+      <view class="overview-card average">
+        <view class="card-icon">📈</view>
+        <view class="card-content">
+          <text class="card-number">{{overview.avgSeizurePerMonth}}</text>
+          <text class="card-label">月均发作</text>
+        </view>
+      </view>
+      
+      <view class="overview-card other">
+        <view class="card-icon">📝</view>
+        <view class="card-content">
+          <text class="card-number">{{overview.otherCount}}</text>
+          <text class="card-label">其他记录</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计分析 -->
+  <view class="statistics-section">
+    <view class="section-header">
+      <text class="section-title">📈 统计分析</text>
+    </view>
+    
+    <!-- 统计类型选择 -->
+    <view class="stats-tabs">
+      <view class="tab-item {{activeStatsTab === 'seizure' ? 'active' : ''}}" bindtap="switchStatsTab" data-tab="seizure">
+        发作统计
+      </view>
+      <view class="tab-item {{activeStatsTab === 'medication' ? 'active' : ''}}" bindtap="switchStatsTab" data-tab="medication">
+        用药统计
+      </view>
+      <view class="tab-item {{activeStatsTab === 'other' ? 'active' : ''}}" bindtap="switchStatsTab" data-tab="other">
+        其他统计
+      </view>
+    </view>
+
+    <!-- 发作统计 -->
+    <view wx:if="{{activeStatsTab === 'seizure'}}" class="stats-content">
+      <!-- 趋势图 -->
+      <view class="chart-container">
+        <view class="chart-header">
+          <text class="chart-title">发作趋势</text>
+          <view class="chart-period">
+            <text class="period-item {{seizureChartPeriod === 'week' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="week">周</text>
+            <text class="period-item {{seizureChartPeriod === 'month' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="month">月</text>
+            <text class="period-item {{seizureChartPeriod === 'year' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="year">年</text>
+          </view>
+        </view>
+        <view class="chart-placeholder">
+          <text class="chart-text">发作趋势图</text>
+          <view class="chart-data">
+            <view wx:for="{{seizureTrendData}}" wx:key="period" class="chart-bar">
+              <view class="bar" style="height: {{item.height}}%"></view>
+              <text class="bar-label">{{item.label}}</text>
+              <text class="bar-value">{{item.count}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 发作类型分布 -->
+      <view class="insight-container">
+        <text class="insight-title">发作类型分布</text>
+        <view class="insight-list">
+          <view wx:for="{{seizureTypeStats}}" wx:key="type" class="insight-item">
+            <view class="insight-dot" style="background-color: {{item.color}}"></view>
+            <text class="insight-label">{{item.type}}</text>
+            <text class="insight-value">{{item.count}}次 ({{item.percentage}}%)</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 时间轴 -->
+      <view class="timeline-container">
+        <text class="timeline-title">最近发作记录</text>
+        <view class="timeline-list">
+          <view wx:for="{{recentSeizures}}" wx:key="id" class="timeline-item">
+            <view class="timeline-dot"></view>
+            <view class="timeline-content">
+              <text class="timeline-time">{{item.datetime}}</text>
+              <text class="timeline-desc">{{item.type}} - 持续{{item.duration}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用药统计 -->
+    <view wx:elif="{{activeStatsTab === 'medication'}}" class="stats-content">
+      <!-- 用药趋势图 -->
+      <view class="chart-container">
+        <view class="chart-header">
+          <text class="chart-title">用药趋势</text>
+          <view class="chart-period">
+            <text class="period-item {{medicationChartPeriod === 'week' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="week">周</text>
+            <text class="period-item {{medicationChartPeriod === 'month' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="month">月</text>
+            <text class="period-item {{medicationChartPeriod === 'year' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="year">年</text>
+          </view>
+        </view>
+        <view class="chart-placeholder">
+          <text class="chart-text">用药趋势图</text>
+          <view class="chart-data">
+            <view wx:for="{{medicationTrendData}}" wx:key="period" class="chart-bar">
+              <view class="bar medication-bar" style="height: {{item.height}}%"></view>
+              <text class="bar-label">{{item.label}}</text>
+              <text class="bar-value">{{item.count}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 药物使用分析 -->
+      <view class="insight-container">
+        <text class="insight-title">药物使用分析</text>
+        <view class="insight-list">
+          <view wx:for="{{medicationStats}}" wx:key="name" class="insight-item">
+            <view class="insight-dot medication-dot"></view>
+            <text class="insight-label">{{item.name}}</text>
+            <text class="insight-value">{{item.totalDosage}}{{item.unit}} ({{item.count}}次)</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 其他统计 -->
+    <view wx:else class="stats-content">
+      <!-- 其他记录趋势 -->
+      <view class="chart-container">
+        <view class="chart-header">
+          <text class="chart-title">其他记录趋势</text>
+        </view>
+        <view class="chart-placeholder">
+          <text class="chart-text">其他记录趋势图</text>
+          <view class="chart-data">
+            <view wx:for="{{otherTrendData}}" wx:key="period" class="chart-bar">
+              <view class="bar other-bar" style="height: {{item.height}}%"></view>
+              <text class="bar-label">{{item.label}}</text>
+              <text class="bar-value">{{item.count}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 记录分类分析 -->
+      <view class="insight-container">
+        <text class="insight-title">记录分类分析</text>
+        <view class="insight-list">
+          <view wx:for="{{otherCategoryStats}}" wx:key="category" class="insight-item">
+            <view class="insight-dot other-dot"></view>
+            <text class="insight-label">{{item.category}}</text>
+            <text class="insight-value">{{item.count}}条记录</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <text class="loading-text">数据分析中...</text>
+  </view>
+</view>
