@@ -2,17 +2,7 @@
 <view class="status-bar"></view>
 
 <view class="schedule-container">
-  <!-- 搜索栏 -->
-  <view class="search-section">
-    <van-search
-      value="{{searchKeyword}}"
-      placeholder="搜索讲座、专家"
-      bind:search="onSearch"
-      bind:change="onSearchChange"
-      show-action
-      action-text="搜索"
-    />
-  </view>
+  ""
 
   <!-- 日期标签页 -->
   <van-tabs active="{{activeTab}}" bind:change="onTabChange" sticky>

@@ -41,6 +41,26 @@ Component({
       }
     },
     
+    // 显示添加记录选择弹窗
+    showAddRecordModal() {
+      wx.showActionSheet({
+        itemList: ['调药记录', '发作记录', '其他记录'],
+        success: (res) => {
+          const recordTypes = [
+            '/pages/medication-record/index',
+            '/pages/seizure-record/index', 
+            '/pages/other-record/index'
+          ]
+          
+          if (res.tapIndex >= 0) {
+            wx.navigateTo({
+              url: recordTypes[res.tapIndex]
+            })
+          }
+        }
+      })
+    },
+    
     // 根据当前页面路径更新active状态
     updateActiveByCurrentPage() {
       const pages = getCurrentPages()
@@ -54,8 +74,8 @@ Component({
       // 根据页面路径判断应该激活哪个tab
       if (route.includes('home')) {
         active = 'home'
-      } else if (route.includes('schedule')) {
-        active = 'schedule'
+      } else if (route.includes('add-record') || route.includes('medication-record') || route.includes('seizure-record') || route.includes('other-record')) {
+        active = 'add-record'
       } else if (route.includes('admin')) {
         active = 'admin'
       }

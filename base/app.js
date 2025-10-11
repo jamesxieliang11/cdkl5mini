@@ -56,26 +56,23 @@ App({
         console.log('用户已登录:', localUserInfo)
       } else {
         // 本地没有用户信息，需要登录
-        console.log('用户未登录，跳转到角色选择页面')
+        console.log('用户未登录，执行登录')
         
-        // 检查用户是否已选择角色（兼容旧版本）
-        const userRole = wx.getStorageSync('userRole')
-        if (userRole) {
-          // 有角色但没有完整登录信息，执行登录
-          await this.performLogin(userRole)
-        } else {
-          // 首次进入，跳转到角色选择页面
-          wx.reLaunch({
-            url: '/pages/role-select/index'
-          })
-        }
+        // 直接执行登录，默认使用 patient 角色
+        await this.performLogin('patient')
       }
     } catch (error) {
       console.error('初始化用户登录状态失败:', error)
-      // 出错时跳转到角色选择页面
-      wx.reLaunch({
-        url: '/pages/role-select/index'
-      })
+      // 出错时也尝试执行登录
+      try {
+        await this.performLogin('patient')
+      } catch (loginError) {
+        console.error('登录失败:', loginError)
+        wx.showToast({
+          title: '登录失败，请重试',
+          icon: 'error'
+        })
+      }
     }
   },
 

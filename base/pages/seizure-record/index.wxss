@@ -1,0 +1,117 @@
+/* pages/seizure-record/index.wxss */
+
+.seizure-record-container {
+  background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 100%);
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+}
+
+/* 页面头部 */
+.page-header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  padding: 40rpx 40rpx 60rpx;
+  color: white;
+  text-align: center;
+}
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20rpx;
+  margin-bottom: 12rpx;
+}
+
+.header-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+/* 表单容器 */
+.form-container {
+  padding: 40rpx 40rpx 0;
+}
+
+.form-group {
+  margin-bottom: 40rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 提交按钮 */
+.submit-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: white;
+  border-top: 2rpx solid #f0f0f0;
+  z-index: 100;
+}
+
+.submit-container .van-button {
+  border-radius: 50rpx;
+  height: 88rpx;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  border: none;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+/* 自定义组件样式 */
+.van-cell-group__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  padding: 20rpx 32rpx 16rpx;
+}
+
+.van-field__label {
+  font-weight: 500;
+  color: #333;
+}
+
+.van-field__input {
+  font-size: 28rpx;
+}
+
+.van-field--textarea .van-field__input {
+  min-height: 120rpx;
+}
+
+/* 快捷选择区域 */
+.quick-template-section {
+  margin: 40rpx 0;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding: 0 40rpx;
+}
+
+/* 响应式适配 */
+@media (max-width: 375px) {
+  .form-container {
+    padding: 30rpx 30rpx 0;
+  }
+  
+  .header-title {
+    font-size: 40rpx;
+  }
+  
+  .submit-container {
+    padding: 20rpx 30rpx;
+  }
+}

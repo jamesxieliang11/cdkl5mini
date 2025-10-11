@@ -4,14 +4,14 @@
     <view class="tabbar-text {{active === 'home' ? 'active' : ''}}">服务</view>
   </view>
   
-  <view class="tabbar-item center-item" bindtap="switchTab" data-path="/pages/schedule/index" data-index="1">
+  <view class="tabbar-item center-item" bindtap="showAddRecordModal" data-index="1">
     <view class="center-button">
-      <image class="center-icon" src="../../icons/cdkl5-logo{{active === 'schedule' ? '-selected' : ''}}.svg"></image>
+      <image class="center-icon" src="../../icons/add-record.png"></image>
     </view>
-    <view class="tabbar-text center-text {{active === 'schedule' ? 'active' : ''}}">议程</view>
+    <view class="tabbar-text center-text {{active === 'add-record' ? 'active' : ''}}">添加记录</view>
   </view>
   
-  <view class="tabbar-item" bindtap="switchTab" data-path="/pages/admin/admin" data-index="2">
+  <view class="tabbar-item" bindtap="switchTab" data-path="/pages/user-profile/index" data-index="2">
     <image class="tabbar-icon" src="../../icons/usercenter{{active === 'admin' ? '-selected' : ''}}.png"></image>
     <view class="tabbar-text {{active === 'admin' ? 'active' : ''}}">我的</view>
   </view>

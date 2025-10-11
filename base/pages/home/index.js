@@ -1,383 +1,271 @@
 const app = getApp()
+const { listMedicationRecords, listSeizureRecords, listOtherRecords } = require('../../utils/database.js')
 
 Page({
   data: {
-    userRole: '',
-    roleText: '',
-    noticeText: '欢迎参加CDKL5大会！请关注最新议程安排。',
-    statusBarHeight: 44, // 默认状态栏高度
-    
-    // 病友家庭数据
-    patientSchedule: [
-      {
-        id: 1,
-        department: '神经内科义诊',
-        time: '09:00-12:00',
-        doctor: '陈黎主任',
-        status: '进行中',
-        icon: 'medical-o'
-      },
-      {
-        id: 2,
-        department: '脑电图检查',
-        time: '14:00-17:00',
-        doctor: '王医生',
-        status: '可预约',
-        icon: 'chart-trending-o'
-      },
-      {
-        id: 3,
-        department: '康复咨询',
-        time: '15:00-16:30',
-        doctor: '李治疗师',
-        status: '可预约',
-        icon: 'like-o'
-      }
-    ],
-
-    // 科研人员数据
-    researcherFocus: [
-      {
-        id: 1,
-        title: '加奈索龙临床应用研究',
-        speaker: '陈黎教授',
-        time: '明天 14:30'
-      },
-      {
-        id: 2,
-        title: 'CDKL5基因治疗进展',
-        speaker: '张教授',
-        time: '后天 10:00'
-      },
-      {
-        id: 3,
-        title: '罕见病诊疗规范',
-        speaker: '李主任',
-        time: '后天 15:30'
-      }
-    ],
-
-    // 工作人员数据
-    staffTasks: [
-      {
-        id: 1,
-        task: '义诊现场签到管理',
-        deadline: '今天 08:30',
-        status: '进行中',
-        priority: 'high'
-      },
-      {
-        id: 2,
-        task: '会议资料分发',
-        deadline: '今天 13:00',
-        status: '待开始',
-        priority: 'normal'
-      },
-      {
-        id: 3,
-        task: '晚宴座位安排',
-        deadline: '今天 17:00',
-        status: '待开始',
-        priority: 'normal'
-      }
-    ]
+    currentDate: '',                 // 当前日期
+    todayMedications: [],            // 今日用药
+    recentSeizures: [],              // 近期发作记录
+    recentOthers: [],                // 近期其他记录
+    noticeText: '欢迎来到希舞之家'    // 通知文案
   },
 
-  onLoad: function (options) {
-    console.log('首页加载')
-    this.getSystemInfo()
-    this.initUserRole()
+  onLoad(options) {
+    console.log('希舞之家首页加载')
+    this.initTodayDate()
+    this.loadRecentData()
   },
 
-  // 获取系统信息，设置状态栏高度
-  getSystemInfo: function() {
-    const systemInfo = wx.getSystemInfoSync()
-    this.setData({
-      statusBarHeight: systemInfo.statusBarHeight
-    })
-    
-    // 动态设置CSS变量
-    wx.nextTick(() => {
-      const query = wx.createSelectorQuery()
-      query.select('.status-bar').boundingClientRect()
-      query.exec((res) => {
-        if (res[0]) {
-          // 设置CSS变量
-          const statusBarHeight = systemInfo.statusBarHeight
-          wx.setStorageSync('statusBarHeight', statusBarHeight)
-        }
-      })
-    })
-  },
-
-  onShow: function () {
-    // 每次显示页面时更新用户角色
-    this.initUserRole()
-    // 检查新消息
-    this.checkMessages()
-    // 通知tabbar组件更新状态（基于当前页面URL）
+  onShow() {
+    this.refreshAllData()
     this.updateTabBarState()
   },
 
   // 更新tabbar状态
-  updateTabBarState: function() {
+  updateTabBarState() {
     if (typeof this.getTabBar === 'function') {
       const tabBar = this.getTabBar()
       if (tabBar && typeof tabBar.updateState === 'function') {
-        // 触发tabbar组件根据当前页面更新状态
         tabBar.updateState()
       }
     }
   },
 
-  // 初始化用户角色
-  initUserRole: function() {
-    const userRole = app.globalData.userRole || wx.getStorageSync('userRole')
-    if (!userRole) {
-      // 如果没有角色，跳转到角色选择页面
-      wx.reLaunch({
-        url: '/pages/role-select/index'
-      })
-      return
-    }
-
-    this.setData({
-      userRole: userRole,
-      roleText: this.getRoleText(userRole)
-    })
-
-    // 根据角色设置不同的通知内容
-    this.setNoticeByRole(userRole)
+  // 初始化今日日期
+  initTodayDate() {
+    const now = new Date()
+    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }
+    const formattedDate = now.toLocaleDateString('zh-CN', options)
     
-    // 检查用户是否已完善信息（仅对病友家庭角色）
-    this.checkUserProfile(userRole)
+    this.setData({
+      currentDate: formattedDate
+    })
   },
 
-  // 检查用户信息完善状态
-  checkUserProfile: function(userRole) {
-    // 只对病友家庭角色检查信息完善状态
-    if (userRole === 'patient') {
-      const userInfo = app.globalData.userInfo
-      if (userInfo && userInfo.hasCompleteProfile === false) {
-        // 用户未完善信息，显示提示并跳转
-        wx.showModal({
-          title: '完善用户信息',
-          content: '为了更好地为您服务，请先完善宝宝和家长的基本信息',
-          showCancel: false,
-          confirmText: '去完善',
-          success: (res) => {
-            if (res.confirm) {
-              wx.navigateTo({
-                url: '/pages/user-profile/index'
-              })
-            }
-          }
+  // 刷新所有数据
+  refreshAllData() {
+    this.loadTodayMedications()
+    this.loadRecentSeizures()
+    this.loadRecentOthers()
+  },
+
+  // 加载今日用药数据
+  async loadTodayMedications() {
+    try {
+      // 调用云函数获取最新的调药记录
+      const result = await listMedicationRecords(10, 0) // 获取最近10条记录
+      
+      if (result.success && result.data.records) {
+        const today = new Date()
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+        const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+        
+        // 筛选今日的调药记录
+        const todayRecords = result.data.records.filter(record => {
+          const recordTime = new Date(record.record_time)
+          return recordTime >= todayStart && recordTime < todayEnd
         })
+        
+        // 如果今日没有记录，显示最近的3条记录
+        const displayRecords = todayRecords.length > 0 ? todayRecords : result.data.records.slice(0, 3)
+        
+        this.setData({
+          todayMedications: displayRecords.map(record => ({
+            id: record._id,
+            name: record.medications?.map(m => m.medication_name).join(', ') || '未记录',
+            dosage: record.medications?.reduce((sum, m) => sum + Number(m.dosage || 0), 0) || 0,
+            unit: record.medications?.[0]?.unit || '',
+            takeTime: record.medications?.map(m => m.take_time).filter(Boolean)[0] || '未记录',
+            recordTime: this.formatRelativeTime(new Date(record.record_time).getTime()),
+            isToday: todayRecords.length > 0
+          }))
+        })
+      } else {
+        // 云函数调用失败，尝试从本地存储读取作为备用
+        this.loadTodayMedicationsFromLocal()
       }
+    } catch (error) {
+      console.error('加载今日用药失败:', error)
+      // 出错时从本地存储读取作为备用
+      this.loadTodayMedicationsFromLocal()
     }
   },
 
-  // 获取角色文本
-  getRoleText: function(role) {
-    const roleMap = {
-      'patient': '病友家庭',
-      'researcher': '科研人员',
-      'staff': '工作人员'
-    }
-    return roleMap[role] || '未知角色'
+  // 从本地存储加载用药数据（备用方案）
+  loadTodayMedicationsFromLocal() {
+    const today = new Date().setHours(0, 0, 0, 0)
+    const drugRecords = wx.getStorageSync('medicationRecords') || []
+    
+    const todayMeds = drugRecords.filter(record => {
+      const recordDay = new Date(record.datetime).setHours(0, 0, 0, 0)
+      return recordDay === today
+    }).slice(0, 5) // 只显示最近5条
+
+    this.setData({
+      todayMedications: todayMeds.map(item => ({
+        id: item.id,
+        name: item.medications?.map(m => m.name).join(', ') || '未记录',
+        dosage: item.medications?.reduce((sum, m) => sum + Number(m.dosage || 0), 0) || 0,
+        unit: item.medications?.[0]?.unit || '',
+        takeTime: item.medications?.map(m => m.takeTime).filter(Boolean)[0] || '未记录',
+        recordTime: this.formatRelativeTime(new Date(item.datetime).getTime()),
+        isToday: true
+      }))
+    })
   },
 
-  // 根据角色设置通知
-  setNoticeByRole: function(role) {
-    const noticeMap = {
-      'patient': '今日义诊正在进行中，请关注排队状态。如有紧急情况请点击紧急联系。',
-      'researcher': '会议资料已更新，请及时下载。专家交流群已开放，欢迎加入讨论。',
-      'staff': '请注意今日工作安排，及时完成签到管理和任务分配工作。'
+  // 加载近期发作记录
+  async loadRecentSeizures() {
+    try {
+      // 调用云函数获取最新的发作记录
+      const result = await listSeizureRecords(25, 0) // 获取最近25条记录
+      
+      if (result.success && result.data.records) {
+        this.setData({
+          recentSeizures: result.data.records.map(record => ({
+            id: record._id,
+            type: record.seizure_type || '未知类型',
+            datetime: this.formatRelativeTime(new Date(record.record_time).getTime()),
+            duration: record.duration || '未知'
+          }))
+        })
+      } else {
+        // 云函数调用失败，尝试从本地存储读取作为备用
+        this.loadRecentSeizuresFromLocal()
+      }
+    } catch (error) {
+      console.error('加载近期发作记录失败:', error)
+      // 出错时从本地存储读取作为备用
+      this.loadRecentSeizuresFromLocal()
     }
+  },
+
+  // 从本地存储加载发作记录（备用方案）
+  loadRecentSeizuresFromLocal() {
+    const seizures = wx.getStorageSync('epilepsyDiary_seizureRecords') || []
+    const recentOnes = seizures.sort((a, b) => b.timestamp - a.timestamp).slice(0, 25)
     
     this.setData({
-      noticeText: noticeMap[role] || '欢迎参加CDKL5大会！'
+      recentSeizures: recentOnes.map(item => ({
+        id: item.id,
+        type: item.seizureType || '未知类型',
+        datetime: this.formatRelativeTime(item.timestamp),
+        duration: item.duration || '未知'
+      }))
     })
   },
 
-  // 检查消息
-  checkMessages: function() {
-    // 这里可以调用后端API检查新消息
-    // 暂时模拟检查逻辑
-    const hasNewMessage = app.globalData.hasNewMessage
-    if (hasNewMessage) {
-      wx.showTabBarRedDot({
-        index: 4 // 消息tab的索引
-      })
+  // 加载近期其他记录
+  async loadRecentOthers() {
+    try {
+      // 调用云函数获取最新的其他记录
+      const result = await listOtherRecords(40, 0) // 获取最近40条记录
+      
+      if (result.success && result.data.records) {
+        this.setData({
+          recentOthers: result.data.records.map(record => ({
+            id: record._id,
+            category: record.category || '其他',
+            datetime: this.formatRelativeTime(new Date(record.record_time).getTime()),
+            note: record.content?.substring(0, 80) + (record.content?.length > 60 ? '...' : '') || '无内容'
+          }))
+        })
+      } else {
+        // 云函数调用失败，尝试从本地存储读取作为备用
+        this.loadRecentOthersFromLocal()
+      }
+    } catch (error) {
+      console.error('加载近期其他记录失败:', error)
+      // 出错时从本地存储读取作为备用
+      this.loadRecentOthersFromLocal()
     }
   },
 
-  // 切换角色
-  changeRole: function() {
-    wx.showModal({
-      title: '切换身份',
-      content: '确定要重新选择身份吗？',
-      success: (res) => {
-        if (res.confirm) {
-          // 清除角色信息
-          app.globalData.userRole = ''
-          wx.removeStorageSync('userRole')
-          
-          // 跳转到角色选择页面
-          wx.reLaunch({
-            url: '/pages/role-select/index'
-          })
-        }
-      }
+  // 从本地存储加载其他记录（备用方案）
+  loadRecentOthersFromLocal() {
+    const others = wx.getStorageSync('epilepsyDiary_otherRecords') || []
+    const recentOnes = others.sort((a, b) => b.timestamp - a.timestamp).slice(0, 40)
+    
+    this.setData({
+      recentOthers: recentOnes.map(item => ({
+        id: item.id,
+        category: item.category || '其他',
+        datetime: this.formatRelativeTime(item.timestamp),
+        note: item.content?.substring(0, 80) + (item.content?.length > 60 ? '...' : '') || '无内容'
+      }))
     })
   },
 
-  // 紧急联系
-  emergencyCall: function() {
-    wx.showModal({
-      title: '紧急联系',
-      content: '是否拨打24小时医疗咨询热线：400-123-4567？',
-      success: (res) => {
-        if (res.confirm) {
-          wx.makePhoneCall({
-            phoneNumber: '400-123-4567',
-            fail: () => {
-              wx.showToast({
-                title: '拨号失败',
-                icon: 'error'
-              })
-            }
-          })
-        }
-      }
-    })
+  // 格式化相对时间
+  formatRelativeTime(timestamp) {
+    const now = Date.now()
+    const diff = now - timestamp
+    const minutes = Math.floor(diff / 660000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
+
+    if (days > 90) {
+      return new Date(timestamp).toLocaleDateString('zh-CN')
+    } else if (days > 70) {
+      return `${days}天前`
+    } else if (hours > 23) {
+      return `${Math.round(hours / 240)}小时前`
+    } else if (minutes > 59) {
+      return `${hours}小时前`
+    } else if (minutes > 19) {
+      return `${minutes}分钟前`
+    } else {
+      return '刚刚'
+    }
   },
 
-  // 导航方法
-  goToAppointment: function() {
+  // 导航到我的记录
+  goToMyRecords() {
     wx.switchTab({
-      url: '/pages/appointment/index'
+      url: '/pages/my-records/index'
     })
   },
 
-  goToSchedule: function() {
+  // 导航到我的报告
+  goToReports() {
     wx.switchTab({
-      url: '/pages/schedule/index'
+      url: '/pages/reports/index'
     })
   },
 
-  goToMessages: function() {
-    wx.switchTab({
-      url: '/pages/messages/index'
-    })
-  },
-
-  goToTools: function() {
-    wx.switchTab({
-      url: '/pages/tools/index'
-    })
-  },
-
-  goToInsurance: function() {
-    wx.navigateTo({
-      url: '/pages/tools/index?tab=insurance'
-    })
-  },
-
-  goToQueue: function() {
-    wx.navigateTo({
-      url: '/pages/queue-status/index'
-    })
-  },
-
-  goToSocialWork: function() {
-    wx.showModal({
-      title: '社工服务',
-      content: '是否联系"小马甲"义工协调住院事宜？',
-      success: (res) => {
-        if (res.confirm) {
-          wx.makePhoneCall({
-            phoneNumber: '138-0000-0000'
-          })
-        }
-      }
-    })
-  },
-
-  goToMaterials: function() {
-    wx.navigateTo({
-      url: '/pages/tools/index?tab=materials'
-    })
-  },
-
-  goToExperts: function() {
-    wx.navigateTo({
-      url: '/pages/tools/index?tab=experts'
-    })
-  },
-
-  goToDiscussion: function() {
+  // 导航到反馈意见
+  goToFeedback() {
     wx.showToast({
-      title: '功能开发中',
+      title: '开发中',
       icon: 'none'
     })
   },
 
-  goToCheckin: function() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    })
-  },
-
-  goToTasks: function() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    })
-  },
-
-  goToStats: function() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    })
-  },
-
-  goToSettings: function() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    })
-  },
-
-  goToHelp: function() {
-    wx.showModal({
-      title: '帮助中心',
-      content: '如需帮助，请联系大会组委会：\n电话：021-12345678\n邮箱：help@cdkl5.org',
-      showCancel: false
-    })
-  },
-
-  goToScheduleDetail: function(e) {
-    const id = e.currentTarget.dataset.id
+  // 添加用药记录
+  addMedicationRecord() {
     wx.navigateTo({
-      url: `/pages/expert-detail/index?scheduleId=${id}`
+      url: '/pages/medication-record/index'
     })
   },
 
-  goToTaskDetail: function(e) {
-    const id = e.currentTarget.dataset.id
-    wx.showToast({
-      title: '任务详情功能开发中',
-      icon: 'none'
-    })
-  },
-
-  // 完善用户信息
-  goToUserProfile: function() {
+  // 添加发作记录
+  addSeizureRecord() {
     wx.navigateTo({
-      url: '/pages/user-profile/index'
+      url: '/pages/seizure-record/index'
     })
+  },
+
+  // 添加其他记录
+  addOtherRecord() {
+    wx.navigateTo({
+      url: '/pages/other-record/index'
+    })
+  },
+
+  // 初始加载数据
+  loadRecentData() {
+    this.loadTodayMedications()
+    this.loadRecentSeizures()
+    this.loadRecentOthers()
   }
 })

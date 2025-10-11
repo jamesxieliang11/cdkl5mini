@@ -1,0 +1,371 @@
+/* pages/my-records/index.wxss */
+
+.container {
+  padding: 0;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面标题 */
+.page-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40rpx 30rpx 30rpx;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+/* 返回主页按钮 */
+.home-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: 50rpx;
+  padding: 16rpx 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  color: white;
+  font-size: 24rpx;
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.home-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
+}
+
+.home-icon {
+  font-size: 28rpx;
+}
+
+.home-text {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+/* 查询条件区域 */
+.search-section {
+  background: white;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.filter-item {
+  margin-bottom: 30rpx;
+}
+
+.filter-item:last-child {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+/* 记录类型标签 */
+.record-type-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 6rpx;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  border-radius: 8rpx;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  background: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+/* 时间范围选择 */
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.date-picker {
+  flex: 1;
+}
+
+.picker-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+}
+
+.picker-display:active {
+  border-color: #667eea;
+  background: #f0f2ff;
+}
+
+.date-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.picker-icon {
+  font-size: 28rpx;
+}
+
+.date-separator {
+  font-size: 26rpx;
+  color: #666;
+  margin: 0 10rpx;
+}
+
+/* 查询按钮 */
+.search-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 40rpx;
+}
+
+.search-btn {
+  flex: 2;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.search-btn[disabled] {
+  background: #ccc;
+}
+
+.reset-btn {
+  flex: 1;
+  background: white;
+  color: #666;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+}
+
+/* 记录列表区域 */
+.records-section {
+  margin: 20rpx;
+}
+
+/* 统计信息 */
+.records-stats {
+  background: white;
+  padding: 20rpx 30rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.stats-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 记录列表 */
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.record-item {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.record-item:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 记录头部 */
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.record-type-tag {
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: white;
+}
+
+.record-type-tag.medication {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.record-type-tag.seizure {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.record-type-tag.other {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #333;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 记录内容 */
+.record-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.record-content text {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.4;
+}
+
+/* 调药记录样式 */
+.medication-name {
+  font-weight: 600;
+  color: #4facfe !important;
+}
+
+.medication-dosage,
+.take-time {
+  color: #666 !important;
+  font-size: 24rpx !important;
+}
+
+/* 发作记录样式 */
+.seizure-type {
+  font-weight: 600;
+  color: #fa709a !important;
+}
+
+.seizure-duration {
+  color: #666 !important;
+  font-size: 24rpx !important;
+}
+
+/* 其他记录样式 */
+.other-category {
+  font-weight: 600;
+  color: #20bf6b !important;
+}
+
+.other-note {
+  color: #666 !important;
+  font-size: 24rpx !important;
+  line-height: 1.5;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.empty-tip {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* 加载更多 */
+.load-more {
+  margin-top: 30rpx;
+  text-align: center;
+}
+
+.load-more-btn {
+  background: white;
+  color: #667eea;
+  border: 2rpx solid #667eea;
+  border-radius: 50rpx;
+  padding: 20rpx 60rpx;
+  font-size: 26rpx;
+}
+
+.load-more-btn[disabled] {
+  background: #f5f5f5;
+  color: #ccc;
+  border-color: #e0e0e0;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  background: white;
+  padding: 40rpx 60rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.2);
+}

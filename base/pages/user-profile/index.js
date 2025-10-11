@@ -36,7 +36,9 @@ Page({
 
   // 返回按钮点击处理
   onBack: function() {
-    wx.navigateBack()
+    wx.switchTab({
+      url: '/pages/home/index'
+    })
   },
 
   // 格式化文件大小
@@ -94,52 +96,61 @@ Page({
 
   // 输入宝宝姓名
   onBabyNameInput: function(e) {
+    const value = (e && e.detail) ? (e.detail || '') : ''
+    console.log('输入宝宝姓名:', e)
     this.setData({
-      'patientInfo.babyName': e.detail.value
+      'patientInfo.babyName': value
     })
   },
 
   // 选择宝宝生日
   onBabyBirthdayChange: function(e) {
+    console.log(e)
+    const value = (e && e.detail) ? (e.detail.value || '') : ''
     this.setData({
-      'patientInfo.babyBirthday': e.detail.value
+      'patientInfo.babyBirthday': value
     })
   },
 
   // 输入家长姓名
   onParentNameInput: function(e) {
+    const value = (e && e.detail) ? (e.detail || '') : ''
     this.setData({
-      'patientInfo.parentName': e.detail.value
+      'patientInfo.parentName': value
     })
   },
 
   // 输入家长电话
   onParentPhoneInput: function(e) {
+    const value = (e && e.detail) ? (e.detail || '') : ''
     this.setData({
-      'patientInfo.parentPhone': e.detail.value
+      'patientInfo.parentPhone': value
     })
   },
 
   // 选择关系
   onRelationshipChange: function(e) {
-    const index = parseInt(e.detail.value)
+    const value = (e && e.detail) ? (e.detail.value || 0) : 0
+    const index = parseInt(value)
     this.setData({
       relationshipIndex: index,
-      'patientInfo.relationship': this.data.relationshipOptions[index]
+      'patientInfo.relationship': this.data.relationshipOptions[index] || this.data.relationshipOptions[0]
     })
   },
 
   // 输入病史
   onMedicalHistoryInput: function(e) {
+    const value = (e && e.detail) ? (e.detail || '') : ''
     this.setData({
-      'patientInfo.medicalHistory': e.detail.value
+      'patientInfo.medicalHistory': value
     })
   },
 
   // 输入备注
   onNotesInput: function(e) {
+    const value = (e && e.detail) ? (e.detail || '') : ''
     this.setData({
-      'patientInfo.notes': e.detail.value
+      'patientInfo.notes': value
     })
   },
 
@@ -268,7 +279,7 @@ Page({
   validateForm: function() {
     const { patientInfo } = this.data
     
-    if (!patientInfo.babyName.trim()) {
+    if (!patientInfo.babyName || !patientInfo.babyName.trim()) {
       wx.showToast({
         title: '请输入宝宝姓名',
         icon: 'error'
@@ -284,7 +295,7 @@ Page({
       return false
     }
 
-    if (!patientInfo.parentName.trim()) {
+    if (!patientInfo.parentName || !patientInfo.parentName.trim()) {
       wx.showToast({
         title: '请输入家长姓名',
         icon: 'error'
@@ -292,7 +303,7 @@ Page({
       return false
     }
 
-    if (!patientInfo.parentPhone.trim()) {
+    if (!patientInfo.parentPhone || !patientInfo.parentPhone.trim()) {
       wx.showToast({
         title: '请输入联系电话',
         icon: 'error'
@@ -300,7 +311,7 @@ Page({
       return false
     }
 
-    if (!/^1[3-9]\d{9}$/.test(patientInfo.parentPhone)) {
+    if (!/^1[3-9]\d{9}$/.test(patientInfo.parentPhone.trim())) {
       wx.showToast({
         title: '请输入正确的手机号',
         icon: 'error'

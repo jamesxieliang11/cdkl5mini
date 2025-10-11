@@ -1,23 +1,149 @@
 <!-- 状态栏区域 -->
 <view class="status-bar"></view>
 
+<!-- 用户角色标识 -->
+<view class="role-header">
+  <view class="app-title">希舞之家</view>
+</view>
+
+<!-- 重要通知 -->
+<van-notice-bar
+  left-icon="volume-o"
+  text="{{noticeText}}"
+  mode="closeable"
+  background="#fff7cc"
+  color="#ed6a0c"
+/>
+
 <view class="home-container">
-  <!-- 用户角色标识 -->
-  <view class="role-header">
-    <view class="role-info">
-      <text class="change-role" bind:tap="changeRole">切换身份</text>
-      <van-tag type="primary" size="large">{{roleText}}</van-tag>
+  <!-- 欢迎信息 -->
+  <view class="welcome-section">
+    <view class="greeting">
+      <text class="subtitle">记录健康每一天</text>
     </view>
+    <view class="today-date">{{currentDate}}</view>
   </view>
 
-  <!-- 重要通知 -->
-  <van-notice-bar
-    left-icon="volume-o"
-    text="{{noticeText}}"
-    mode="closeable"
-    background="#fff7cc"
-    color="#ed6a0c"
-  />
+  <!-- 常用功能模块 -->
+  <view class="common-functions section-card">
+    <view class="section-title">
+      <van-icon name="apps-o" size="18" color="#34BFA3" />
+      <text>常用功能</text>
+    </view>
+    <van-grid column-num="3" border="{{false}}" gutter="16">
+      <van-grid-item 
+        icon="notes-o" 
+        text="我的记录"
+        bind:click="goToMyRecords"
+        custom-class="function-item"
+      />
+      <van-grid-item 
+        icon="chart-trending-o" 
+        text="我的报告"
+        bind:click="goToReports"
+        custom-class="function-item"
+      />
+      <van-grid-item 
+        icon="comment-o" 
+        text="反馈意见"
+        bind:click="goToFeedback"
+        custom-class="function-item"
+      />
+    </van-grid>
+  </view>
+
+  <!-- 今日用药模块 -->
+  <view class="medication-today section-card">
+    <view class="section-title">
+      <van-icon name="paimai" size="18" color="#FF9800" />
+      <text>今日用药</text>
+      <van-icon 
+        name="plus" 
+        size="20" 
+        color="#FF9800"
+        bind:click="addMedicationRecord"
+        style="padding: 4px; cursor: pointer;"
+      />
+    </view>
+    <van-cell-group wx:if="{{todayMedications.length > 0}}">
+      <van-cell 
+        wx:for="{{todayMedications}}" 
+        wx:key="id"
+        title="{{item.name}}"
+        label="用量：{{item.dosage}}{{item.unit}}｜服用时间：{{item.takeTime}}｜记录时间：{{item.recordTime}}"
+        icon="{{item.isToday ? 'passed' : 'clock-o'}}"
+        border="{{false}}"
+      />
+    </van-cell-group>
+    <van-empty 
+      wx:else
+      image="error" 
+      description="暂无用药记录"
+      bind:click="addMedicationRecord"
+    >
+      <van-button slot="button" type="primary" size="small">添加用药记录</van-button>
+    </van-empty>
+  </view>
+
+  <!-- 发作记录模块 -->
+  <view class="seizure-records section-card">
+    <view class="section-title">
+      <van-icon name="warning-o" size="18" color="#EE6363" />
+      <text>发作记录</text>
+      <van-icon 
+        name="arrow" 
+        size="20" 
+        color="#EE6363"
+        bind:click="addSeizureRecord"
+        style="padding: 4px; cursor: pointer;"
+      />
+    </view>
+    <van-cell-group wx:if="{{recentSeizures.length > 0}}">
+      <van-cell 
+        wx:for="{{recentSeizures}}" 
+        wx:key="id"
+        title="{{item.type}}发作"
+        label="时间：{{item.datetime}}｜时长：{{item.duration}}分钟"
+        icon="fire-o"
+        border="{{false}}"
+      />
+    </van-cell-group>
+    <van-empty 
+      wx:else
+      image="error" 
+      description="暂无发作记录"
+    />
+  </view>
+
+  <!-- 其他记录模块 -->
+  <view class="other-records section-card">
+    <view class="section-title">
+      <van-icon name="orders-o" size="18" color="#2196F3" />
+      <text>其他记录</text>
+      <van-icon 
+        name="arrow" 
+        size="20" 
+        color="#2196F3"
+        bind:click="addOtherRecord"
+        style="padding: 4px; cursor: pointer;"
+      />
+    </view>
+    <van-cell-group wx:if="{{recentOthers.length > 0}}">
+      <van-cell 
+        wx:for="{{recentOthers}}" 
+        wx:key="id"
+        title="{{item.category}}"
+        label="时间：{{item.datetime}}｜备注：{{item.note}}"
+        icon="label-o"
+        border="{{false}}"
+      />
+    </van-cell-group>
+    <van-empty 
+      wx:else
+      image="error" 
+      description="暂无其他记录"
+    />
+  </view>
 
   <!-- 病友家庭专用功能 -->
   <view wx:if="{{userRole === 'patient'}}" class="patient-section">

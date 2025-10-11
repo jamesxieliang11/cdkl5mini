@@ -1,45 +1,47 @@
 {
   "pages": [
     "pages/home/index",
-    "pages/schedule/index", 
-    "pages/appointment/index",
-    "pages/tools/index",
-    "pages/messages/index",
-    "pages/role-select/index",
+    "pages/add-record/index",
+    "pages/medication-record/index",
+    "pages/seizure-record/index",
+    "pages/other-record/index",
+    "pages/my-records/index",
+    "pages/reports/index",
     "pages/user-profile/index",
-    "pages/expert-detail/index",
-    "pages/appointment-form/index",
-    "pages/queue-status/index",
     "pages/admin/admin"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#1989fa",
-    "navigationBarTitleText": "CDKL5大会",
+    "navigationBarBackgroundColor": "#34BFA3",
+    "navigationBarTitleText": "希舞之家",
     "navigationBarTextStyle": "white",
     "navigationStyle": "custom"
   },
   "tabBar": {
     "custom": true,
-    "color": "#7A7E83",
-    "selectedColor": "#1989fa",
+    "color": "#666666",
+    "selectedColor": "#34BFA3",
     "backgroundColor": "#ffffff",
     "list": [
       {
         "pagePath": "pages/home/index",
-        "text": "首页"
+        "text": "主页"
       },
       {
-        "pagePath": "pages/schedule/index",
-        "text": "议程"
+        "pagePath": "pages/add-record/index",
+        "text": "添加记录"
       },
       {
-        "pagePath": "pages/appointment/index",
-        "text": "义诊"
+        "pagePath": "pages/my-records/index",
+        "text": "我的记录"
+      },
+      {
+        "pagePath": "pages/user-profile/index",
+        "text": "个人中心"
       },
       {
         "pagePath": "pages/admin/admin",
-        "text": "管理"
+        "text": "个人中心"
       }
     ]
   },
@@ -49,6 +51,13 @@
     "van-tabbar": "/miniprogram_npm/@vant/weapp/tabbar/index",
     "van-tabbar-item": "/miniprogram_npm/@vant/weapp/tabbar-item/index",
     "van-icon": "/miniprogram_npm/@vant/weapp/icon/index",
+    "van-popup": "/miniprogram_npm/@vant/weapp/popup/index",
+    "van-datetime-picker": "/miniprogram_npm/@vant/weapp/datetime-picker/index",
+    "van-action-sheet": "/miniprogram_npm/@vant/weapp/action-sheet/index",
+    "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
+    "van-field": "/miniprogram_npm/@vant/weapp/field/index",
+    "van-button": "/miniprogram_npm/@vant/weapp/button/index",
+    "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
     "custom-tabbar": "/components/custom-tabbar/index"
   }
 }

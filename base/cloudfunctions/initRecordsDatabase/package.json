@@ -1,0 +1,9 @@
+{
+  "name": "initRecordsDatabase",
+  "version": "1.0.0",
+  "description": "初始化患者记录数据库云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

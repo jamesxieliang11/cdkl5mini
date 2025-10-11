@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "CDKL5大会",
+  "navigationBarTitleText": "希舞之家",
   "usingComponents": {
     "van-button": "/miniprogram_npm/@vant/weapp/button/index",
     "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
@@ -10,6 +10,7 @@
     "van-notice-bar": "/miniprogram_npm/@vant/weapp/notice-bar/index",
     "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
     "van-divider": "/miniprogram_npm/@vant/weapp/divider/index",
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
     "custom-tabbar": "/components/custom-tabbar/index"
   }
 }

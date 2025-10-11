@@ -77,6 +77,7 @@ function userLogin(params = {}) {
           wx.setStorageSync('userInfo', userData)
           wx.setStorageSync('openid', userData.openid)
           wx.setStorageSync('userRole', userData.userRole)
+          wx.setStorageSync('userId', userData._id) // 保存用户ID
           
           wx.showToast({
             title: res.result.message,
@@ -116,11 +117,13 @@ function getUserInfo() {
   const userInfo = wx.getStorageSync('userInfo')
   const openid = wx.getStorageSync('openid')
   const userRole = wx.getStorageSync('userRole')
+  const userId = wx.getStorageSync('userId')
   
   return {
     userInfo: userInfo || null,
     openid: openid || '',
-    userRole: userRole || ''
+    userRole: userRole || '',
+    userId: userId || ''
   }
 }
 
@@ -141,6 +144,7 @@ function logout() {
   wx.removeStorageSync('userInfo')
   wx.removeStorageSync('openid')
   wx.removeStorageSync('userRole')
+  wx.removeStorageSync('userId') // 清除用户ID
   
   // 清除全局数据
   const app = getApp()

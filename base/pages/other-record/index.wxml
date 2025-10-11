@@ -1,0 +1,110 @@
+<view class="other-record-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="header-title-row">
+      <van-icon name="wap-home-o" size="20" color="#34BFA3" bind:click="onBack" />
+      <text class="header-title">其他记录</text>
+    </view>
+    <view class="header-subtitle">记录日常观察和特殊事件</view>
+  </view>
+
+  <!-- 记录表单 -->
+  <view class="form-container">
+    <!-- 基本信息 -->
+    <van-cell-group title="基本信息" custom-class="form-group">
+      <van-field
+        label="记录时间"
+        value="{{formData.datetime}}"
+        placeholder="请选择记录时间"
+        readonly
+        is-link
+        bind:click-input="showDateTimePicker"
+      />
+      <van-field
+        label="记录类别"
+        value="{{formData.category}}"
+        placeholder="请选择记录类别"
+        readonly
+        is-link
+        bind:click-input="showCategoryPicker"
+      />
+    </van-cell-group>
+
+    <!-- 记录详情 -->
+    <van-cell-group title="记录详情" custom-class="form-group">
+      <van-field
+        label="记录内容"
+        value="{{formData.content}}"
+        placeholder="请详细记录相关内容"
+        type="textarea"
+        autosize
+        rows="4"
+        maxlength="600"
+        show-word-limit
+        bind:input="onContentInput"
+      />
+      <van-field
+        label="备注信息"
+        value="{{formData.remark}}"
+        placeholder="补充说明（可选）"
+        type="textarea"
+        autosize
+        rows="2"
+        maxlength="100"
+        show-word-limit
+        bind:input="onRemarkInput"
+      />
+    </van-cell-group>
+
+    <!-- 快捷选择历史记录 -->
+    <van-cell-group wx:if="{{historyRecords.length > 0}}" title="快捷选择" custom-class="form-group">
+      <van-cell 
+        title="选择历史记录" 
+        label="快速复制之前的记录内容（时间会更新为当前时间）"
+        is-link
+        bind:click="showHistoryPicker"
+      />
+    </van-cell-group>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-container">
+    <van-button 
+      type="primary" 
+      size="large" 
+      bind:click="submitRecord"
+      loading="{{submitting}}"
+    >保存记录</van-button>
+  </view>
+</view>
+
+<!-- Vant 时间选择器 -->
+
+<!-- 日期时间选择器 -->
+<van-popup show="{{showDatePicker}}" position="bottom" bind:close="onDateTimeCancel">
+  <van-datetime-picker
+    type="datetime"
+    value="{{currentDate}}"
+    bind:confirm="onDateTimeConfirm"
+    bind:cancel="onDateTimeCancel"
+    title="选择记录时间"
+  />
+</van-popup>
+
+<!-- 记录类别选择器 -->
+<van-action-sheet
+  show="{{showCategoryPicker}}"
+  actions="{{categoryOptions}}"
+  bind:select="onCategorySelect"
+  bind:cancel="onCategoryCancel"
+  title="选择记录类别"
+/>
+
+<!-- 历史记录选择器 -->
+<van-action-sheet
+  show="{{showHistoryPicker}}"
+  actions="{{historyOptions}}"
+  bind:select="onHistorySelect"
+  bind:cancel="onHistoryCancel"
+  title="选择历史记录"
+/>

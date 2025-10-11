@@ -1,0 +1,130 @@
+<!--pages/my-records/index.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">我的记录</text>
+    <button class="home-btn" bindtap="goToHome">
+      <text class="home-icon">🏠</text>
+      <text class="home-text">主页</text>
+    </button>
+  </view>
+
+  <!-- 查询条件区域 -->
+  <view class="search-section">
+    <!-- 记录类型选择 -->
+    <view class="filter-item">
+      <text class="filter-label">记录类型</text>
+      <view class="record-type-tabs">
+        <view class="tab-item {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">
+          全部
+        </view>
+        <view class="tab-item {{activeTab === 'medication' ? 'active' : ''}}" bindtap="switchTab" data-tab="medication">
+          调药记录
+        </view>
+        <view class="tab-item {{activeTab === 'seizure' ? 'active' : ''}}" bindtap="switchTab" data-tab="seizure">
+          发作记录
+        </view>
+        <view class="tab-item {{activeTab === 'other' ? 'active' : ''}}" bindtap="switchTab" data-tab="other">
+          其他记录
+        </view>
+      </view>
+    </view>
+
+    <!-- 时间范围选择 -->
+    <view class="filter-item">
+      <text class="filter-label">时间范围</text>
+      <view class="date-range">
+        <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange" class="date-picker">
+          <view class="picker-display">
+            <text class="date-text">{{startDate || '开始日期'}}</text>
+            <text class="picker-icon">📅</text>
+          </view>
+        </picker>
+        <text class="date-separator">至</text>
+        <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange" class="date-picker">
+          <view class="picker-display">
+            <text class="date-text">{{endDate || '结束日期'}}</text>
+            <text class="picker-icon">📅</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 查询按钮 -->
+    <view class="search-actions">
+      <button class="search-btn" bindtap="searchRecords" disabled="{{loading}}">
+        {{loading ? '查询中...' : '查询记录'}}
+      </button>
+      <button class="reset-btn" bindtap="resetFilters">重置</button>
+    </view>
+  </view>
+
+  <!-- 记录列表区域 -->
+  <view class="records-section">
+    <!-- 统计信息 -->
+    <view class="records-stats" wx:if="{{totalCount > 0}}">
+      <text class="stats-text">共找到 {{totalCount}} 条记录</text>
+    </view>
+
+    <!-- 记录列表 -->
+    <view class="records-list" wx:if="{{records.length > 0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="id" bindtap="viewRecordDetail" data-record="{{item}}">
+        <!-- 调药记录 -->
+        <view wx:if="{{item.type === 'medication'}}" class="medication-record">
+          <view class="record-header">
+            <text class="record-type-tag medication">调药记录</text>
+            <text class="record-time">{{item.datetime}}</text>
+          </view>
+          <view class="record-content">
+            <text class="medication-name">{{item.name}}</text>
+            <text class="medication-dosage">剂量: {{item.dosage}}{{item.unit}}</text>
+            <text class="take-time">服用时间: {{item.takeTime}}</text>
+          </view>
+        </view>
+
+        <!-- 发作记录 -->
+        <view wx:elif="{{item.type === 'seizure'}}" class="seizure-record">
+          <view class="record-header">
+            <text class="record-type-tag seizure">发作记录</text>
+            <text class="record-time">{{item.datetime}}</text>
+          </view>
+          <view class="record-content">
+            <text class="seizure-type">类型: {{item.seizureType}}</text>
+            <text class="seizure-duration">持续时间: {{item.duration}}</text>
+          </view>
+        </view>
+
+        <!-- 其他记录 -->
+        <view wx:else class="other-record">
+          <view class="record-header">
+            <text class="record-type-tag other">其他记录</text>
+            <text class="record-time">{{item.datetime}}</text>
+          </view>
+          <view class="record-content">
+            <text class="other-category">分类: {{item.category}}</text>
+            <text class="other-note">{{item.note}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && records.length === 0}}">
+      <text class="empty-icon">📝</text>
+      <text class="empty-text">暂无记录</text>
+      <text class="empty-tip">请调整查询条件或添加新记录</text>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && records.length > 0}}">
+      <button class="load-more-btn" bindtap="loadMoreRecords" disabled="{{loadingMore}}">
+        {{loadingMore ? '加载中...' : '加载更多'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <text class="loading-text">查询中...</text>
+  </view>
+</view>

@@ -1,0 +1,5 @@
+[
+  {"file": "base/pages/edit-drug-adjustment/index.json"},
+  {"file": "base/pages/seizure-record/index.json"}, 
+  {"file": "base/pages/other-record/index.json"}
+]

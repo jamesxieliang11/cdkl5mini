@@ -1,0 +1,174 @@
+<view class="medication-record-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="header-title-row">
+      <van-icon name="wap-home-o" size="20" color="#34BFA3" bind:click="onBack" />
+      <text class="header-title">调药记录</text>
+    </view>
+    <view class="header-subtitle">记录用药情况和身体状况</view>
+  </view>
+
+  <!-- 记录表单 -->
+  <view class="form-container">
+    <!-- 记录时间 -->
+    <van-cell-group title="基本信息" custom-class="form-group">
+      <van-field
+        label="记录时间"
+        value="{{formData.datetime}}"
+        placeholder="请选择记录时间"
+        readonly
+        is-link
+        bind:click-input="showDateTimePicker"
+      />
+      
+      <van-field
+        label="体重 (kg)"
+        value="{{formData.weight}}"
+        placeholder="请输入当前体重"
+        type="digit"
+        bind:input="onWeightInput"
+      />
+    </van-cell-group>
+
+    <!-- 药物列表 -->
+    <van-cell-group title="药物信息" custom-class="form-group">
+      <view class="medication-list">
+        <view wx:for="{{formData.medications}}" wx:key="index" class="medication-item">
+          <view class="medication-header">
+            <text class="medication-title">药物 {{index + 1}}</text>
+            <van-button 
+              wx:if="{{formData.medications.length > 1}}"
+              type="danger" 
+              size="mini" 
+              bind:click="removeMedication"
+              data-index="{{index}}"
+            >删除</van-button>
+          </view>
+          
+          <van-field
+            label="服用时间"
+            value="{{item.takeTime}}"
+            placeholder="请选择服用时间"
+            readonly
+            is-link
+            bind:click-input="showMedicationTimePicker"
+            data-index="{{index}}"
+          />
+          
+          <van-field
+            label="药物名称"
+            value="{{item.name}}"
+            placeholder="请输入药物名称"
+            bind:input="onMedicationNameInput"
+            data-index="{{index}}"
+          />
+          
+          <view class="dosage-container">
+            <van-field
+              label="药量"
+              value="{{item.dosage}}"
+              placeholder="请输入药量"
+              type="digit"
+              bind:input="onDosageInput"
+              data-index="{{index}}"
+              custom-style="flex: 1; margin-right: 20rpx;"
+            />
+            <van-field
+              label="单位"
+              value="{{item.unit}}"
+              placeholder="单位"
+              bind:click="showUnitPicker"
+              data-index="{{index}}"
+              readonly
+              is-link
+              custom-style="flex: 0 0 200rpx;"
+            />
+          </view>
+        </view>
+        
+        <van-button 
+          type="info" 
+          size="small" 
+          bind:click="addMedication"
+          custom-class="add-medication-btn"
+        >+ 添加药物</van-button>
+      </view>
+    </van-cell-group>
+
+    <!-- 副作用 -->
+    <van-cell-group title="副作用记录" custom-class="form-group">
+      <van-field
+        label="副作用"
+        value="{{formData.sideEffects}}"
+        placeholder="请描述是否有副作用及具体情况"
+        type="textarea"
+        autosize
+        maxlength="500"
+        show-word-limit
+        bind:input="onSideEffectsInput"
+      />
+    </van-cell-group>
+
+    <!-- 快捷选择历史记录 -->
+    <van-cell-group wx:if="{{historyRecords.length > 0}}" title="快捷选择" custom-class="form-group">
+      <van-cell 
+        title="选择历史记录" 
+        label="快速复制之前的用药记录（时间会更新为当前时间）"
+        is-link
+        bind:click="showHistoryPicker"
+      />
+    </van-cell-group>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-container">
+    <van-button 
+      type="primary" 
+      size="large" 
+      bind:click="submitRecord"
+      loading="{{submitting}}"
+    >保存记录</van-button>
+  </view>
+</view>
+
+<!-- Vant 时间选择器 -->
+
+<!-- 日期时间选择器 -->
+<van-popup show="{{showDatePicker}}" position="bottom" bind:close="onDateTimeCancel">
+  <van-datetime-picker
+    type="datetime"
+    value="{{currentDate}}"
+    bind:confirm="onDateTimeConfirm"
+    bind:cancel="onDateTimeCancel"
+    title="选择记录时间"
+  />
+</van-popup>
+
+<!-- 时间选择器 -->
+<van-popup show="{{showMedicationTimePicker}}" position="bottom" bind:close="onMedicationTimeCancel">
+  <van-datetime-picker
+    type="time"
+    value="{{currentTime}}"
+    bind:confirm="onMedicationTimeConfirm"
+    bind:cancel="onMedicationTimeCancel"
+    title="选择服用时间"
+  />
+</van-popup>
+
+<!-- 单位选择器 -->
+<van-action-sheet
+  show="{{showUnitPicker}}"
+  actions="{{unitOptions}}"
+  bind:select="onUnitSelect"
+  bind:cancel="onUnitCancel"
+  title="选择单位"
+/>
+
+<!-- 历史记录选择器 -->
+<van-action-sheet
+  show="{{showHistoryPicker}}"
+  actions="{{historyOptions}}"
+  bind:select="onHistorySelect"
+  bind:cancel="onHistoryCancel"
+  title="选择历史记录"
+/>

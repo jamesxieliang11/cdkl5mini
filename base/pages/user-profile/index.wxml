@@ -27,7 +27,7 @@
           label="宝宝姓名"
           placeholder="请输入宝宝姓名"
           required
-          bind:change="onBabyNameInput"
+          bind:input="onBabyNameInput"
         />
         
         <picker
@@ -59,7 +59,7 @@
           label="家长姓名"
           placeholder="请输入家长姓名"
           required
-          bind:change="onParentNameInput"
+          bind:input="onParentNameInput"
         />
         
         <van-field
@@ -68,7 +68,7 @@
           placeholder="请输入手机号码"
           type="number"
           required
-          bind:change="onParentPhoneInput"
+          bind:input="onParentPhoneInput"
         />
         
         <picker
