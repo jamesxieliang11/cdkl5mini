@@ -9,7 +9,7 @@
 /* 页面标题 */
 .page-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 40rpx 30rpx 30rpx;
+  padding: 60rpx 30rpx 30rpx;
   color: white;
   display: flex;
   justify-content: space-between;
