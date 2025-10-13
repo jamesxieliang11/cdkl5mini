@@ -127,6 +127,50 @@
   min-height: 120rpx;
 }
 
+/* 快捷选择样式 */
+.quick-select-cell {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border-radius: 12rpx;
+  margin: 16rpx 0;
+  border: 2rpx solid #1976d2;
+}
+
+.quick-select-cell .van-cell__title {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.quick-select-cell .van-cell__label {
+  color: #666;
+  font-size: 24rpx;
+}
+
+.quick-select-cell .van-icon {
+  color: #1976d2;
+}
+
+/* 药物选择器样式增强 */
+.van-action-sheet__header {
+  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  color: white;
+}
+
+.van-action-sheet__description {
+  color: #666;
+  font-size: 24rpx;
+  padding: 16rpx 32rpx;
+  background: #f8f9fa;
+}
+
+/* 单位选择器修复 */
+.van-field--clickable {
+  cursor: pointer;
+}
+
+.van-field--clickable .van-field__input {
+  pointer-events: none;
+}
+
 /* 响应式适配 */
 @media (max-width: 375px) {
   .form-container {

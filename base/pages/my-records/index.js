@@ -15,7 +15,12 @@ Page({
     pageSize: 20,               // 每页数量
     hasMore: true,              // 是否还有更多数据
     loading: false,             // 是否正在加载
-    loadingMore: false          // 是否正在加载更多
+    loadingMore: false,         // 是否正在加载更多
+    showDetailPopup: false,     // 是否显示详情弹窗
+    detailData: {               // 详情数据
+      title: '',
+      record: {}
+    }
   },
 
   /**
@@ -309,11 +314,86 @@ Page({
     const record = e.currentTarget.dataset.record
     console.log('查看记录详情:', record)
     
-    // 这里可以跳转到详情页面或显示详情弹窗
-    wx.showModal({
-      title: '记录详情',
-      content: JSON.stringify(record, null, 2),
-      showCancel: false
+    // 设置详情数据并显示弹窗
+    const title = this.getRecordTitle(record)
+    
+    this.setData({
+      detailData: {
+        title: title,
+        record: record
+      },
+      showDetailPopup: true
+    })
+  },
+
+  /**
+   * 获取记录标题
+   */
+  getRecordTitle(record) {
+    const typeMap = {
+      'medication': '💊 调药记录',
+      'seizure': '⚡ 发作记录',
+      'other': '📄 其他记录'
+    }
+    
+    return typeMap[record.type] || '📋 记录详情'
+  },
+
+  /**
+   * 关闭详情弹窗
+   */
+  closeDetailPopup() {
+    this.setData({
+      showDetailPopup: false,
+      detailData: {
+        title: '',
+        record: {}
+      }
+    })
+  },
+
+  /**
+   * 编辑当前记录
+   */
+  editCurrentRecord() {
+    const record = this.data.detailData.record
+    this.editRecord(record)
+    this.closeDetailPopup()
+  },
+
+  /**
+   * 编辑记录
+   */
+  editRecord(record) {
+    // 根据记录类型跳转到对应的编辑页面
+    let url = ''
+    
+    switch (record.type) {
+      case 'medication':
+        url = `/pages/medication-record/index?id=${record.id}&mode=edit`
+        break
+      case 'seizure':
+        url = `/pages/seizure-record/index?id=${record.id}&mode=edit`
+        break
+      case 'other':
+        url = `/pages/other-record/index?id=${record.id}&mode=edit`
+        break
+      default:
+        wx.showToast({
+          title: '暂不支持编辑此类型记录',
+          icon: 'none'
+        })
+        return
+    }
+    
+    wx.navigateTo({
+      url: url,
+      fail: () => {
+        wx.showToast({
+          title: '页面跳转失败',
+          icon: 'error'
+        })
+      }
     })
   },
 
@@ -338,6 +418,31 @@ Page({
   goToHome() {
     wx.switchTab({
       url: '/pages/home/index'
+    })
+  },
+
+  /**
+   * 跳转到添加记录页面
+   */
+  goToAddRecord() {
+    wx.navigateTo({
+      url: '/pages/add-record/index'
+    })
+  },
+
+  /**
+   * 加载更多记录
+   */
+  loadMoreRecords() {
+    if (this.data.loadingMore || !this.data.hasMore) return
+    
+    this.setData({ 
+      loadingMore: true,
+      currentPage: this.data.currentPage + 1
+    })
+    
+    this.searchRecords().finally(() => {
+      this.setData({ loadingMore: false })
     })
   }
 })

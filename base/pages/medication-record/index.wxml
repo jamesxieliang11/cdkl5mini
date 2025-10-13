@@ -58,9 +58,21 @@
           <van-field
             label="药物名称"
             value="{{item.name}}"
-            placeholder="请输入药物名称"
+            placeholder="请输入药物名称或点击快捷选择"
             bind:input="onMedicationNameInput"
             data-index="{{index}}"
+            is-link
+            readonly="{{false}}"
+            bind:click-right-icon="showMedicationPicker"
+          />
+          
+          <van-cell 
+            title="快捷选择药物" 
+            label="选择常用儿童癫痫药物"
+            is-link
+            bind:click="showMedicationPicker"
+            data-index="{{index}}"
+            custom-class="quick-select-cell"
           />
           
           <view class="dosage-container">
@@ -73,14 +85,12 @@
               data-index="{{index}}"
               custom-style="flex: 1; margin-right: 20rpx;"
             />
-            <van-field
-              label="单位"
-              value="{{item.unit}}"
-              placeholder="单位"
+            <van-cell 
+              title="单位" 
+              value="{{item.unit || '请选择单位'}}"
+              is-link
               bind:click="showUnitPicker"
               data-index="{{index}}"
-              readonly
-              is-link
               custom-style="flex: 0 0 200rpx;"
             />
           </view>
@@ -171,4 +181,14 @@
   bind:select="onHistorySelect"
   bind:cancel="onHistoryCancel"
   title="选择历史记录"
+/>
+
+<!-- 药物快捷选择器 -->
+<van-action-sheet
+  show="{{showMedicationPicker}}"
+  actions="{{commonMedicationOptions}}"
+  bind:select="onMedicationSelect"
+  bind:cancel="onMedicationCancel"
+  title="选择常用药物"
+  description="选择后将自动填充药物名称、剂量和单位"
 />

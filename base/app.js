@@ -85,6 +85,7 @@ App({
       this.globalData.userInfo = loginResult.data
       this.globalData.userRole = loginResult.data.userRole
       this.globalData.openid = loginResult.data.openid
+      this.globalData.userId = loginResult.data._id
       
       console.log('登录成功:', loginResult)
       

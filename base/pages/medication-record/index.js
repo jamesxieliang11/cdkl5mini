@@ -32,8 +32,28 @@ Page({
       { name: '片', value: '片' },
       { name: '粒', value: '粒' },
       { name: '包', value: '包' },
-      { name: '滴', value: '滴' }
+      { name: '滴', value: '滴' },
+      { name: 'μg', value: 'μg' },
+      { name: 'IU', value: 'IU' }
     ],
+    
+    // 儿童癫痫常用药物选项
+    commonMedicationOptions: [
+      { name: '卡马西平片', value: '卡马西平片', defaultDosage: '100', defaultUnit: 'mg' },
+      { name: '丙戊酸钠片', value: '丙戊酸钠片', defaultDosage: '200', defaultUnit: 'mg' },
+      { name: '苯妥英钠片', value: '苯妥英钠片', defaultDosage: '100', defaultUnit: 'mg' },
+      { name: '拉莫三嗪片', value: '拉莫三嗪片', defaultDosage: '25', defaultUnit: 'mg' },
+      { name: '左乙拉西坦片', value: '左乙拉西坦片', defaultDosage: '250', defaultUnit: 'mg' },
+      { name: '奥卡西平片', value: '奥卡西平片', defaultDosage: '150', defaultUnit: 'mg' },
+      { name: '托吡酯片', value: '托吡酯片', defaultDosage: '25', defaultUnit: 'mg' },
+      { name: '氯硝西泮片', value: '氯硝西泮片', defaultDosage: '0.5', defaultUnit: 'mg' },
+      { name: '加巴喷丁胶囊', value: '加巴喷丁胶囊', defaultDosage: '100', defaultUnit: 'mg' },
+      { name: '普瑞巴林胶囊', value: '普瑞巴林胶囊', defaultDosage: '75', defaultUnit: 'mg' },
+      { name: '自定义药物', value: 'custom' }
+    ],
+    
+    // 选择器状态
+    showMedicationPicker: false,
     
     // 历史记录
     historyRecords: [],
@@ -208,6 +228,7 @@ Page({
   // 显示单位选择器
   showUnitPicker(event) {
     const index = event.currentTarget.dataset.index
+    console.log('showUnitPicker 被调用')
     this.setData({
       showUnitPicker: true,
       currentMedicationIndex: index
@@ -228,6 +249,47 @@ Page({
   // 取消单位选择
   onUnitCancel() {
     this.setData({ showUnitPicker: false })
+  },
+
+  // 显示药物快捷选择器
+  showMedicationPicker(event) {
+    const index = event.currentTarget.dataset.index
+    this.setData({
+      showMedicationPicker: true,
+      currentMedicationIndex: index
+    })
+  },
+
+  // 选择药物
+  onMedicationSelect(event) {
+    const selectedMedication = this.data.commonMedicationOptions.find(med => med.value === event.detail.value)
+    const index = this.data.currentMedicationIndex
+    
+    if (selectedMedication && selectedMedication.value !== 'custom') {
+      // 自动填充药物信息
+      this.setData({
+        [`formData.medications[${index}].name`]: selectedMedication.value,
+        [`formData.medications[${index}].dosage`]: selectedMedication.defaultDosage,
+        [`formData.medications[${index}].unit`]: selectedMedication.defaultUnit,
+        showMedicationPicker: false
+      })
+      
+      wx.showToast({
+        title: '已自动填充药物信息',
+        icon: 'success',
+        duration: 1500
+      })
+    } else if (selectedMedication && selectedMedication.value === 'custom') {
+      // 自定义药物，只关闭选择器
+      this.setData({
+        showMedicationPicker: false
+      })
+    }
+  },
+
+  // 取消药物选择
+  onMedicationCancel() {
+    this.setData({ showMedicationPicker: false })
   },
 
   // 副作用输入

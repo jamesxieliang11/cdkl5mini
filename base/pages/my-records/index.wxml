@@ -2,7 +2,10 @@
 <view class="container">
   <!-- 页面标题 -->
   <view class="page-header">
-    <text class="page-title">我的记录</text>
+    <view class="header-content">
+      <text class="page-title">📋 我的记录</text>
+      <text class="page-subtitle">健康记录管理</text>
+    </view>
     <button class="home-btn" bindtap="goToHome">
       <text class="home-icon">🏠</text>
       <text class="home-text">主页</text>
@@ -13,26 +16,30 @@
   <view class="search-section">
     <!-- 记录类型选择 -->
     <view class="filter-item">
-      <text class="filter-label">记录类型</text>
+      <text class="filter-label">📊 记录类型</text>
       <view class="record-type-tabs">
         <view class="tab-item {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">
-          全部
+          <text class="tab-icon">📝</text>
+          <text class="tab-text">全部</text>
         </view>
         <view class="tab-item {{activeTab === 'medication' ? 'active' : ''}}" bindtap="switchTab" data-tab="medication">
-          调药记录
+          <text class="tab-icon">💊</text>
+          <text class="tab-text">调药</text>
         </view>
         <view class="tab-item {{activeTab === 'seizure' ? 'active' : ''}}" bindtap="switchTab" data-tab="seizure">
-          发作记录
+          <text class="tab-icon">⚡</text>
+          <text class="tab-text">发作</text>
         </view>
         <view class="tab-item {{activeTab === 'other' ? 'active' : ''}}" bindtap="switchTab" data-tab="other">
-          其他记录
+          <text class="tab-icon">📄</text>
+          <text class="tab-text">其他</text>
         </view>
       </view>
     </view>
 
     <!-- 时间范围选择 -->
     <view class="filter-item">
-      <text class="filter-label">时间范围</text>
+      <text class="filter-label">📅 时间范围</text>
       <view class="date-range">
         <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange" class="date-picker">
           <view class="picker-display">
@@ -53,9 +60,13 @@
     <!-- 查询按钮 -->
     <view class="search-actions">
       <button class="search-btn" bindtap="searchRecords" disabled="{{loading}}">
-        {{loading ? '查询中...' : '查询记录'}}
+        <text class="btn-icon">🔍</text>
+        <text class="btn-text">{{loading ? '查询中...' : '查询记录'}}</text>
       </button>
-      <button class="reset-btn" bindtap="resetFilters">重置</button>
+      <button class="reset-btn" bindtap="resetFilters">
+        <text class="btn-icon">🔄</text>
+        <text class="btn-text">重置</text>
+      </button>
     </view>
   </view>
 
@@ -63,7 +74,10 @@
   <view class="records-section">
     <!-- 统计信息 -->
     <view class="records-stats" wx:if="{{totalCount > 0}}">
-      <text class="stats-text">共找到 {{totalCount}} 条记录</text>
+      <view class="stats-content">
+        <text class="stats-icon">📈</text>
+        <text class="stats-text">共找到 {{totalCount}} 条记录</text>
+      </view>
     </view>
 
     <!-- 记录列表 -->
@@ -72,38 +86,80 @@
         <!-- 调药记录 -->
         <view wx:if="{{item.type === 'medication'}}" class="medication-record">
           <view class="record-header">
-            <text class="record-type-tag medication">调药记录</text>
+            <view class="record-type-info">
+              <text class="record-type-tag medication">
+                <text class="tag-icon">💊</text>
+                <text class="tag-text">调药记录</text>
+              </text>
+            </view>
             <text class="record-time">{{item.datetime}}</text>
           </view>
           <view class="record-content">
-            <text class="medication-name">{{item.name}}</text>
-            <text class="medication-dosage">剂量: {{item.dosage}}{{item.unit}}</text>
-            <text class="take-time">服用时间: {{item.takeTime}}</text>
+            <view class="content-item">
+              <text class="content-icon">🏷️</text>
+              <text class="medication-name">{{item.name}}</text>
+            </view>
+            <view class="content-item">
+              <text class="content-icon">⚖️</text>
+              <text class="medication-dosage">剂量: {{item.dosage}}{{item.unit}}</text>
+            </view>
+            <view class="content-item">
+              <text class="content-icon">⏰</text>
+              <text class="take-time">服用时间: {{item.takeTime}}</text>
+            </view>
           </view>
         </view>
 
         <!-- 发作记录 -->
         <view wx:elif="{{item.type === 'seizure'}}" class="seizure-record">
           <view class="record-header">
-            <text class="record-type-tag seizure">发作记录</text>
+            <view class="record-type-info">
+              <text class="record-type-tag seizure">
+                <text class="tag-icon">⚡</text>
+                <text class="tag-text">发作记录</text>
+              </text>
+            </view>
             <text class="record-time">{{item.datetime}}</text>
           </view>
           <view class="record-content">
-            <text class="seizure-type">类型: {{item.seizureType}}</text>
-            <text class="seizure-duration">持续时间: {{item.duration}}</text>
+            <view class="content-item">
+              <text class="content-icon">🔍</text>
+              <text class="seizure-type">类型: {{item.seizureType}}</text>
+            </view>
+            <view class="content-item">
+              <text class="content-icon">⏱️</text>
+              <text class="seizure-duration">持续时间: {{item.duration}}</text>
+            </view>
           </view>
         </view>
 
         <!-- 其他记录 -->
         <view wx:else class="other-record">
           <view class="record-header">
-            <text class="record-type-tag other">其他记录</text>
+            <view class="record-type-info">
+              <text class="record-type-tag other">
+                <text class="tag-icon">📄</text>
+                <text class="tag-text">其他记录</text>
+              </text>
+            </view>
             <text class="record-time">{{item.datetime}}</text>
           </view>
           <view class="record-content">
-            <text class="other-category">分类: {{item.category}}</text>
-            <text class="other-note">{{item.note}}</text>
+            <view class="content-item">
+              <text class="content-icon">📂</text>
+              <text class="other-category">分类: {{item.category}}</text>
+            </view>
+            <view class="content-item">
+              <text class="content-icon">📝</text>
+              <text class="other-note">{{item.note}}</text>
+            </view>
           </view>
+        </view>
+        
+        <!-- 记录操作指示 -->
+        <view class="record-action-hint">
+          <text class="action-text">点击查看详情</text>
+          <text class="action-icon">👆</text>
         </view>
       </view>
     </view>
@@ -113,18 +169,168 @@
       <text class="empty-icon">📝</text>
       <text class="empty-text">暂无记录</text>
       <text class="empty-tip">请调整查询条件或添加新记录</text>
+      <button class="empty-action-btn" bindtap="goToAddRecord">
+        <text class="btn-icon">➕</text>
+        <text class="btn-text">添加记录</text>
+      </button>
     </view>
 
     <!-- 加载更多 -->
     <view class="load-more" wx:if="{{hasMore && records.length > 0}}">
       <button class="load-more-btn" bindtap="loadMoreRecords" disabled="{{loadingMore}}">
-        {{loadingMore ? '加载中...' : '加载更多'}}
+        <text class="btn-icon">⬇️</text>
+        <text class="btn-text">{{loadingMore ? '加载中...' : '加载更多'}}</text>
       </button>
     </view>
   </view>
 
   <!-- 加载状态 -->
   <view class="loading-overlay" wx:if="{{loading}}">
-    <text class="loading-text">查询中...</text>
+    <view class="loading-content">
+      <text class="loading-icon">⏳</text>
+      <text class="loading-text">查询中...</text>
+    </view>
   </view>
+
+  <!-- 记录详情弹窗 -->
+  <van-popup 
+    show="{{showDetailPopup}}" 
+    position="bottom" 
+    round
+    closeable
+    close-icon="close"
+    bind:close="closeDetailPopup"
+    custom-style="height: 70vh;"
+  >
+    <view class="detail-popup-container">
+      <!-- 弹窗标题 -->
+      <view class="detail-header">
+        <view class="detail-title-section">
+          <text class="detail-title">{{detailData.title}}</text>
+          <text class="detail-subtitle">详细信息</text>
+        </view>
+        <view class="detail-actions">
+          <button class="detail-edit-btn" bindtap="editCurrentRecord">
+            <van-icon name="edit" size="16px" />
+            <text>编辑</text>
+          </button>
+        </view>
+      </view>
+
+      <!-- 弹窗内容 -->
+      <scroll-view class="detail-content" scroll-y>
+        <!-- 调药记录详情 -->
+        <view wx:if="{{detailData.record.type === 'medication'}}" class="medication-detail">
+          <view class="detail-section">
+            <view class="section-header">
+              <van-icon name="clock-o" size="18px" color="#667eea" />
+              <text class="section-title">时间信息</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">记录时间</text>
+              <text class="info-value">{{detailData.record.datetime}}</text>
+            </view>
+          </view>
+
+          <view class="detail-section">
+            <view class="section-header">
+              <van-icon name="bag-o" size="18px" color="#4facfe" />
+              <text class="section-title">药物信息</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">药物名称</text>
+              <text class="info-value medication-highlight">{{detailData.record.name}}</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">用药剂量</text>
+              <text class="info-value">{{detailData.record.dosage}}{{detailData.record.unit}}</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">服用时间</text>
+              <text class="info-value">{{detailData.record.takeTime}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 发作记录详情 -->
+        <view wx:elif="{{detailData.record.type === 'seizure'}}" class="seizure-detail">
+          <view class="detail-section">
+            <view class="section-header">
+              <van-icon name="clock-o" size="18px" color="#667eea" />
+              <text class="section-title">时间信息</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">记录时间</text>
+              <text class="info-value">{{detailData.record.datetime}}</text>
+            </view>
+          </view>
+
+          <view class="detail-section">
+            <view class="section-header">
+              <van-icon name="warning-o" size="18px" color="#fa709a" />
+              <text class="section-title">发作信息</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">发作类型</text>
+              <text class="info-value seizure-highlight">{{detailData.record.seizureType}}</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">持续时间</text>
+              <text class="info-value">{{detailData.record.duration}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 其他记录详情 -->
+        <view wx:else class="other-detail">
+          <view class="detail-section">
+            <view class="section-header">
+              <van-icon name="clock-o" size="18px" color="#667eea" />
+              <text class="section-title">时间信息</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">记录时间</text>
+              <text class="info-value">{{detailData.record.datetime}}</text>
+            </view>
+          </view>
+
+          <view class="detail-section">
+            <view class="section-header">
+              <van-icon name="notes-o" size="18px" color="#20bf6b" />
+              <text class="section-title">记录信息</text>
+            </view>
+            <view class="info-item">
+              <text class="info-label">记录分类</text>
+              <text class="info-value other-highlight">{{detailData.record.category}}</text>
+            </view>
+            <view class="info-item vertical">
+              <text class="info-label">记录内容</text>
+              <text class="info-value content-text">{{detailData.record.note}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 底部操作区 -->
+      <view class="detail-footer">
+        <van-button 
+          type="default" 
+          size="large" 
+          custom-class="footer-btn cancel-btn"
+          bindtap="closeDetailPopup"
+        >
+          关闭
+        </van-button>
+        <van-button 
+          type="primary" 
+          size="large" 
+          custom-class="footer-btn edit-btn"
+          bindtap="editCurrentRecord"
+        >
+          <van-icon name="edit" size="16px" />
+          编辑记录
+        </van-button>
+      </view>
+    </view>
+  </van-popup>
 </view>

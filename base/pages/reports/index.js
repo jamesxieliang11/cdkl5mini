@@ -81,7 +81,7 @@ Page({
    * 编辑宝宝信息
    */
   editBabyInfo() {
-    wx.navigateTo({
+    wx.switchTab({
       url: '/pages/user-profile/index'
     })
   },
@@ -89,33 +89,52 @@ Page({
   /**
    * 加载宝宝信息
    */
-  loadBabyInfo() {
-    // 从本地存储获取宝宝信息
-    const babyInfo = wx.getStorageSync('babyInfo') || {}
-    
-    // 计算年龄
-    let age = '未设置'
-    if (babyInfo.birthday) {
-      const birthDate = new Date(babyInfo.birthday)
-      const now = new Date()
-      const ageInMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth())
-      if (ageInMonths < 12) {
-        age = `${ageInMonths}个月`
-      } else {
-        const years = Math.floor(ageInMonths / 12)
-        const months = ageInMonths % 12
-        age = months > 0 ? `${years}岁${months}个月` : `${years}岁`
+  async loadBabyInfo() {
+    try {
+      // 调用云函数获取用户信息
+      const result = await wx.cloud.callFunction({
+        name: 'getUserProfile',
+        data: {}
+      })
+      
+      const userData = result.result?.data?.patientInfo || {}
+      console.log('用户信息:', userData)
+      
+      // 计算年龄
+      let age = '未设置'
+      if (userData.babyBirthday) {
+        const birthDate = new Date(userData.babyBirthday)
+        const now = new Date()
+        const ageInMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth())
+        if (ageInMonths < 12) {
+          age = `${ageInMonths}个月`
+        } else {
+          const years = Math.floor(ageInMonths / 12)
+          const months = ageInMonths % 12
+          age = months > 0 ? `${years}岁${months}个月` : `${years}岁`
+        }
       }
+      
+      this.setData({
+        babyInfo: {
+          name: userData.babyName || '未设置',
+          age: age,
+          weight: '未设置', // 接口中没有体重字段
+          firstSeizure: userData.medicalHistory || '未记录' // 使用病史作为首次发作记录
+        }
+      })
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      // 如果云函数调用失败，显示默认信息
+      this.setData({
+        babyInfo: {
+          name: '未设置',
+          age: '未设置',
+          weight: '未设置',
+          firstSeizure: '未记录'
+        }
+      })
     }
-    
-    this.setData({
-      babyInfo: {
-        name: babyInfo.name || '未设置',
-        age: age,
-        weight: babyInfo.weight ? `${babyInfo.weight}kg` : '未设置',
-        firstSeizure: babyInfo.firstSeizure || '未记录'
-      }
-    })
   },
 
   /**

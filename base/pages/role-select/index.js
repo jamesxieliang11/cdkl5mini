@@ -34,6 +34,7 @@ Page({
       // 更新全局用户信息
       app.globalData.userInfo = loginResult.data
       app.globalData.openid = loginResult.data.openid
+      app.globalData.userId = loginResult.data._id
       
       console.log('登录成功:', loginResult)
       
