@@ -5,6 +5,8 @@
     "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
     "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
     "van-field": "/miniprogram_npm/@vant/weapp/field/index",
-    "van-toast": "/miniprogram_npm/@vant/weapp/toast/index"
+    "van-toast": "/miniprogram_npm/@vant/weapp/toast/index",
+    "van-loading": "/miniprogram_npm/@vant/weapp/loading/index",
+    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index"
   }
 }

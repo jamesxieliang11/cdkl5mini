@@ -95,6 +95,91 @@
   font-size: 32rpx !important;
 }
 
+/* 图片上传样式 */
+.image-upload-section {
+  padding: 20rpx;
+}
+
+.image-upload-tips {
+  margin-bottom: 20rpx;
+}
+
+.tips-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.image-item {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-actions {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+}
+
+.delete-icon {
+  color: #ff4444;
+  font-size: 32rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 4rpx;
+}
+
+.image-upload-btn {
+  width: 160rpx;
+  height: 160rpx;
+  border: 2rpx dashed #ddd;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+}
+
+.upload-icon {
+  font-size: 48rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.upload-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.upload-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  color: #666;
+}
+
+.status-text {
+  margin-left: 12rpx;
+  font-size: 28rpx;
+}
+
 /* 响应式适配 */
 @media (max-width: 375px) {
   .page-header {
@@ -107,5 +192,11 @@
   
   .form-container {
     padding: 30rpx 20rpx;
+  }
+  
+  .image-item,
+  .image-upload-btn {
+    width: 140rpx;
+    height: 140rpx;
   }
 }

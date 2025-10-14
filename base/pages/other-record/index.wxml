@@ -66,6 +66,57 @@
       />
     </van-cell-group>
 
+    <!-- 图片上传 -->
+    <van-cell-group title="相关图片" custom-class="form-group">
+      <view class="image-upload-section">
+        <view class="image-upload-tips">
+          <text class="tips-text">支持上传相关图片（最多{{maxImageCount}}张）</text>
+        </view>
+        
+        <view class="image-list">
+          <!-- 已上传的图片 -->
+          <view 
+            class="image-item" 
+            wx:for="{{formData.images}}" 
+            wx:key="fileID"
+            wx:for-index="index"
+          >
+            <image 
+              class="uploaded-image" 
+              src="{{item.tempFilePath || item.fileID}}" 
+              mode="aspectFill"
+              bind:tap="previewImage"
+              data-index="{{index}}"
+            />
+            <view class="image-actions">
+              <van-icon 
+                name="delete" 
+                class="delete-icon" 
+                bind:tap="deleteImage"
+                data-index="{{index}}"
+              />
+            </view>
+          </view>
+          
+          <!-- 上传按钮 -->
+          <view 
+            class="image-upload-btn" 
+            wx:if="{{formData.images.length < maxImageCount}}"
+            bind:tap="chooseImages"
+          >
+            <van-icon name="plus" class="upload-icon" />
+            <text class="upload-text">添加图片</text>
+          </view>
+        </view>
+        
+        <!-- 上传状态 -->
+        <view class="upload-status" wx:if="{{uploadingImages}}">
+          <van-loading size="24px" />
+          <text class="status-text">上传中...</text>
+        </view>
+      </view>
+    </van-cell-group>
+
     </view>
 
   <!-- 提交按钮 -->

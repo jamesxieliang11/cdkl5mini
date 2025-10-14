@@ -157,47 +157,96 @@ Page({
   // 上传病历文件
   uploadMedicalFile: async function() {
     try {
+      // 检查当前文件数量限制
+      if (this.data.medicalFiles.length >= 10) {
+        wx.showToast({
+          title: '最多只能上传10个文件',
+          icon: 'none'
+        })
+        return
+      }
+
       const res = await wx.chooseMessageFile({
-        count: 5,
+        count: Math.min(5, 10 - this.data.medicalFiles.length), // 动态计算可选择的文件数量
         type: 'file',
-        extension: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']
+        extension: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'bmp']
       })
 
       if (res.tempFiles && res.tempFiles.length > 0) {
+        // 检查文件大小限制（单个文件不超过20MB）
+        const oversizedFiles = res.tempFiles.filter(file => file.size > 20 * 1024 * 1024)
+        if (oversizedFiles.length > 0) {
+          wx.showModal({
+            title: '文件过大',
+            content: `以下文件超过20MB限制：\n${oversizedFiles.map(f => f.name).join('\n')}`,
+            showCancel: false
+          })
+          return
+        }
+
         wx.showLoading({ title: '上传中...' })
         
-        const uploadPromises = res.tempFiles.map(async (file) => {
-          const cloudPath = `medical-files/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${file.name.split('.').pop()}`
-          
-          const uploadRes = await wx.cloud.uploadFile({
-            cloudPath: cloudPath,
-            filePath: file.path
-          })
+        const uploadPromises = res.tempFiles.map(async (file, index) => {
+          try {
+            // 生成更安全的文件路径
+            const timestamp = Date.now()
+            const randomStr = Math.random().toString(36).substr(2, 9)
+            const fileExt = file.name.split('.').pop().toLowerCase()
+            const cloudPath = `medical-files/${timestamp}-${randomStr}-${index}.${fileExt}`
+            
+            const uploadRes = await wx.cloud.uploadFile({
+              cloudPath: cloudPath,
+              filePath: file.path
+            })
 
-          return {
-            fileID: uploadRes.fileID,
-            name: file.name,
-            size: file.size,
-            formattedSize: this.formatFileSize(file.size),
-            uploadTime: new Date().toISOString()
+            return {
+              fileID: uploadRes.fileID,
+              name: file.name,
+              size: file.size,
+              formattedSize: this.formatFileSize(file.size),
+              uploadTime: new Date().toISOString(),
+              cloudPath: cloudPath
+            }
+          } catch (uploadError) {
+            console.error(`文件 ${file.name} 上传失败:`, uploadError)
+            throw new Error(`${file.name} 上传失败`)
           }
         })
 
-        const uploadedFiles = await Promise.all(uploadPromises)
-        
-        this.setData({
-          medicalFiles: [...this.data.medicalFiles, ...uploadedFiles]
-        })
+        try {
+          const uploadedFiles = await Promise.all(uploadPromises)
+          
+          this.setData({
+            medicalFiles: [...this.data.medicalFiles, ...uploadedFiles]
+          })
 
-        wx.showToast({
-          title: '上传成功',
-          icon: 'success'
-        })
+          wx.showToast({
+            title: `成功上传${uploadedFiles.length}个文件`,
+            icon: 'success'
+          })
+        } catch (uploadError) {
+          // 如果有文件上传失败，显示具体错误信息
+          wx.showModal({
+            title: '上传失败',
+            content: uploadError.message || '部分文件上传失败，请重试',
+            showCancel: false
+          })
+        }
       }
     } catch (error) {
-      console.error('上传文件失败:', error)
+      console.error('选择文件失败:', error)
+      let errorMsg = '上传失败'
+      
+      if (error.errMsg) {
+        if (error.errMsg.includes('cancel')) {
+          return // 用户取消选择，不显示错误
+        } else if (error.errMsg.includes('limit')) {
+          errorMsg = '文件选择超出限制'
+        }
+      }
+      
       wx.showToast({
-        title: '上传失败',
+        title: errorMsg,
         icon: 'error'
       })
     } finally {
@@ -209,16 +258,42 @@ Page({
   deleteFile: function(e) {
     const index = e.currentTarget.dataset.index
     const files = this.data.medicalFiles
+    const fileToDelete = files[index]
     
     wx.showModal({
       title: '确认删除',
-      content: '确定要删除这个文件吗？',
-      success: (res) => {
+      content: '确定要删除这个文件吗？删除后无法恢复。',
+      success: async (res) => {
         if (res.confirm) {
-          files.splice(index, 1)
-          this.setData({
-            medicalFiles: files
-          })
+          try {
+            wx.showLoading({ title: '删除中...' })
+            
+            // 从云存储中删除文件
+            if (fileToDelete.fileID) {
+              await wx.cloud.deleteFile({
+                fileList: [fileToDelete.fileID]
+              })
+            }
+            
+            // 从页面数据中移除
+            files.splice(index, 1)
+            this.setData({
+              medicalFiles: files
+            })
+            
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            })
+          } catch (error) {
+            console.error('删除文件失败:', error)
+            wx.showToast({
+              title: '删除失败',
+              icon: 'error'
+            })
+          } finally {
+            wx.hideLoading()
+          }
         }
       }
     })
@@ -229,46 +304,94 @@ Page({
     const fileID = e.currentTarget.dataset.fileid
     const fileName = e.currentTarget.dataset.filename
     
+    if (!fileID) {
+      wx.showToast({
+        title: '文件信息错误',
+        icon: 'error'
+      })
+      return
+    }
+    
+    wx.showLoading({ title: '加载中...' })
+    
     // 获取文件临时链接
     wx.cloud.getTempFileURL({
       fileList: [fileID],
       success: (res) => {
-        if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
-          const fileUrl = res.fileList[0].tempFileURL
-          const fileExt = fileName.split('.').pop().toLowerCase()
+        wx.hideLoading()
+        
+        if (res.fileList && res.fileList[0]) {
+          const fileInfo = res.fileList[0]
           
-          if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
-            // 图片文件，使用预览图片
-            wx.previewImage({
-              urls: [fileUrl]
-            })
-          } else {
-            // 其他文件，下载到本地
-            wx.downloadFile({
-              url: fileUrl,
-              success: (downloadRes) => {
-                wx.openDocument({
-                  filePath: downloadRes.tempFilePath,
-                  success: () => {
-                    console.log('打开文档成功')
-                  },
-                  fail: (error) => {
-                    console.error('打开文档失败:', error)
+          if (fileInfo.status === 0 && fileInfo.tempFileURL) {
+            const fileUrl = fileInfo.tempFileURL
+            const fileExt = fileName.split('.').pop().toLowerCase()
+            
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(fileExt)) {
+              // 图片文件，使用预览图片
+              wx.previewImage({
+                urls: [fileUrl],
+                current: fileUrl
+              })
+            } else {
+              // 其他文件，下载到本地预览
+              wx.showLoading({ title: '下载中...' })
+              wx.downloadFile({
+                url: fileUrl,
+                success: (downloadRes) => {
+                  wx.hideLoading()
+                  if (downloadRes.statusCode === 200) {
+                    wx.openDocument({
+                      filePath: downloadRes.tempFilePath,
+                      showMenu: true,
+                      success: () => {
+                        console.log('文档打开成功')
+                      },
+                      fail: (error) => {
+                        console.error('文档打开失败:', error)
+                        wx.showModal({
+                          title: '无法预览',
+                          content: '当前设备不支持预览此类型文件，建议在电脑上查看',
+                          showCancel: false
+                        })
+                      }
+                    })
+                  } else {
                     wx.showToast({
-                      title: '无法打开文件',
+                      title: '下载失败',
                       icon: 'error'
                     })
                   }
-                })
-              }
+                },
+                fail: (error) => {
+                  wx.hideLoading()
+                  console.error('文件下载失败:', error)
+                  wx.showToast({
+                    title: '下载失败',
+                    icon: 'error'
+                  })
+                }
+              })
+            }
+          } else {
+            wx.showModal({
+              title: '文件不存在',
+              content: '文件可能已被删除或链接已过期',
+              showCancel: false
             })
           }
+        } else {
+          wx.showToast({
+            title: '获取文件链接失败',
+            icon: 'error'
+          })
         }
       },
       fail: (error) => {
-        console.error('获取文件链接失败:', error)
+        wx.hideLoading()
+        console.error('获取文件临时链接失败:', error)
         wx.showToast({
-          title: '文件加载失败',
+          title: '获取文件链接失败',
           icon: 'error'
         })
       }

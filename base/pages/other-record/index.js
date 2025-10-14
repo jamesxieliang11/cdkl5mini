@@ -7,7 +7,8 @@ Page({
       datetime: '',           // 记录时间
       category: '',           // 记录类别
       content: '',            // 记录内容
-      remark: ''              // 备注信息
+      remark: '',             // 备注信息
+      images: []              // 上传的图片文件
     },
     
     // 选择器相关
@@ -18,6 +19,12 @@ Page({
     
     // 选项数据
     categoryOptions: [
+      { name: '手术记录', value: '手术记录' },
+      { name: '门诊记录', value: '门诊记录' },
+      { name: '住院记录', value: '住院记录' },
+      { name: '检查报告', value: '检查报告' },
+      { name: '化验结果', value: '化验结果' },
+      { name: '用药记录', value: '用药记录' },
       { name: '日常观察', value: '日常观察' },
       { name: '饮食记录', value: '饮食记录' },
       { name: '睡眠记录', value: '睡眠记录' },
@@ -32,7 +39,11 @@ Page({
     historyRecords: [],
     historyOptions: [],
     
-    submitting: false
+    submitting: false,
+    
+    // 图片上传相关
+    maxImageCount: 9, // 最多上传图片数量
+    uploadingImages: false // 图片上传状态
   },
 
   // 返回按钮点击处理
@@ -278,6 +289,153 @@ Page({
   onHistoryCancel() {
     this.setData({ 
       showHistoryPicker: false 
+    })
+  },
+
+  // 选择图片上传
+  chooseImages: function() {
+    const { images, maxImageCount } = this.data
+    
+    if (images.length >= maxImageCount) {
+      wx.showToast({
+        title: `最多只能上传${maxImageCount}张图片`,
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.chooseMedia({
+      count: maxImageCount - images.length,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      maxDuration: 30,
+      camera: 'back',
+      success: (res) => {
+        if (res.tempFiles && res.tempFiles.length > 0) {
+          this.uploadImages(res.tempFiles)
+        }
+      },
+      fail: (error) => {
+        console.error('选择图片失败:', error)
+        wx.showToast({
+          title: '选择图片失败',
+          icon: 'error'
+        })
+      }
+    })
+  },
+
+  // 上传图片到云存储
+  uploadImages: async function(tempFiles) {
+    this.setData({ uploadingImages: true })
+    
+    try {
+      const uploadPromises = tempFiles.map(async (file, index) => {
+        try {
+          // 生成云存储路径
+          const timestamp = Date.now()
+          const randomStr = Math.random().toString(36).substr(2, 9)
+          const fileExt = file.tempFilePath.split('.').pop().toLowerCase()
+          const cloudPath = `other-record-images/${timestamp}-${randomStr}-${index}.${fileExt}`
+          
+          // 上传到云存储
+          const uploadRes = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: file.tempFilePath
+          })
+
+          return {
+            fileID: uploadRes.fileID,
+            cloudPath: cloudPath,
+            size: file.size,
+            width: file.width,
+            height: file.height,
+            tempFilePath: file.tempFilePath,
+            uploadTime: new Date().toISOString()
+          }
+        } catch (uploadError) {
+          console.error('图片上传失败:', uploadError)
+          throw new Error('图片上传失败')
+        }
+      })
+
+      const uploadedImages = await Promise.all(uploadPromises)
+      
+      // 更新图片列表
+      const currentImages = this.data.formData.images || []
+      this.setData({
+        'formData.images': [...currentImages, ...uploadedImages],
+        uploadingImages: false
+      })
+
+      wx.showToast({
+        title: `成功上传${uploadedImages.length}张图片`,
+        icon: 'success'
+      })
+    } catch (error) {
+      console.error('批量上传图片失败:', error)
+      this.setData({ uploadingImages: false })
+      wx.showToast({
+        title: '图片上传失败',
+        icon: 'error'
+      })
+    }
+  },
+
+  // 预览图片
+  previewImage: function(e) {
+    const index = e.currentTarget.dataset.index
+    const images = this.data.formData.images
+    
+    if (!images || images.length === 0) return
+    
+    const urls = images.map(img => img.tempFilePath || img.fileID)
+    
+    wx.previewImage({
+      urls: urls,
+      current: urls[index]
+    })
+  },
+
+  // 删除图片
+  deleteImage: function(e) {
+    const index = e.currentTarget.dataset.index
+    const images = this.data.formData.images
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这张图片吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            const imageToDelete = images[index]
+            
+            // 从云存储中删除图片
+            if (imageToDelete.fileID) {
+              await wx.cloud.deleteFile({
+                fileList: [imageToDelete.fileID]
+              })
+            }
+            
+            // 从列表中移除
+            images.splice(index, 1)
+            this.setData({
+              'formData.images': images
+            })
+            
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            })
+          } catch (error) {
+            console.error('删除图片失败:', error)
+            wx.showToast({
+              title: '删除失败',
+              icon: 'error'
+            })
+          }
+        }
+      }
     })
   },
 
