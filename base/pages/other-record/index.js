@@ -74,8 +74,64 @@ Page({
     })
   },
 
-  // 加载历史记录
-  loadHistoryRecords() {
+  // 加载历史记录（优先从云函数获取）
+  async loadHistoryRecords() {
+    try {
+      // 获取用户ID
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo || !userInfo.openid) {
+        console.log('用户信息不存在，回退到本地存储')
+        this.loadLocalHistoryRecords()
+        return
+      }
+
+      // 优先从云函数获取历史记录
+      const cloudResult = await wx.cloud.callFunction({
+        name: 'otherRecord',
+        data: {
+          action: 'list',
+          userId: userInfo._id,
+          pageSize: 5,
+          pageIndex: 0
+        }
+      })
+      
+      let records = []
+      if (cloudResult.result && cloudResult.result.success && cloudResult.result.data && cloudResult.result.data.records) {
+        // 云函数获取成功，转换数据格式
+        const cloudRecords = cloudResult.result.data.records
+        records = cloudRecords.map(record => ({
+          datetime: this.formatDateTime(record.record_time),
+          category: record.category || '其他',
+          content: record.content || '',
+          remark: record.remark || ''
+        }))
+        console.log('从云函数获取其他记录成功:', records.length, '条')
+      } else {
+        // 云函数获取失败或无数据，回退到本地存储
+        console.log('云函数获取其他记录失败，回退到本地存储')
+        this.loadLocalHistoryRecords()
+        return
+      }
+      
+      const historyOptions = records.map((record, index) => ({
+        name: `${record.datetime} - ${record.category}`,
+        value: index
+      }))
+      
+      this.setData({
+        historyRecords: records,
+        historyOptions
+      })
+    } catch (error) {
+      console.error('加载历史记录失败:', error)
+      // 出错时回退到本地存储
+      this.loadLocalHistoryRecords()
+    }
+  },
+
+  // 从本地存储加载历史记录（备用方案）
+  loadLocalHistoryRecords() {
     try {
       const records = wx.getStorageSync('epilepsyDiary_otherRecords') || []
       const historyOptions = records.slice(0, 5).map((record, index) => ({
@@ -88,8 +144,18 @@ Page({
         historyOptions
       })
     } catch (error) {
-      console.error('加载历史记录失败:', error)
+      console.error('本地存储获取失败:', error)
+      this.setData({
+        historyRecords: [],
+        historyOptions: []
+      })
     }
+  },
+
+  // 格式化日期时间
+  formatDateTime(dateTime) {
+    const date = new Date(dateTime)
+    return `${date.getFullYear()}-${this.formatTwoDigits(date.getMonth() + 1)}-${this.formatTwoDigits(date.getDate())} ${this.formatTwoDigits(date.getHours())}:${this.formatTwoDigits(date.getMinutes())}`
   },
 
   // 数字两位补齐

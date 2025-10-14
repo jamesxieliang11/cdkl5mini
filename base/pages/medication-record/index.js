@@ -55,6 +55,24 @@ Page({
     // 选择器状态
     showMedicationPicker: false,
     
+    // 儿童癫痫常见副作用选项（按优先级排序）
+    commonSideEffects: [
+      { name: '无副作用', selected: false },
+      { name: '嗜睡/困倦', selected: false },
+      { name: '注意力不集中', selected: false },
+      { name: '情绪变化/易怒', selected: false },
+      { name: '头晕', selected: false },
+      { name: '食欲不振', selected: false },
+      { name: '恶心呕吐', selected: false },
+      { name: '皮疹/过敏', selected: false },
+      { name: '牙龈增生', selected: false },
+      { name: '体重变化', selected: false },
+      { name: '记忆力下降', selected: false },
+      { name: '协调性差', selected: false },
+      { name: '疲劳乏力', selected: false },
+      { name: '其他', selected: false }
+    ],
+    
     // 历史记录
     historyRecords: [],
     historyOptions: [],
@@ -111,8 +129,70 @@ Page({
     return num.toString().padStart(2, '0')
   },
 
-  // 加载历史记录
-  loadHistoryRecords() {
+  // 加载历史记录（优先从云函数获取）
+  // 加载历史记录（优先从云函数获取）
+  async loadHistoryRecords() {
+    try {
+      // 获取用户ID
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo || !userInfo.openid) {
+        console.log('用户信息不存在，回退到本地存储')
+        this.loadLocalHistoryRecords()
+        return
+      }
+
+      // 优先从云函数获取历史记录
+      const cloudResult = await wx.cloud.callFunction({
+        name: 'medicationRecord',
+        data: {
+          action: 'list',
+          userId: userInfo._id,
+          pageSize: 5,
+          pageIndex: 0
+        }
+      })
+      
+      let records = []
+      if (cloudResult.result && cloudResult.result.success && cloudResult.result.data && cloudResult.result.data.records) {
+        // 云函数获取成功，转换数据格式
+        const cloudRecords = cloudResult.result.data.records
+        records = cloudRecords.map(record => ({
+          datetime: this.formatDateTime(record.record_time),
+          weight: record.weight.toString(),
+          medications: record.medications.map(med => ({
+            takeTime: med.take_time,
+            name: med.medication_name,
+            dosage: med.dosage.toString(),
+            unit: med.unit
+          })),
+          sideEffects: record.side_effects || ''
+        }))
+        console.log('从云函数获取历史记录成功:', records.length, '条')
+      } else {
+        // 云函数获取失败或无数据，回退到本地存储
+        console.log('云函数获取历史记录失败，回退到本地存储')
+        this.loadLocalHistoryRecords()
+        return
+      }
+      
+      const historyOptions = records.map((record, index) => ({
+        name: `${record.datetime} - ${record.medications.length}种药物`,
+        value: index
+      }))
+      
+      this.setData({
+        historyRecords: records,
+        historyOptions
+      })
+    } catch (error) {
+      console.error('加载历史记录失败:', error)
+      // 出错时回退到本地存储
+      this.loadLocalHistoryRecords()
+    }
+  },
+
+  // 从本地存储加载历史记录（备用方案）
+  loadLocalHistoryRecords() {
     try {
       const records = wx.getStorageSync('medicationRecords') || []
       const historyOptions = records.slice(0, 5).map((record, index) => ({
@@ -125,8 +205,18 @@ Page({
         historyOptions
       })
     } catch (error) {
-      console.error('加载历史记录失败:', error)
+      console.error('本地存储获取失败:', error)
+      this.setData({
+        historyRecords: [],
+        historyOptions: []
+      })
     }
+  },
+
+  // 格式化日期时间
+  formatDateTime(dateTime) {
+    const date = new Date(dateTime)
+    return `${date.getFullYear()}-${this.formatTwoDigits(date.getMonth() + 1)}-${this.formatTwoDigits(date.getDate())} ${this.formatTwoDigits(date.getHours())}:${this.formatTwoDigits(date.getMinutes())}`
   },
 
   // 显示日期时间选择器（使用 Vant 选择器）
@@ -296,6 +386,42 @@ Page({
   onSideEffectsInput(event) {
     this.setData({
       'formData.sideEffects': event.detail
+    })
+  },
+
+  // 切换副作用标签选择状态
+  toggleSideEffect(event) {
+    const index = event.currentTarget.dataset.index
+    const sideEffects = [...this.data.commonSideEffects]
+    
+    // 如果选择的是"无副作用"，则清空其他选择
+    if (index === 0) {
+      sideEffects.forEach((item, i) => {
+        item.selected = i === 0 ? !item.selected : false
+      })
+    } else {
+      // 选择其他副作用时，取消"无副作用"的选择
+      sideEffects[0].selected = false
+      sideEffects[index].selected = !sideEffects[index].selected
+    }
+    
+    // 更新副作用数据
+    this.setData({
+      commonSideEffects: sideEffects
+    })
+    
+    // 更新副作用文本
+    this.updateSideEffectsText()
+  },
+
+  // 更新副作用文本
+  updateSideEffectsText() {
+    const selectedEffects = this.data.commonSideEffects
+      .filter(item => item.selected)
+      .map(item => item.name)
+    
+    this.setData({
+      'formData.sideEffects': selectedEffects.join('、')
     })
   },
 

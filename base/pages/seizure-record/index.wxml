@@ -10,6 +10,16 @@
 
   <!-- 记录表单 -->
   <view class="form-container">
+    <!-- 快捷选择历史记录 -->
+    <van-cell-group wx:if="{{historyRecords.length > 0}}" title="快捷选择" custom-class="form-group">
+      <van-cell 
+        title="选择历史记录" 
+        label="快速复制之前的发作记录（时间会更新为当前时间）"
+        is-link
+        bind:click="showHistoryPicker"
+      />
+    </van-cell-group>
+
     <!-- 基本信息 -->
     <van-cell-group title="基本信息" custom-class="form-group">
       <van-field
@@ -58,16 +68,7 @@
       />
     </van-cell-group>
 
-    <!-- 快捷选择历史记录 -->
-    <van-cell-group wx:if="{{historyRecords.length > 0}}" title="快捷选择" custom-class="form-group">
-      <van-cell 
-        title="选择历史记录" 
-        label="快速复制之前的发作记录（时间会更新为当前时间）"
-        is-link
-        bind:click="showHistoryPicker"
-      />
-    </van-cell-group>
-  </view>
+    </view>
 
   <!-- 提交按钮 -->
   <view class="submit-container">
