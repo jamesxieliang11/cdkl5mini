@@ -47,7 +47,7 @@ App({
       // 检查本地是否有用户信息
       const localUserInfo = getUserInfo()
       
-      if (localUserInfo.openid && localUserInfo.userRole) {
+      if (localUserInfo.openid && localUserInfo.userRole && wx.getStorageSync('userId')) {
         // 本地有用户信息，恢复到全局数据
         this.globalData.userInfo = localUserInfo.userInfo
         this.globalData.userRole = localUserInfo.userRole
