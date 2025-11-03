@@ -68,6 +68,50 @@
       />
     </van-cell-group>
 
+    <!-- 相关图片 -->
+    <van-cell-group title="相关图片" custom-class="form-group">
+      <view class="image-upload-section">
+        <view class="image-upload-tip">
+          <text>可上传发作时的相关图片（如药物、环境等），最多{{maxImageCount}}张</text>
+        </view>
+        
+        <!-- 图片列表 -->
+        <view class="uploaded-images" wx:if="{{uploadedImages.length > 0}}">
+          <view 
+            class="image-item" 
+            wx:for="{{uploadedImages}}" 
+            wx:key="index"
+            data-index="{{index}}"
+            bind:tap="previewImage"
+          >
+            <image 
+              src="{{item.tempFilePath || item.fileID}}" 
+              mode="aspectFill"
+              class="uploaded-image"
+            />
+            <view 
+              class="delete-btn" 
+              data-index="{{index}}"
+              bind:tap="deleteImage"
+              catch:tap="deleteImage"
+            >
+              <van-icon name="cross" size="12" color="#fff" />
+            </view>
+          </view>
+        </view>
+
+        <!-- 上传按钮 -->
+        <view 
+          class="upload-btn" 
+          wx:if="{{uploadedImages.length < maxImageCount}}"
+          bind:tap="uploadImages"
+        >
+          <van-icon name="plus" size="24" color="#999" />
+          <text class="upload-text">添加图片</text>
+        </view>
+      </view>
+    </van-cell-group>
+
     </view>
 
   <!-- 提交按钮 -->

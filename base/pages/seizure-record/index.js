@@ -8,7 +8,8 @@ Page({
       seizureType: '',        // 发作类型
       duration: '',           // 持续时间
       triggers: '',           // 诱发因素
-      symptoms: ''            // 症状表现
+      symptoms: '',           // 症状表现
+      images: []              // 相关图片
     },
     
     // 选择器相关
@@ -30,6 +31,10 @@ Page({
     // 历史记录
     historyRecords: [],
     historyOptions: [],
+    
+    // 图片上传相关
+    uploadedImages: [],
+    maxImageCount: 5,
     
     submitting: false
   },
@@ -104,7 +109,8 @@ Page({
           seizureType: record.seizure_type || '未知类型',
           duration: record.duration ? record.duration.toString() : '',
           triggers: record.triggers || '',
-          symptoms: record.symptoms || ''
+          symptoms: record.symptoms || '',
+          images: record.images || []
         }))
         console.log('从云函数获取发作记录成功:', records.length, '条')
       } else {
@@ -162,7 +168,6 @@ Page({
   formatTwoDigits(num) {
     return num.toString().padStart(2, '0')
   },
-
 
   // 显示日期时间选择器（使用 Vant 选择器）
   showDateTimePicker() {
@@ -281,6 +286,8 @@ Page({
         'formData.duration': selectedRecord.duration,
         'formData.triggers': selectedRecord.triggers,
         'formData.symptoms': selectedRecord.symptoms,
+        'formData.images': [],  // 不复制图片
+        uploadedImages: [],     // 清空已上传图片
         showHistoryPicker: false
       })
 
@@ -295,6 +302,159 @@ Page({
   onHistoryCancel() {
     this.setData({ 
       showHistoryPicker: false 
+    })
+  },
+
+  // 图片上传相关方法
+  
+  // 选择并上传图片
+  async uploadImages() {
+    try {
+      // 检查当前图片数量限制
+      if (this.data.uploadedImages.length >= this.data.maxImageCount) {
+        wx.showToast({
+          title: `最多只能上传${this.data.maxImageCount}张图片`,
+          icon: 'none'
+        })
+        return
+      }
+
+      const remainingCount = this.data.maxImageCount - this.data.uploadedImages.length
+      const res = await wx.chooseImage({
+        count: remainingCount,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera']
+      })
+
+      if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+        wx.showLoading({ title: '上传中...' })
+        
+        const uploadPromises = res.tempFilePaths.map(async (tempFilePath, index) => {
+          try {
+            // 生成唯一的文件路径
+            const timestamp = Date.now()
+            const randomStr = Math.random().toString(36).substr(2, 9)
+            const cloudPath = `seizure-images/${timestamp}-${randomStr}-${index}.jpg`
+            
+            const uploadRes = await wx.cloud.uploadFile({
+              cloudPath: cloudPath,
+              filePath: tempFilePath
+            })
+
+            return {
+              fileID: uploadRes.fileID,
+              cloudPath: cloudPath,
+              tempFilePath: tempFilePath,
+              uploadTime: new Date().toISOString()
+            }
+          } catch (uploadError) {
+            console.error(`图片上传失败:`, uploadError)
+            throw new Error(`图片上传失败`)
+          }
+        })
+
+        try {
+          const uploadedImages = await Promise.all(uploadPromises)
+          
+          this.setData({
+            uploadedImages: [...this.data.uploadedImages, ...uploadedImages],
+            'formData.images': [...this.data.formData.images, ...uploadedImages.map(img => ({
+              fileID: img.fileID,
+              cloudPath: img.cloudPath,
+              uploadTime: img.uploadTime
+            }))]
+          })
+
+          wx.showToast({
+            title: `成功上传${uploadedImages.length}张图片`,
+            icon: 'success'
+          })
+        } catch (uploadError) {
+          wx.showModal({
+            title: '上传失败',
+            content: uploadError.message || '部分图片上传失败，请重试',
+            showCancel: false
+          })
+        }
+      }
+    } catch (error) {
+      console.error('选择图片失败:', error)
+      let errorMsg = '上传失败'
+      
+      if (error.errMsg) {
+        if (error.errMsg.includes('cancel')) {
+          return // 用户取消选择，不显示错误
+        } else if (error.errMsg.includes('limit')) {
+          errorMsg = '图片选择超出限制'
+        }
+      }
+      
+      wx.showToast({
+        title: errorMsg,
+        icon: 'error'
+      })
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
+  // 删除图片
+  deleteImage(e) {
+    const index = e.currentTarget.dataset.index
+    const images = this.data.uploadedImages
+    const imageToDelete = images[index]
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这张图片吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '删除中...' })
+            
+            // 从云存储中删除文件
+            if (imageToDelete.fileID) {
+              await wx.cloud.deleteFile({
+                fileList: [imageToDelete.fileID]
+              })
+            }
+            
+            // 从页面数据中移除
+            images.splice(index, 1)
+            const formDataImages = this.data.formData.images
+            formDataImages.splice(index, 1)
+            
+            this.setData({
+              uploadedImages: images,
+              'formData.images': formDataImages
+            })
+            
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            })
+          } catch (error) {
+            console.error('删除图片失败:', error)
+            wx.showToast({
+              title: '删除失败',
+              icon: 'error'
+            })
+          } finally {
+            wx.hideLoading()
+          }
+        }
+      }
+    })
+  },
+
+  // 预览图片
+  previewImage(e) {
+    const index = e.currentTarget.dataset.index
+    const urls = this.data.uploadedImages.map(img => img.tempFilePath || img.fileID)
+    
+    wx.previewImage({
+      current: urls[index],
+      urls: urls
     })
   },
 

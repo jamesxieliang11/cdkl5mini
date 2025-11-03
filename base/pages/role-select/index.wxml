@@ -11,7 +11,7 @@
     <view class="logo">
       <van-icon name="medical-o" size="60" color="#1989fa" />
     </view>
-    <view class="title">CDKL5大会</view>
+    <view class="title">希舞之家</view>
     <view class="subtitle">请选择您的身份</view>
   </view>
 

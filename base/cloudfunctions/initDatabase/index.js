@@ -1,4 +1,4 @@
-// CDKL5大会小程序云函数 - 数据库初始化
+// 希舞之家小程序云函数 - 数据库初始化
 // 云函数入口文件
 const cloud = require('wx-server-sdk')
 

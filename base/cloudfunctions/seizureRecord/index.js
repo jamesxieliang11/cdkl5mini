@@ -62,6 +62,7 @@ async function createRecord(data, userId) {
     symptoms: data.symptoms || '',
     recovery_time: data.recoveryTime || '',
     notes: data.notes || '',
+    images: data.images || [], // 添加图片字段支持
     created_at: new Date(),
     updated_at: new Date()
   }
@@ -135,6 +136,9 @@ async function updateRecord(recordId, data, userId) {
   }
   if (data.notes !== undefined) {
     updateData.notes = data.notes
+  }
+  if (data.images !== undefined) {
+    updateData.images = data.images
   }
 
   await db.collection('seizure_records')

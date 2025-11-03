@@ -1,4 +1,4 @@
--- CDKL5患者记录数据表设计
+-- 希舞之家患者记录数据表设计
 -- 创建时间: 2025-10-10
 
 -- 1. 调药记录表
@@ -44,6 +44,7 @@ CREATE TABLE seizure_records (
   rescue_dosage VARCHAR(50) COMMENT '急救药物剂量',
   recovery_time INT COMMENT '恢复时间(分钟)',
   notes TEXT COMMENT '备注',
+  images JSON COMMENT '相关图片信息(包含fileID、cloudPath、uploadTime等)',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
