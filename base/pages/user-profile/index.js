@@ -155,98 +155,178 @@ Page({
   },
 
   // 上传病历文件
-  uploadMedicalFile: async function() {
+  uploadMedicalFile: function() {
+    const that = this
+    
+    // 检查当前文件数量限制
+    if (this.data.medicalFiles.length >= 10) {
+      wx.showToast({
+        title: '最多只能上传10个文件',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 显示选择文件类型的弹窗
+    wx.showActionSheet({
+      itemList: ['拍照', '从相册选择', '选择文档'],
+      success: function(res) {
+        if (res.tapIndex === 0) {
+          // 拍照
+          that.chooseImageFromCamera()
+        } else if (res.tapIndex === 1) {
+          // 从相册选择
+          that.chooseImageFromAlbum()
+        } else if (res.tapIndex === 2) {
+          // 选择文档
+          that.chooseDocument()
+        }
+      }
+    })
+  },
+
+  // 拍照选择图片
+  chooseImageFromCamera: function() {
+    const that = this
+    wx.chooseImage({
+      count: Math.min(5, 10 - this.data.medicalFiles.length),
+      sizeType: ['original', 'compressed'],
+      sourceType: ['camera'],
+      success: function(res) {
+        that.handleSelectedFiles(res.tempFilePaths.map((path, index) => ({
+          path: path,
+          name: `camera_${Date.now()}_${index}.jpg`,
+          size: 0 // 相机拍照无法获取准确大小，上传时会获取
+        })))
+      }
+    })
+  },
+
+  // 从相册选择图片
+  chooseImageFromAlbum: function() {
+    const that = this
+    wx.chooseImage({
+      count: Math.min(5, 10 - this.data.medicalFiles.length),
+      sizeType: ['original', 'compressed'],
+      sourceType: ['album'],
+      success: function(res) {
+        that.handleSelectedFiles(res.tempFilePaths.map((path, index) => ({
+          path: path,
+          name: `album_${Date.now()}_${index}.${path.split('.').pop()}`,
+          size: 0 // 从相册选择无法直接获取大小，上传时会获取
+        })))
+      }
+    })
+  },
+
+  // 选择文档文件
+  chooseDocument: function() {
+    const that = this
+    wx.chooseMessageFile({
+      count: Math.min(5, 10 - this.data.medicalFiles.length),
+      type: 'file',
+      extension: ['pdf', 'doc', 'docx', 'txt'],
+      success: function(res) {
+        that.handleSelectedFiles(res.tempFiles.map(file => ({
+          path: file.path,
+          name: file.name,
+          size: file.size
+        })))
+      },
+      fail: function(error) {
+        if (!error.errMsg || !error.errMsg.includes('cancel')) {
+          wx.showToast({
+            title: '请从聊天记录中选择文档',
+            icon: 'none'
+          })
+        }
+      }
+    })
+  },
+
+  // 处理选中的文件
+  handleSelectedFiles: async function(selectedFiles) {
     try {
-      // 检查当前文件数量限制
-      if (this.data.medicalFiles.length >= 10) {
-        wx.showToast({
-          title: '最多只能上传10个文件',
-          icon: 'none'
+      if (!selectedFiles || selectedFiles.length === 0) {
+        return
+      }
+
+      // 检查文件大小限制（单个文件不超过20MB）
+      const oversizedFiles = selectedFiles.filter(file => file.size > 20 * 1024 * 1024)
+      if (oversizedFiles.length > 0) {
+        wx.showModal({
+          title: '文件过大',
+          content: `以下文件超过20MB限制：\n${oversizedFiles.map(f => f.name).join('\n')}`,
+          showCancel: false
         })
         return
       }
 
-      const res = await wx.chooseMessageFile({
-        count: Math.min(5, 10 - this.data.medicalFiles.length), // 动态计算可选择的文件数量
-        type: 'file',
-        extension: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'bmp']
+      wx.showLoading({ title: '上传中...' })
+      
+      const uploadPromises = selectedFiles.map(async (file, index) => {
+        try {
+          // 生成更安全的文件路径
+          const timestamp = Date.now()
+          const randomStr = Math.random().toString(36).substr(2, 9)
+          const fileExt = file.name.split('.').pop().toLowerCase()
+          const cloudPath = `medical-files/${timestamp}-${randomStr}-${index}.${fileExt}`
+          
+          const uploadRes = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: file.path
+          })
+
+          // 获取文件信息
+          let fileSize = file.size
+          if (!fileSize || fileSize === 0) {
+            try {
+              const fileInfo = await wx.getFileInfo({
+                filePath: file.path
+              })
+              fileSize = fileInfo.size
+            } catch (e) {
+              fileSize = 0
+            }
+          }
+
+          return {
+            fileID: uploadRes.fileID,
+            name: file.name,
+            size: fileSize,
+            formattedSize: this.formatFileSize(fileSize),
+            uploadTime: new Date().toISOString(),
+            cloudPath: cloudPath
+          }
+        } catch (uploadError) {
+          console.error(`文件 ${file.name} 上传失败:`, uploadError)
+          throw new Error(`${file.name} 上传失败`)
+        }
       })
 
-      if (res.tempFiles && res.tempFiles.length > 0) {
-        // 检查文件大小限制（单个文件不超过20MB）
-        const oversizedFiles = res.tempFiles.filter(file => file.size > 20 * 1024 * 1024)
-        if (oversizedFiles.length > 0) {
-          wx.showModal({
-            title: '文件过大',
-            content: `以下文件超过20MB限制：\n${oversizedFiles.map(f => f.name).join('\n')}`,
-            showCancel: false
-          })
-          return
-        }
-
-        wx.showLoading({ title: '上传中...' })
+      try {
+        const uploadedFiles = await Promise.all(uploadPromises)
         
-        const uploadPromises = res.tempFiles.map(async (file, index) => {
-          try {
-            // 生成更安全的文件路径
-            const timestamp = Date.now()
-            const randomStr = Math.random().toString(36).substr(2, 9)
-            const fileExt = file.name.split('.').pop().toLowerCase()
-            const cloudPath = `medical-files/${timestamp}-${randomStr}-${index}.${fileExt}`
-            
-            const uploadRes = await wx.cloud.uploadFile({
-              cloudPath: cloudPath,
-              filePath: file.path
-            })
-
-            return {
-              fileID: uploadRes.fileID,
-              name: file.name,
-              size: file.size,
-              formattedSize: this.formatFileSize(file.size),
-              uploadTime: new Date().toISOString(),
-              cloudPath: cloudPath
-            }
-          } catch (uploadError) {
-            console.error(`文件 ${file.name} 上传失败:`, uploadError)
-            throw new Error(`${file.name} 上传失败`)
-          }
+        this.setData({
+          medicalFiles: [...this.data.medicalFiles, ...uploadedFiles]
         })
 
-        try {
-          const uploadedFiles = await Promise.all(uploadPromises)
-          
-          this.setData({
-            medicalFiles: [...this.data.medicalFiles, ...uploadedFiles]
-          })
-
-          wx.showToast({
-            title: `成功上传${uploadedFiles.length}个文件`,
-            icon: 'success'
-          })
-        } catch (uploadError) {
-          // 如果有文件上传失败，显示具体错误信息
-          wx.showModal({
-            title: '上传失败',
-            content: uploadError.message || '部分文件上传失败，请重试',
-            showCancel: false
-          })
-        }
+        wx.showToast({
+          title: `成功上传${uploadedFiles.length}个文件`,
+          icon: 'success'
+        })
+      } catch (uploadError) {
+        // 如果有文件上传失败，显示具体错误信息
+        wx.showModal({
+          title: '上传失败',
+          content: uploadError.message || '部分文件上传失败，请重试',
+          showCancel: false
+        })
       }
     } catch (error) {
-      console.error('选择文件失败:', error)
-      let errorMsg = '上传失败'
-      
-      if (error.errMsg) {
-        if (error.errMsg.includes('cancel')) {
-          return // 用户取消选择，不显示错误
-        } else if (error.errMsg.includes('limit')) {
-          errorMsg = '文件选择超出限制'
-        }
-      }
-      
+      console.error('处理文件失败:', error)
       wx.showToast({
-        title: errorMsg,
+        title: '文件处理失败',
         icon: 'error'
       })
     } finally {
