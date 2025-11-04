@@ -1,5 +1,5 @@
 const app = getApp()
-const { createMedicationRecord } = require('../../utils/database.js')
+const { createMedicationRecord, getMedicationRecord, updateMedicationRecord } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -77,7 +77,11 @@ Page({
     historyRecords: [],
     historyOptions: [],
     
-    submitting: false
+    submitting: false,
+    
+    // 编辑模式相关
+    isEditMode: false,
+    editRecordId: null
   },
 
   // 返回按钮点击处理
@@ -88,16 +92,26 @@ Page({
   },
 
   onLoad(options) {
-    console.log('调药记录页面加载')
+    console.log('调药记录页面加载', options)
     // 确保所有选择器都是关闭状态
     this.setData({
       showDatePicker: false,
       showMedicationTimePicker: false,
       showUnitPicker: false,
-      showHistoryPicker: false
+      showHistoryPicker: false,
+      isEditMode: options.mode === 'edit',
+      editRecordId: options.id || null
     })
-    this.initDefaultValues()
-    this.loadHistoryRecords()
+    
+    if (options.mode === 'edit' && options.id) {
+      // 编辑模式：加载要编辑的记录
+      this.loadRecordForEdit(options.id)
+    } else {
+      // 新建模式：初始化默认值
+      this.initDefaultValues()
+      // 只有新建模式才加载历史记录
+      this.loadHistoryRecords()
+    }
   },
 
   onShow() {
@@ -210,6 +224,76 @@ Page({
         historyRecords: [],
         historyOptions: []
       })
+    }
+  },
+
+  // 加载要编辑的记录
+  async loadRecordForEdit(recordId) {
+    try {
+      wx.showLoading({ title: '加载记录中...' })
+      
+      const result = await getMedicationRecord(recordId)
+      
+      if (result.success && result.data) {
+        const record = result.data
+        console.log('加载编辑记录:', record)
+        
+        // 格式化时间
+        const recordTime = new Date(record.created_at)
+        const formattedDatetime = `${recordTime.getFullYear()}-${this.formatTwoDigits(recordTime.getMonth() + 1)}-${this.formatTwoDigits(recordTime.getDate())} ${this.formatTwoDigits(recordTime.getHours())}:${this.formatTwoDigits(recordTime.getMinutes())}`
+        
+        // 设置表单数据
+        const medications = record.medications && record.medications.length > 0 
+          ? record.medications.map(med => ({
+              takeTime: med.take_time || '',
+              name: med.medication_name || '',
+              dosage: med.dosage ? med.dosage.toString() : '',
+              unit: med.unit || 'mg'
+            }))
+          : [{
+              takeTime: '',
+              name: '',
+              dosage: '',
+              unit: 'mg'
+            }]
+        
+        // 处理副作用选择状态
+        let updatedSideEffects = this.data.commonSideEffects
+        if (record.side_effects) {
+          const sideEffects = record.side_effects.split(',').map(s => s.trim())
+          updatedSideEffects = this.data.commonSideEffects.map(effect => ({
+            ...effect,
+            selected: sideEffects.includes(effect.name)
+          }))
+        }
+        
+        // 一次性设置所有数据
+        this.setData({
+          'formData.datetime': formattedDatetime,
+          'formData.weight': record.weight ? record.weight.toString() : '',
+          'formData.medications': medications,
+          'formData.sideEffects': record.side_effects || '',
+          currentDate: recordTime.getTime(),
+          commonSideEffects: updatedSideEffects
+        })
+        
+      } else {
+        wx.showToast({
+          title: '记录不存在或已删除',
+          icon: 'error'
+        })
+        setTimeout(() => {
+          wx.navigateBack()
+        }, 1500)
+      }
+    } catch (error) {
+      console.error('加载编辑记录失败:', error)
+      wx.showToast({
+        title: '加载失败，请重试',
+        icon: 'error'
+      })
+    } finally {
+      wx.hideLoading()
     }
   },
 
@@ -522,13 +606,20 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      // 调用云函数保存记录
-      const result = await createMedicationRecord(this.data.formData)
+      // 根据模式调用不同的云函数
+      let result
+      if (this.data.isEditMode && this.data.editRecordId) {
+        // 编辑模式：更新记录
+        result = await updateMedicationRecord(this.data.editRecordId, this.data.formData)
+      } else {
+        // 新建模式：创建记录
+        result = await createMedicationRecord(this.data.formData)
+      }
       
       console.log('调药记录保存成功:', result)
       
       wx.showToast({
-        title: '保存成功',
+        title: this.data.isEditMode ? '更新成功' : '保存成功',
         icon: 'success'
       })
 

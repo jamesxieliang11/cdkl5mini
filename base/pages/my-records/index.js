@@ -133,6 +133,13 @@ Page({
   async searchRecords() {
     if (this.data.loading) return
     
+    console.log('开始搜索记录...', {
+      activeTab: this.data.activeTab,
+      startDate: this.data.startDate,
+      endDate: this.data.endDate,
+      currentPage: this.data.currentPage
+    })
+    
     this.setData({ loading: true })
     
     try {
@@ -141,18 +148,24 @@ Page({
       // 根据选中的类型获取数据
       if (this.data.activeTab === 'all' || this.data.activeTab === 'medication') {
         const medicationRecords = await this.fetchMedicationRecords()
+        console.log('调药记录获取结果:', medicationRecords.length, '条')
         allRecords = allRecords.concat(medicationRecords)
       }
       
       if (this.data.activeTab === 'all' || this.data.activeTab === 'seizure') {
         const seizureRecords = await this.fetchSeizureRecords()
+        console.log('发作记录获取结果:', seizureRecords.length, '条')
         allRecords = allRecords.concat(seizureRecords)
       }
       
       if (this.data.activeTab === 'all' || this.data.activeTab === 'other') {
         const otherRecords = await this.fetchOtherRecords()
+        console.log('其他记录获取结果:', otherRecords.length, '条')
         allRecords = allRecords.concat(otherRecords)
       }
+      
+      console.log('合并后总记录数:', allRecords.length)
+      console.log('今天的记录样例:', allRecords.filter(r => r.datetime.includes('今天') || r.datetime.includes('刚刚') || r.datetime.includes('分钟前') || r.datetime.includes('小时前')))
       
       // 按时间排序
       allRecords.sort((a, b) => new Date(b.rawTime) - new Date(a.rawTime))
@@ -162,12 +175,16 @@ Page({
       const endIndex = startIndex + this.data.pageSize
       const pageRecords = allRecords.slice(startIndex, endIndex)
       
+      console.log('分页结果:', { startIndex, endIndex, pageRecords: pageRecords.length })
+      
       this.setData({
         records: this.data.currentPage === 0 ? pageRecords : this.data.records.concat(pageRecords),
         totalCount: allRecords.length,
         hasMore: endIndex < allRecords.length,
         loading: false
       })
+      
+      console.log('最终显示记录数:', this.data.records.length)
       
     } catch (error) {
       console.error('搜索记录失败:', error)
@@ -187,7 +204,7 @@ Page({
       const result = await listMedicationRecords(100, 0)
       if (result.success && result.data.records) {
         return result.data.records
-          .filter(record => this.isInDateRange(record.record_time))
+          .filter(record => this.isInDateRange(record.created_at))
           .map(record => ({
             id: record._id,
             type: 'medication',
@@ -195,8 +212,8 @@ Page({
             dosage: record.medications?.reduce((sum, m) => sum + Number(m.dosage || 0), 0) || 0,
             unit: record.medications?.[0]?.unit || '',
             takeTime: record.medications?.map(m => m.take_time).filter(Boolean)[0] || '未记录',
-            datetime: this.formatRelativeTime(new Date(record.record_time).getTime()),
-            rawTime: record.record_time
+            datetime: this.formatRelativeTime(new Date(record.created_at).getTime()),
+            rawTime: record.created_at
           }))
       }
     } catch (error) {
@@ -210,18 +227,34 @@ Page({
    */
   async fetchSeizureRecords() {
     try {
+      console.log('开始获取发作记录...')
       const result = await listSeizureRecords(100, 0)
+      console.log('发作记录原始结果:', result)
+      
       if (result.success && result.data.records) {
-        return result.data.records
-          .filter(record => this.isInDateRange(record.record_time))
-          .map(record => ({
-            id: record._id,
-            type: 'seizure',
-            seizureType: record.seizure_type || '未知类型',
-            duration: record.duration || '未知',
-            datetime: this.formatRelativeTime(new Date(record.record_time).getTime()),
-            rawTime: record.record_time
-          }))
+        const allRecords = result.data.records
+        console.log('发作记录总数:', allRecords.length)
+        console.log('发作记录样例:', allRecords.slice(0, 2))
+        
+        const filteredRecords = allRecords.filter(record => {
+          const inRange = this.isInDateRange(record.created_at)
+          console.log('发作记录过滤:', { id: record._id, record_time: record.record_time, inRange })
+          return inRange
+        })
+        
+        console.log('过滤后发作记录数:', filteredRecords.length)
+        
+        return filteredRecords.map(record => ({
+          id: record._id,
+          type: 'seizure',
+          seizureType: record.seizure_type || '未知类型',
+          duration: record.duration || '未知',
+          images: record.images || [],
+          datetime: this.formatRelativeTime(new Date(record.created_at).getTime()),
+          rawTime: record.created_at
+        }))
+      } else {
+        console.log('发作记录获取失败或无数据:', result)
       }
     } catch (error) {
       console.error('获取发作记录失败:', error)
@@ -234,18 +267,34 @@ Page({
    */
   async fetchOtherRecords() {
     try {
+      console.log('开始获取其他记录...')
       const result = await listOtherRecords(100, 0)
+      console.log('其他记录原始结果:', result)
+      
       if (result.success && result.data.records) {
-        return result.data.records
-          .filter(record => this.isInDateRange(record.record_time))
-          .map(record => ({
-            id: record._id,
-            type: 'other',
-            category: record.category || '其他',
-            note: record.content?.substring(0, 80) + (record.content?.length > 60 ? '...' : '') || '无内容',
-            datetime: this.formatRelativeTime(new Date(record.record_time).getTime()),
-            rawTime: record.record_time
-          }))
+        const allRecords = result.data.records
+        console.log('其他记录总数:', allRecords.length)
+        console.log('其他记录样例:', allRecords.slice(0, 2))
+        
+        const filteredRecords = allRecords.filter(record => {
+          const inRange = this.isInDateRange(record.created_at)
+          console.log('其他记录过滤:', { id: record._id, record_time: record.record_time, inRange })
+          return inRange
+        })
+        
+        console.log('过滤后其他记录数:', filteredRecords.length)
+        
+        return filteredRecords.map(record => ({
+          id: record._id,
+          type: 'other',
+          category: record.category || '其他',
+          note: record.content?.substring(0, 80) + (record.content?.length > 60 ? '...' : '') || '无内容',
+          images: record.images || [],
+          datetime: this.formatRelativeTime(new Date(record.created_at).getTime()),
+          rawTime: record.created_at
+        }))
+      } else {
+        console.log('其他记录获取失败或无数据:', result)
       }
     } catch (error) {
       console.error('获取其他记录失败:', error)
@@ -259,11 +308,37 @@ Page({
   isInDateRange(recordTime) {
     if (!this.data.startDate || !this.data.endDate) return true
     
-    const recordDate = new Date(recordTime)
-    const startDate = new Date(this.data.startDate + ' 00:00:00')
-    const endDate = new Date(this.data.endDate + ' 23:59:59')
-    
-    return recordDate >= startDate && recordDate <= endDate
+    try {
+      const recordDate = new Date(recordTime)
+      
+      // 开始日期：当天的 00:00:00
+      const startDate = new Date(this.data.startDate)
+      startDate.setHours(0, 0, 0, 0)
+      
+      // 结束日期：当天的 23:59:59.999
+      const endDate = new Date(this.data.endDate)
+      endDate.setHours(23, 59, 59, 999)
+      
+      // 添加调试信息
+      console.log('日期范围过滤:', {
+        recordTime,
+        recordDate: recordDate.toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        inRange: recordDate >= startDate && recordDate <= endDate
+      })
+      
+      // 检查日期是否有效
+      if (isNaN(recordDate.getTime()) || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.warn('无效的日期:', { recordTime, startDate: this.data.startDate, endDate: this.data.endDate })
+        return true // 如果日期无效，不过滤
+      }
+      
+      return recordDate >= startDate && recordDate <= endDate
+    } catch (error) {
+      console.error('日期范围判断出错:', error, { recordTime })
+      return true // 出错时不过滤
+    }
   },
 
   /**
@@ -443,6 +518,50 @@ Page({
     
     this.searchRecords().finally(() => {
       this.setData({ loadingMore: false })
+    })
+  },
+
+  /**
+   * 预览图片
+   */
+  previewImage(e) {
+    const index = e.currentTarget.dataset.index
+    const images = this.data.detailData.record.images
+    
+    if (!images || images.length === 0) {
+      wx.showToast({
+        title: '图片加载失败',
+        icon: 'error'
+      })
+      return
+    }
+    
+    // 提取图片URL，支持多种格式
+    const urls = images.map(img => {
+      if (typeof img === 'string') {
+        return img
+      }
+      return img.tempFilePath || img.fileID || img.cloudPath || img
+    }).filter(url => url) // 过滤掉空值
+    
+    if (urls.length === 0) {
+      wx.showToast({
+        title: '图片URL无效',
+        icon: 'error'
+      })
+      return
+    }
+    
+    wx.previewImage({
+      current: urls[index] || urls[0],
+      urls: urls,
+      fail: (error) => {
+        console.error('预览图片失败:', error)
+        wx.showToast({
+          title: '预览失败',
+          icon: 'error'
+        })
+      }
     })
   }
 })

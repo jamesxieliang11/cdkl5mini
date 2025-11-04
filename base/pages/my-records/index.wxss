@@ -799,6 +799,76 @@
 }
 
 .other-detail .detail-section:first-child .section-header {
+  background: linear-gradient(135deg, #20bf6b 0%, #01baef 100%);
+  color: white;
+  margin: -32rpx -32rpx 24rpx;
+  padding: 24rpx 32rpx;
+  border-radius: 16rpx 16rpx 0 0;
+  border-bottom: none;
+}
+
+/* 详情图片样式 */
+.detail-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.detail-image-item {
+  position: relative;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.detail-image-item:active {
+  transform: scale(0.95);
+}
+
+.detail-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12rpx;
+}
+
+.detail-image-item:active .image-overlay {
+  opacity: 1;
+}
+
+/* 响应式图片布局 */
+@media screen and (max-width: 750rpx) {
+  .detail-image-item {
+    width: calc(50% - 8rpx);
+  }
+}
+
+@media screen and (max-width: 500rpx) {
+  .detail-image-item {
+    width: 100%;
+    height: 240rpx;
+  }
+}
+
+.other-detail .detail-section:first-child .section-header {
   background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
   color: #333;
   margin: -32rpx -32rpx 24rpx;

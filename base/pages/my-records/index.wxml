@@ -165,7 +165,7 @@
     </view>
 
     <!-- 空状态 -->
-    <view class="empty-state" wx:if="{{!loading && records.length === 0}}">
+    <view class="empty-state">
       <text class="empty-icon">📝</text>
       <text class="empty-text">暂无记录</text>
       <text class="empty-tip">请调整查询条件或添加新记录</text>
@@ -279,6 +279,33 @@
               <text class="info-value">{{detailData.record.duration}}</text>
             </view>
           </view>
+
+          <!-- 发作记录图片区域 -->
+          <view class="detail-section" wx:if="{{detailData.record.images && detailData.record.images.length > 0}}">
+            <view class="section-header">
+              <van-icon name="photo-o" size="18px" color="#20bf6b" />
+              <text class="section-title">相关图片</text>
+            </view>
+            <view class="detail-images">
+              <view 
+                class="detail-image-item" 
+                wx:for="{{detailData.record.images}}" 
+                wx:key="index"
+                bindtap="previewImage"
+                data-index="{{index}}"
+              >
+                <image 
+                  src="{{item.tempFilePath || item.fileID || item.cloudPath || item}}" 
+                  mode="aspectFill"
+                  class="detail-image"
+                  lazy-load="{{true}}"
+                />
+                <view class="image-overlay">
+                  <van-icon name="eye-o" size="20px" color="#fff" />
+                </view>
+              </view>
+            </view>
+          </view>
         </view>
 
         <!-- 其他记录详情 -->
@@ -306,6 +333,33 @@
             <view class="info-item vertical">
               <text class="info-label">记录内容</text>
               <text class="info-value content-text">{{detailData.record.note}}</text>
+            </view>
+          </view>
+
+          <!-- 其他记录图片区域 -->
+          <view class="detail-section" wx:if="{{detailData.record.images && detailData.record.images.length > 0}}">
+            <view class="section-header">
+              <van-icon name="photo-o" size="18px" color="#20bf6b" />
+              <text class="section-title">相关图片</text>
+            </view>
+            <view class="detail-images">
+              <view 
+                class="detail-image-item" 
+                wx:for="{{detailData.record.images}}" 
+                wx:key="index"
+                bindtap="previewImage"
+                data-index="{{index}}"
+              >
+                <image 
+                  src="{{item.tempFilePath || item.fileID || item.cloudPath || item}}" 
+                  mode="aspectFill"
+                  class="detail-image"
+                  lazy-load="{{true}}"
+                />
+                <view class="image-overlay">
+                  <van-icon name="eye-o" size="20px" color="#fff" />
+                </view>
+              </view>
             </view>
           </view>
         </view>

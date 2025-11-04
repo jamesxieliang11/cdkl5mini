@@ -1,5 +1,5 @@
 const app = getApp()
-const { createOtherRecord } = require('../../utils/database.js')
+const { createOtherRecord, getOtherRecord, updateOtherRecord } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -54,15 +54,97 @@ Page({
   },
 
   onLoad(options) {
-    console.log('其他记录页面加载')
+    console.log('其他记录页面加载', options)
     // 确保所有选择器都是关闭状态
     this.setData({
       showDatePicker: false,
       showCategoryPicker: false,
-      showHistoryPicker: false
+      showHistoryPicker: false,
+      isEditMode: options.mode === 'edit',
+      editRecordId: options.id || null,
+      loading: false
     })
-    this.initDefaultValues()
-    this.loadHistoryRecords()
+    
+    if (options.mode === 'edit' && options.id) {
+      // 编辑模式：加载要编辑的记录
+      this.loadRecordForEdit(options.id)
+    } else {
+      // 新建模式：初始化默认值
+      this.initDefaultValues()
+      // 只有新建模式才加载历史记录
+      this.loadHistoryRecords()
+    }
+  },
+
+  // 加载要编辑的记录数据
+  async loadRecordForEdit(recordId) {
+    console.log('开始加载编辑记录:', recordId)
+    this.setData({ loading: true })
+    
+    try {
+      // 检查用户信息
+      const userInfo = wx.getStorageSync('userInfo')
+      const userId = wx.getStorageSync('userId')
+      console.log('用户信息检查:', { userInfo, userId, recordId })
+      
+      // 如果没有用户信息，尝试从userInfo中获取
+      if (!userId && userInfo && userInfo._id) {
+        wx.setStorageSync('userId', userInfo._id)
+        console.log('从userInfo设置userId:', userInfo._id)
+      }
+      
+      const result = await getOtherRecord(recordId)
+      console.log('获取其他记录详情结果:', result)
+      
+      if (result && result.success && result.data) {
+        const record = result.data
+        console.log('原始记录数据:', record)
+        
+        // 转换数据格式以适配表单
+        const formData = {
+          datetime: this.formatDateTime(record.record_time),
+          category: record.category || '',
+          content: record.content || '',
+          remark: record.remark || '',
+          images: record.images || []
+        }
+        
+        console.log('转换后的表单数据:', formData)
+        
+        this.setData({
+          formData: formData,
+          currentDate: new Date(record.record_time).getTime(),
+          loading: false
+        })
+        
+        wx.showToast({
+          title: '记录加载成功',
+          icon: 'success',
+          duration: 1500
+        })
+      } else {
+        console.error('获取记录失败，result:', result)
+        throw new Error((result && result.message) || '获取记录失败')
+      }
+    } catch (error) {
+      console.error('加载编辑记录失败:', error)
+      this.setData({ loading: false })
+      
+      wx.showModal({
+        title: '加载失败',
+        content: error.message || '无法加载记录数据，请重试',
+        showCancel: true,
+        cancelText: '返回',
+        confirmText: '重试',
+        success: (res) => {
+          if (res.confirm) {
+            this.loadRecordForEdit(recordId)
+          } else {
+            wx.navigateBack()
+          }
+        }
+      })
+    }
   },
 
   onShow() {
@@ -294,7 +376,8 @@ Page({
 
   // 选择图片上传
   chooseImages: function() {
-    const { images, maxImageCount } = this.data
+    const { maxImageCount } = this.data
+    const images = this.data.formData.images || []
     
     if (images.length >= maxImageCount) {
       wx.showToast({
@@ -449,18 +532,36 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      // 调用其他记录新增接口
-      const result = await createOtherRecord(this.data.formData)
+      let result
+      const recordData = {
+        datetime: this.data.formData.datetime,
+        category: this.data.formData.category,
+        content: this.data.formData.content,
+        remark: this.data.formData.remark,
+        images: this.data.formData.images
+      }
+      
+      if (this.data.isEditMode && this.data.editRecordId) {
+        // 更新现有记录
+        console.log('更新其他记录:', this.data.editRecordId, recordData)
+        result = await updateOtherRecord(this.data.editRecordId, recordData)
+      } else {
+        // 创建新记录
+        console.log('创建其他记录:', recordData)
+        result = await createOtherRecord(recordData)
+      }
       
       if (result.success) {
-        // 同时保存到本地存储作为备份
-        this.saveToLocalStorage()
+        // 只有新建模式才保存到本地存储作为备份
+        if (!this.data.isEditMode) {
+          this.saveToLocalStorage()
+        }
         
         // 重置提交状态
         this.setData({ submitting: false })
         
         wx.showToast({
-          title: '保存成功',
+          title: this.data.isEditMode ? '更新成功' : '保存成功',
           icon: 'success',
           duration: 1500,
           success: () => {

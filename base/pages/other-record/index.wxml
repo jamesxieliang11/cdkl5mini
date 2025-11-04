@@ -3,10 +3,27 @@
   <view class="page-header">
     <view class="header-title-row">
       <van-icon name="wap-home-o" size="20" color="#34BFA3" bind:click="onBack" />
-      <text class="header-title">其他记录</text>
+      <text class="header-title">{{isEditMode ? '编辑其他记录' : '其他记录'}}</text>
     </view>
-    <view class="header-subtitle">记录日常观察和特殊事件</view>
+    <view class="header-subtitle">{{isEditMode ? '修改其他记录的详细信息' : '记录日常观察和特殊事件'}}</view>
   </view>
+
+  <!-- 编辑模式提示 -->
+  <van-notice-bar wx:if="{{isEditMode}}" 
+    left-icon="info-o" 
+    text="编辑模式：您正在修改现有的其他记录" 
+    color="#1989fa" 
+    background="#ecf5ff" 
+    custom-class="edit-mode-notice" />
+
+  <!-- 加载状态 -->
+  <van-loading wx:if="{{loading}}" 
+    type="spinner" 
+    text-color="#969799" 
+    vertical
+    custom-class="loading-container">
+    正在加载记录数据...
+  </van-loading>
 
   <!-- 记录表单 -->
   <view class="form-container">
