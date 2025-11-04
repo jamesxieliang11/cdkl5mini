@@ -500,8 +500,8 @@ Page({
    * 跳转到添加记录页面
    */
   goToAddRecord() {
-    wx.navigateTo({
-      url: '/pages/add-record/index'
+    wx.switchTab({
+      url: '/pages/home/index'
     })
   },
 

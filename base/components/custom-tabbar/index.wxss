@@ -55,6 +55,16 @@
   filter: brightness(0) invert(1);
 }
 
+.center-icon-text {
+  font-size: 60rpx;
+  color: #ffffff;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .tabbar-text {
   font-size: 20rpx;
   color: #999;

@@ -361,5 +361,18 @@ Page({
     wx.navigateTo({
       url: '/pages/other-record/index'
     })
+  },
+
+  // 返回上一页或重置选择
+  goBack() {
+    if (this.data.selectedType) {
+      // 如果已选择类型，则重置到类型选择页面
+      this.setData({
+        selectedType: null
+      })
+    } else {
+      // 否则返回上一页
+      wx.navigateBack()
+    }
   }
 })

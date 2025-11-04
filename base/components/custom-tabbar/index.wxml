@@ -6,7 +6,7 @@
   
   <view class="tabbar-item center-item" bindtap="showAddRecordModal" data-index="1">
     <view class="center-button">
-      <image class="center-icon" src="../../icons/add-record.png"></image>
+      <text class="center-icon-text">➕</text>
     </view>
     <view class="tabbar-text center-text {{active === 'add-record' ? 'active' : ''}}">添加记录</view>
   </view>

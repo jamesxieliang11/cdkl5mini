@@ -1,111 +1,144 @@
-<!-- 状态栏区域 -->
-<view class="status-bar"></view>
+<!--pages/add-record/index.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">📝 添加记录</text>
+    <text class="page-subtitle">选择记录类型</text>
+  </view>
 
-<view class="schedule-container">
-  ""
+  <!-- 记录类型选择 -->
+  <view class="record-types" wx:if="{{!selectedType}}">
+    <view class="type-card" bindtap="selectDrugAdjustmentType">
+      <view class="type-icon">💊</view>
+      <view class="type-info">
+        <text class="type-title">调药记录</text>
+        <text class="type-desc">记录用药调整信息</text>
+      </view>
+      <view class="type-arrow">→</view>
+    </view>
 
-  <!-- 日期标签页 -->
-  <van-tabs active="{{activeTab}}" bind:change="onTabChange" sticky>
-    <van-tab 
-      wx:for="{{scheduleDays}}" 
-      wx:key="date"
-      title="{{item.title}}"
-      name="{{item.date}}"
-    >
-      <!-- 搜索结果为空 -->
-      <van-empty 
-        wx:if="{{searchKeyword && filteredSchedules.length === 0}}"
-        image="search" 
-        description="未找到相关内容"
-      />
-      
-      <!-- 议程列表 -->
-      <view wx:else class="schedule-list">
-        <view 
-          wx:for="{{searchKeyword ? filteredSchedules : item.schedules}}" 
-          wx:key="id"
-          class="schedule-item"
-        >
-          <!-- 时间轴 -->
-          <view class="timeline">
-            <view class="time-dot {{item.status === 'ongoing' ? 'active' : ''}}"></view>
-            <view class="time-line" wx:if="{{index < (searchKeyword ? filteredSchedules.length : item.schedules.length) - 1}}"></view>
+    <view class="type-card" bindtap="selectSeizureType">
+      <view class="type-icon">⚡</view>
+      <view class="type-info">
+        <text class="type-title">发作记录</text>
+        <text class="type-desc">记录发作详细情况</text>
+      </view>
+      <view class="type-arrow">→</view>
+    </view>
+
+    <view class="type-card" bindtap="selectOtherType">
+      <view class="type-icon">📄</view>
+      <view class="type-info">
+        <text class="type-title">其他记录</text>
+        <text class="type-desc">记录其他相关信息</text>
+      </view>
+      <view class="type-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 调药记录表单 -->
+  <view class="form-container" wx:if="{{selectedType === 'drug_adjustment'}}">
+    <view class="form-header">
+      <text class="form-title">💊 调药记录</text>
+      <button class="back-btn" bindtap="goBack">返回</button>
+    </view>
+
+    <view class="form-section">
+      <view class="form-item">
+        <text class="label">记录时间 *</text>
+        <input class="input" value="{{drugForm.datetime}}" bindtap="showDateTimePickerForDrug" placeholder="选择时间" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">体重 (kg) *</text>
+        <input class="input" type="digit" value="{{drugForm.weight}}" bindinput="onWeightInput" placeholder="请输入体重" />
+      </view>
+
+      <view class="medicines-section">
+        <view class="section-title">药物信息</view>
+        <view class="medicine-item" wx:for="{{drugForm.medicines}}" wx:key="index">
+          <view class="medicine-header">
+            <text class="medicine-title">药物 {{index + 1}}</text>
+            <button class="remove-btn" wx:if="{{drugForm.medicines.length > 1}}" bindtap="removeMedicine" data-index="{{index}}">删除</button>
+          </view>
+          
+          <view class="form-item">
+            <text class="label">服用时间 *</text>
+            <input class="input" value="{{item.takeTime}}" bindtap="showTakeTimePicker" data-index="{{index}}" placeholder="选择服用时间" />
           </view>
 
-          <!-- 议程内容 -->
-          <view class="schedule-content">
-            <view class="schedule-header">
-              <view class="time-info">
-                <text class="time">{{item.time}}</text>
-                <van-tag 
-                  wx:if="{{item.status === 'ongoing'}}" 
-                  type="success" 
-                  size="small"
-                >
-                  进行中
-                </van-tag>
-                <van-tag 
-                  wx:elif="{{item.status === 'upcoming'}}" 
-                  type="primary" 
-                  size="small"
-                >
-                  即将开始
-                </van-tag>
-                <van-tag 
-                  wx:elif="{{item.status === 'finished'}}" 
-                  type="default" 
-                  size="small"
-                >
-                  已结束
-                </van-tag>
-              </view>
-              
-              <!-- 收藏按钮 -->
-              <van-icon 
-                name="{{item.isFavorite ? 'star' : 'star-o'}}" 
-                size="20" 
-                color="{{item.isFavorite ? '#ffd21e' : '#c8c9cc'}}"
-                bind:click="toggleFavorite"
-                data-id="{{item.id}}"
-                class="favorite-icon"
-              />
-            </view>
+          <view class="form-item">
+            <text class="label">药物名称 *</text>
+            <input class="input" value="{{item.name}}" bindinput="onMedicineNameInput" data-index="{{index}}" placeholder="请输入药物名称" />
+          </view>
 
-            <view class="schedule-title" bind:tap="goToDetail" data-id="{{item.id}}">
-              {{item.title}}
+          <view class="form-row">
+            <view class="form-item flex-1">
+              <text class="label">剂量 *</text>
+              <input class="input" type="digit" value="{{item.dosage}}" bindinput="onDosageInput" data-index="{{index}}" placeholder="剂量" />
             </view>
-            
-            <view class="schedule-meta">
-              <view class="speaker" bind:tap="goToExpertDetail" data-expert="{{item.speaker}}">
-                <van-icon name="contact" size="14" color="#969799" />
-                <text>{{item.speaker}}</text>
-              </view>
-              <view class="location">
-                <van-icon name="location-o" size="14" color="#969799" />
-                <text>{{item.location}}</text>
-              </view>
-            </view>
-
-            <!-- 议程描述 -->
-            <view wx:if="{{item.description}}" class="schedule-desc">
-              {{item.description}}
-            </view>
-
-            <!-- 重点标记 -->
-            <view wx:if="{{item.isHighlight}}" class="highlight-mark">
-              <van-tag type="warning" size="small">重点关注</van-tag>
+            <view class="form-item flex-1">
+              <text class="label">单位 *</text>
+              <input class="input" value="{{item.unit}}" bindinput="onUnitInput" data-index="{{index}}" placeholder="mg" />
             </view>
           </view>
         </view>
-      </view>
-    </van-tab>
-  </van-tabs>
 
-  <!-- 我的收藏浮动按钮 -->
-  <view class="floating-btn" bind:tap="showFavorites">
-    <van-icon name="star" size="24" color="white" />
-    <view class="btn-text">收藏</view>
-    <view wx:if="{{favoriteCount > 0}}" class="badge">{{favoriteCount}}</view>
+        <button class="add-medicine-btn" bindtap="addNewMedicine">+ 添加药物</button>
+      </view>
+
+      <view class="form-item">
+        <text class="label">副作用</text>
+        <textarea class="textarea" value="{{drugForm.sideEffects}}" bindinput="onSideEffectInput" placeholder="请描述副作用情况（可选）" />
+      </view>
+    </view>
+
+    <view class="form-actions">
+      <button class="save-btn" bindtap="saveRecord">保存记录</button>
+    </view>
+  </view>
+
+  <!-- 发作记录表单 -->
+  <view class="form-container" wx:if="{{selectedType === 'seizure'}}">
+    <view class="form-header">
+      <text class="form-title">⚡ 发作记录</text>
+      <button class="back-btn" bindtap="goBack">返回</button>
+    </view>
+
+    <view class="template-section" wx:if="{{hasPreviousSeizures}}">
+      <button class="template-btn" bindtap="useLastSeizureTemplate">使用上次记录模板</button>
+    </view>
+
+    <view class="form-section">
+      <view class="form-item">
+        <text class="label">发作时间 *</text>
+        <input class="input" value="{{seizureForm.datetime}}" bindtap="showDateTimePickerForSeizure" placeholder="选择时间" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">发作类型 *</text>
+        <input class="input" value="{{seizureForm.type}}" bindtap="showSeizureTypePicker" placeholder="选择发作类型" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">持续时间 *</text>
+        <input class="input" value="{{seizureForm.duration}}" bindinput="onDurationInput" placeholder="如：2分钟" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">诱发因素</text>
+        <textarea class="textarea" value="{{seizureForm.triggers}}" bindinput="onTriggersInput" placeholder="请描述可能的诱发因素（可选）" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">症状描述 *</text>
+        <textarea class="textarea" value="{{seizureForm.symptoms}}" bindinput="onSymptomsInput" placeholder="请详细描述发作症状" />
+      </view>
+    </view>
+
+    <view class="form-actions">
+      <button class="save-btn" bindtap="saveRecord">保存记录</button>
+    </view>
   </view>
 </view>
 

@@ -165,10 +165,10 @@
     </view>
 
     <!-- 空状态 -->
-    <view class="empty-state">
+    <view class="empty-state" wx:if="{{!loading && records.length === 0}}">
       <text class="empty-icon">📝</text>
       <text class="empty-text">暂无记录</text>
-      <text class="empty-tip">请调整查询条件或添加新记录</text>
+      <text class="empty-tip">请调整查询条件或在首页添加新记录</text>
       <button class="empty-action-btn" bindtap="goToAddRecord">
         <text class="btn-icon">➕</text>
         <text class="btn-text">添加记录</text>
