@@ -43,6 +43,14 @@
             required
           />
         </picker>
+        
+        <van-field
+          value="{{patientInfo.weight}}"
+          label="体重(kg)"
+          placeholder="请输入宝宝体重"
+          type="digit"
+          bind:input="onWeightInput"
+        />
       </van-cell-group>
     </view>
 

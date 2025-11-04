@@ -7,6 +7,7 @@ Page({
     patientInfo: {
       babyName: '',
       babyBirthday: '',
+      weight: '',
       parentName: '',
       parentPhone: '',
       relationship: '父亲',
@@ -109,6 +110,14 @@ Page({
     const value = (e && e.detail) ? (e.detail.value || '') : ''
     this.setData({
       'patientInfo.babyBirthday': value
+    })
+  },
+
+  // 输入宝宝体重
+  onWeightInput: function(e) {
+    const value = (e && e.detail) ? (e.detail || '') : ''
+    this.setData({
+      'patientInfo.weight': value
     })
   },
 
@@ -496,6 +505,17 @@ Page({
         icon: 'error'
       })
       return false
+    }
+
+    if (patientInfo.weight && patientInfo.weight.trim()) {
+      const weight = parseFloat(patientInfo.weight.trim())
+      if (isNaN(weight) || weight <= 0 || weight > 200) {
+        wx.showToast({
+          title: '请输入正确的体重(0-200kg)',
+          icon: 'error'
+        })
+        return false
+      }
     }
 
     if (!patientInfo.parentName || !patientInfo.parentName.trim()) {

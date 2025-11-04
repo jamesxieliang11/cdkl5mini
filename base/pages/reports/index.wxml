@@ -25,7 +25,7 @@
         <text class="info-value">{{babyInfo.age || '未设置'}}</text>
       </view>
       <view class="info-row">
-        <text class="info-label">体重：</text>
+        <text class="info-label">体重(kg)：</text>
         <text class="info-value">{{babyInfo.weight || '未设置'}}</text>
       </view>
       <view class="info-row">

@@ -119,7 +119,7 @@ Page({
         babyInfo: {
           name: userData.babyName || '未设置',
           age: age,
-          weight: '未设置', // 接口中没有体重字段
+          weight: userData.weight, // 接口中没有体重字段
           firstSeizure: userData.medicalHistory || '未记录' // 使用病史作为首次发作记录
         }
       })
