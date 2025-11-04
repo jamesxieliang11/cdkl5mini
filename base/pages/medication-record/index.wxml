@@ -186,7 +186,7 @@
   show="{{showUnitPicker}}"
   actions="{{unitOptions}}"
   bind:select="onUnitSelect"
-  bind:cancel="onUnitCancel"
+  bind:close="onUnitCancel"
   title="选择单位"
 />
 
@@ -195,7 +195,7 @@
   show="{{showHistoryPicker}}"
   actions="{{historyOptions}}"
   bind:select="onHistorySelect"
-  bind:cancel="onHistoryCancel"
+  bind:close="onHistoryCancel"
   title="选择历史记录"
 />
 
@@ -204,7 +204,7 @@
   show="{{showMedicationPicker}}"
   actions="{{commonMedicationOptions}}"
   bind:select="onMedicationSelect"
-  bind:cancel="onMedicationCancel"
+  bind:close="onMedicationCancel"
   title="选择常用药物"
   description="选择后将自动填充药物名称、剂量和单位"
 />

@@ -463,6 +463,7 @@ Page({
 
   // 取消药物选择
   onMedicationCancel() {
+    console.log('onMedicationCancel 被调用')
     this.setData({ showMedicationPicker: false })
   },
 
@@ -569,6 +570,35 @@ Page({
   // 取消历史记录选择
   onHistoryCancel() {
     this.setData({ showHistoryPicker: false })
+  },
+
+  // 取消药物选择
+  onMedicationCancel() {
+    this.setData({ showMedicationPicker: false })
+  },
+
+  // 日期时间选择取消
+  onDateTimeCancel() {
+    this.setData({
+      showDatePicker: false
+    })
+  },
+
+  // 药物服用时间选择取消
+  onMedicationTimeCancel() {
+    this.setData({
+      showMedicationTimePicker: false
+    })
+  },
+
+  // 取消单位选择
+  onUnitCancel() {
+    this.setData({ showUnitPicker: false })
+  },
+
+  // 取消药物选择
+  onMedicationCancel() {
+    this.setData({ showMedicationPicker: false })
   },
 
   // 提交记录

@@ -160,7 +160,7 @@
   show="{{showSeizureTypePicker}}"
   actions="{{seizureTypeOptions}}"
   bind:select="onSeizureTypeSelect"
-  bind:cancel="onSeizureTypeCancel"
+  bind:close="onSeizureTypeCancel"
   title="选择发作类型"
 />
 
@@ -169,6 +169,6 @@
   show="{{showHistoryPicker}}"
   actions="{{historyOptions}}"
   bind:select="onHistorySelect"
-  bind:cancel="onHistoryCancel"
+  bind:close="onHistoryCancel"
   title="选择历史记录"
 />
