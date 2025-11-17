@@ -326,6 +326,7 @@ Page({
     
     // 计算分类统计
     const categoryStats = this.calculateCategoryDistribution(records)
+    console.log(1111, trendData)
     
     this.setData({
       otherTrendData: trendData,

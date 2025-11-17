@@ -119,7 +119,7 @@
           <text class="chart-text">发作趋势图</text>
           <view class="chart-data">
             <view wx:for="{{seizureTrendData}}" wx:key="period" class="chart-bar">
-              <view class="bar" style="height: {{item.height}}%"></view>
+              <view class="bar" style="height: {{item.height}}rpx"></view>
               <text class="bar-label">{{item.label}}</text>
               <text class="bar-value">{{item.count}}</text>
             </view>
@@ -170,7 +170,7 @@
           <text class="chart-text">用药趋势图</text>
           <view class="chart-data">
             <view wx:for="{{medicationTrendData}}" wx:key="period" class="chart-bar">
-              <view class="bar medication-bar" style="height: {{item.height}}%"></view>
+              <view class="bar medication-bar" style="height: {{item.height}}rpx"></view>
               <text class="bar-label">{{item.label}}</text>
               <text class="bar-value">{{item.count}}</text>
             </view>
@@ -202,7 +202,7 @@
           <text class="chart-text">其他记录趋势图</text>
           <view class="chart-data">
             <view wx:for="{{otherTrendData}}" wx:key="period" class="chart-bar">
-              <view class="bar other-bar" style="height: {{item.height}}%"></view>
+              <view class="bar other-bar" style="height: {{item.height}}rpx"></view>
               <text class="bar-label">{{item.label}}</text>
               <text class="bar-value">{{item.count}}</text>
             </view>

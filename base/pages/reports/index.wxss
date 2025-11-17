@@ -321,9 +321,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   gap: 8rpx;
   min-width: 45rpx;
   flex-shrink: 0; /* 防止压缩 */
+  height: 100%;
 }
 
 .bar {
