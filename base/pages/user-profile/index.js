@@ -178,7 +178,7 @@ Page({
 
     // 显示选择文件类型的弹窗
     wx.showActionSheet({
-      itemList: ['拍照', '从相册选择', '选择文档'],
+      itemList: ['拍照', '从相册选择'],
       success: function(res) {
         if (res.tapIndex === 0) {
           // 拍照
