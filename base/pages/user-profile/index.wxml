@@ -71,6 +71,7 @@
         />
         
         <van-field
+          wx:if="{{isProd}}"
           value="{{patientInfo.parentPhone}}"
           label="联系电话"
           placeholder="请输入手机号码"

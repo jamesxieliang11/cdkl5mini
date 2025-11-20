@@ -30,13 +30,13 @@ Page({
     activeStatsTab: 'seizure', // 当前选中的统计类型
     
     // 发作统计
-    seizureChartPeriod: 'month',
+    seizureChartPeriod: 'day',
     seizureTrendData: [],
     seizureTypeStats: [],
     recentSeizures: [],
     
     // 用药统计
-    medicationChartPeriod: 'month',
+    medicationChartPeriod: 'day',
     medicationTrendData: [],
     medicationStats: [],
     
@@ -342,14 +342,53 @@ Page({
     const trendData = []
     let periods = []
     
+    console.log('计算趋势数据 - 周期:', period, '记录数量:', records.length)
+    
     // 根据周期生成时间段
-    if (period === 'week') {
+    if (period === 'day') {
+      // 按日统计，生成最近7天
       for (let i = 6; i >= 0; i--) {
         const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
+        const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)
+        const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999)
+        
         periods.push({
           label: `${date.getMonth() + 1}/${date.getDate()}`,
-          start: new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime(),
-          end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime()
+          start: startOfDay.getTime(),
+          end: endOfDay.getTime()
+        })
+      }
+    } else if (period === 'week') {
+      // 按周统计，生成最近的几周
+      for (let i = 3; i >= 0; i--) {
+        // 计算周的开始时间（周一）
+        const weekStart = new Date(now)
+        const dayOfWeek = weekStart.getDay() === 0 ? 7 : weekStart.getDay() // 将周日从0改为7
+        weekStart.setDate(weekStart.getDate() - dayOfWeek + 1 - i * 7) // 周一
+        weekStart.setHours(0, 0, 0, 0)
+        
+        // 计算周的结束时间（周日）
+        const weekEnd = new Date(weekStart)
+        weekEnd.setDate(weekEnd.getDate() + 6) // 周日
+        weekEnd.setHours(23, 59, 59, 999)
+        
+        // 生成周标签
+        const startMonth = weekStart.getMonth() + 1
+        const startDate = weekStart.getDate()
+        const endMonth = weekEnd.getMonth() + 1
+        const endDate = weekEnd.getDate()
+        
+        let label
+        if (startMonth === endMonth) {
+          label = `${startMonth}/${startDate}-${endDate}`
+        } else {
+          label = `${startMonth}/${startDate}-${endMonth}/${endDate}`
+        }
+        
+        periods.push({
+          label: label,
+          start: weekStart.getTime(),
+          end: weekEnd.getTime()
         })
       }
     } else if (period === 'month') {
@@ -358,7 +397,7 @@ Page({
         periods.push({
           label: `${date.getMonth() + 1}月`,
           start: new Date(date.getFullYear(), date.getMonth(), 1).getTime(),
-          end: new Date(date.getFullYear(), date.getMonth() + 1, 1).getTime()
+          end: new Date(date.getFullYear(), date.getMonth() + 1, 1).getTime() - 1
         })
       }
     } else if (period === 'year') {
@@ -367,31 +406,46 @@ Page({
         periods.push({
           label: `${year}年`,
           start: new Date(year, 0, 1).getTime(),
-          end: new Date(year + 1, 0, 1).getTime()
+          end: new Date(year + 1, 0, 1).getTime() - 1
         })
       }
     }
     
-    // 计算每个时间段的记录数量
-    const maxCount = Math.max(...periods.map(period => {
-      return records.filter(record => 
-        record.timestamp >= period.start && record.timestamp < period.end
-      ).length
-    }), 1)
+    // 添加调试信息
+    console.log('生成的时间段:', periods.map(p => ({
+      label: p.label,
+      start: new Date(p.start).toLocaleString(),
+      end: new Date(p.end).toLocaleString()
+    })))
     
-    periods.forEach(period => {
-      const count = records.filter(record => 
-        record.timestamp >= period.start && record.timestamp < period.end
-      ).length
+    // 计算每个时间段的记录数量
+    const counts = periods.map(period => {
+      const filteredRecords = records.filter(record => {
+        const recordTime = record.timestamp
+        const inRange = recordTime >= period.start && recordTime <= period.end
+        return inRange
+      })
+      
+      console.log(`${period.label} 时间段内的记录:`, period, records, filteredRecords.length, 
+        filteredRecords.map(r => new Date(r.timestamp).toLocaleString()))
+      
+      return filteredRecords.length
+    })
+    
+    const maxCount = Math.max(...counts, 1)
+    
+    periods.forEach((period, index) => {
+      const count = counts[index]
       
       trendData.push({
         period: period.label,
         label: period.label,
         count: count,
-        height: (count / maxCount) * 100
+        height: Math.max((count / maxCount) * 100, 10) // 确保最小高度为10rpx
       })
     })
     
+    console.log('最终趋势数据:', trendData)
     return trendData
   },
 

@@ -19,17 +19,26 @@ Page({
     medicalFiles: [], // 上传的病历文件
     loading: false,
     isEdit: false, // 是否为编辑模式
-    currentDate: '' // 当前日期，用于限制生日选择
+    currentDate: '', // 当前日期，用于限制生日选择
+    isProd: false // 是否为生产环境
   },
 
   onLoad: function (options) {
-    console.log('用户信息完善页面加载')
+    // 检测环境版本
+    let isProd = false
+    try {
+      const accountInfo = wx.getAccountInfoSync()
+      isProd = accountInfo?.miniProgram?.envVersion === "release"
+    } catch (error) {
+      isProd = false
+    }
     
     // 设置当前日期
     const today = new Date()
     const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
     this.setData({
-      currentDate: currentDate
+      currentDate: currentDate,
+      isProd: isProd
     })
     
     this.loadUserProfile()
@@ -526,20 +535,23 @@ Page({
       return false
     }
 
-    if (!patientInfo.parentPhone || !patientInfo.parentPhone.trim()) {
-      wx.showToast({
-        title: '请输入联系电话',
-        icon: 'error'
-      })
-      return false
-    }
+    // 只有在生产环境下才验证联系电话
+    if (this.data.isProd) {
+      if (!patientInfo.parentPhone || !patientInfo.parentPhone.trim()) {
+        wx.showToast({
+          title: '请输入联系电话',
+          icon: 'error'
+        })
+        return false
+      }
 
-    if (!/^1[3-9]\d{9}$/.test(patientInfo.parentPhone.trim())) {
-      wx.showToast({
-        title: '请输入正确的手机号',
-        icon: 'error'
-      })
-      return false
+      if (!/^1[3-9]\d{9}$/.test(patientInfo.parentPhone.trim())) {
+        wx.showToast({
+          title: '请输入正确的手机号',
+          icon: 'error'
+        })
+        return false
+      }
     }
 
     return true

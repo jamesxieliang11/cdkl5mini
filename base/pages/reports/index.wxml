@@ -110,6 +110,7 @@
         <view class="chart-header">
           <text class="chart-title">发作趋势</text>
           <view class="chart-period">
+            <text class="period-item {{seizureChartPeriod === 'day' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="day">日</text>
             <text class="period-item {{seizureChartPeriod === 'week' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="week">周</text>
             <text class="period-item {{seizureChartPeriod === 'month' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="month">月</text>
             <text class="period-item {{seizureChartPeriod === 'year' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="seizure" data-period="year">年</text>
@@ -161,6 +162,7 @@
         <view class="chart-header">
           <text class="chart-title">用药趋势</text>
           <view class="chart-period">
+            <text class="period-item {{medicationChartPeriod === 'day' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="day">日</text>
             <text class="period-item {{medicationChartPeriod === 'week' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="week">周</text>
             <text class="period-item {{medicationChartPeriod === 'month' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="month">月</text>
             <text class="period-item {{medicationChartPeriod === 'year' ? 'active' : ''}}" bindtap="changeChartPeriod" data-type="medication" data-period="year">年</text>
