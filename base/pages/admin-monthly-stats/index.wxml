@@ -1,0 +1,224 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+
+<!-- 页面头部 -->
+<view class="page-header">
+  <view class="header-row">
+    <van-icon name="arrow-left" size="20" color="#fff" bind:click="onBack" />
+    <text class="header-title">月度汇报统计</text>
+    <van-icon name="replay" size="20" color="#fff" bind:click="onRefresh" />
+  </view>
+</view>
+
+<!-- 月份选择 -->
+<view class="month-selector" bindtap="showMonthPicker">
+  <van-icon name="calendar-o" size="18" color="#1989fa" />
+  <text class="month-text">{{reportMonthDisplay}}</text>
+  <van-icon name="arrow-down" size="14" color="#999" />
+</view>
+
+<!-- 加载状态 -->
+<view wx:if="{{loading}}" class="loading-container">
+  <van-empty description="加载中..." />
+</view>
+
+<view class="stats-container" wx:if="{{!loading}}">
+
+  <!-- ========== 提交概览 ========== -->
+  <view class="section-card overview-card">
+    <view class="section-header">
+      <van-icon name="chart-trending-o" size="18" color="#1989fa" />
+      <text class="section-title">提交概览</text>
+    </view>
+
+    <view class="overview-grid">
+      <view class="overview-item">
+        <text class="overview-value primary">{{overview.totalSubmitted}}</text>
+        <text class="overview-label">已提交</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value warning">{{overview.totalDrafts}}</text>
+        <text class="overview-label">草稿</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value">{{overview.totalUsers}}</text>
+        <text class="overview-label">总用户</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value success">{{overview.submissionRate}}%</text>
+        <text class="overview-label">提交率</text>
+      </view>
+    </view>
+
+    <!-- 提交率进度条 -->
+    <view class="rate-bar">
+      <text class="rate-label">提交率</text>
+      <view class="progress-wrapper">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{overview.submissionRate}}%"></view>
+        </view>
+        <text class="rate-value">{{overview.submissionRate}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 用药统计 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="medel-o" size="18" color="#FF9800" />
+      <text class="section-title">用药统计</text>
+      <van-tag type="primary" size="medium">{{medication.totalEntries}}条记录</van-tag>
+    </view>
+
+    <!-- 药物使用排行 -->
+    <view class="ranking-list" wx:if="{{medication.ranking.length > 0}}">
+      <view class="ranking-item" wx:for="{{medication.ranking}}" wx:key="name">
+        <view class="ranking-left">
+          <text class="ranking-index">{{index + 1}}</text>
+          <text class="ranking-name">{{item.name}}</text>
+        </view>
+        <view class="ranking-right">
+          <view class="mini-bar-wrapper">
+            <view class="mini-bar" style="width: {{item.percentage}}%"></view>
+          </view>
+          <text class="ranking-count">{{item.count}}人 ({{item.percentage}}%)</text>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty-hint">暂无用药数据</view>
+
+    <!-- 依从性分布 -->
+    <view class="sub-section" wx:if="{{medication.totalEntries > 0}}">
+      <text class="sub-title">用药依从性分布</text>
+      <view class="tag-row">
+        <van-tag type="success" size="medium" custom-class="stat-tag">好: {{medication.compliance.good}}</van-tag>
+        <van-tag type="warning" size="medium" custom-class="stat-tag">一般: {{medication.compliance.fair}}</van-tag>
+        <van-tag type="danger" size="medium" custom-class="stat-tag">差: {{medication.compliance.poor}}</van-tag>
+      </view>
+      <view class="dosage-change-hint" wx:if="{{medication.totalDosageChanged > 0}}">
+        <van-icon name="info-o" size="14" color="#FF9800" />
+        <text>本月有 {{medication.totalDosageChanged}} 条调整剂量记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 发作统计 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="warning-o" size="18" color="#EE6363" />
+      <text class="section-title">发作统计</text>
+    </view>
+
+    <view class="seizure-overview">
+      <view class="seizure-stat-item">
+        <text class="seizure-stat-value">{{seizure.totalCount}}</text>
+        <text class="seizure-stat-label">总发作次数</text>
+      </view>
+      <view class="seizure-stat-item">
+        <text class="seizure-stat-value">{{seizure.avgCount}}</text>
+        <text class="seizure-stat-label">人均发作次数</text>
+      </view>
+    </view>
+
+    <!-- 与上月对比分布 -->
+    <view class="sub-section">
+      <text class="sub-title">与上月对比</text>
+      <view class="tag-row">
+        <van-tag type="success" size="medium" custom-class="stat-tag">📉 减少: {{seizure.compared.better}}</van-tag>
+        <van-tag type="primary" size="medium" custom-class="stat-tag">➡️ 持平: {{seizure.compared.same}}</van-tag>
+        <van-tag type="danger" size="medium" custom-class="stat-tag">📈 增加: {{seizure.compared.worse}}</van-tag>
+      </view>
+    </view>
+
+    <!-- 发作类型排行 -->
+    <view class="sub-section" wx:if="{{seizure.typeRanking.length > 0}}">
+      <text class="sub-title">各类型发作次数</text>
+      <view class="type-list">
+        <view class="type-item" wx:for="{{seizure.typeRanking}}" wx:key="type">
+          <text class="type-name">{{item.type}}</text>
+          <text class="type-count">{{item.count}} 次</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 发育里程碑 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="smile-o" size="18" color="#4CAF50" />
+      <text class="section-title">发育里程碑达成率</text>
+      <van-tag type="success" size="medium">{{milestone.totalChecked}}项达成</van-tag>
+    </view>
+
+    <view class="milestone-stats" wx:if="{{milestone.ranking.length > 0}}">
+      <view class="milestone-stat-item" wx:for="{{milestone.ranking}}" wx:key="id">
+        <view class="milestone-stat-left">
+          <text class="milestone-stat-label">{{item.label}}</text>
+        </view>
+        <view class="milestone-stat-right">
+          <view class="mini-bar-wrapper green">
+            <view class="mini-bar green" style="width: {{item.percentage}}%"></view>
+          </view>
+          <text class="milestone-stat-count">{{item.count}}人 ({{item.percentage}}%)</text>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty-hint">暂无里程碑数据</view>
+  </view>
+
+  <!-- ========== 详细列表 ========== -->
+  <view class="section-card">
+    <view class="section-header clickable" bindtap="toggleDetailList">
+      <van-icon name="friends-o" size="18" color="#9C27B0" />
+      <text class="section-title">用户提交详情</text>
+      <van-icon name="{{showDetailList ? 'arrow-up' : 'arrow-down'}}" size="16" color="#999" />
+    </view>
+
+    <view wx:if="{{showDetailList}}">
+      <view wx:if="{{loadingDetail}}" class="empty-hint">加载中...</view>
+
+      <view wx:elif="{{detailList.length === 0}}" class="empty-hint">暂无提交记录</view>
+
+      <view wx:else class="detail-list">
+        <view class="detail-item" wx:for="{{detailList}}" wx:key="reportId">
+          <view class="detail-header">
+            <text class="detail-name">{{item.babyName || item.userName}}</text>
+            <text wx:if="{{item.babyName}}" class="detail-parent-name">（{{item.userName}}）</text>
+            <van-tag
+              type="{{item.status === 'submitted' ? 'success' : 'warning'}}"
+              size="small"
+            >{{item.status === 'submitted' ? '已提交' : '草稿'}}</van-tag>
+          </view>
+          <view class="detail-body">
+            <view class="detail-info">
+              <text class="detail-info-item">💊 {{item.medicationCount}}种药物</text>
+              <text class="detail-info-item">⚡ 发作{{item.seizureCount}}次</text>
+              <text class="detail-info-item">🎯 {{item.milestoneCount}}项里程碑</text>
+            </view>
+            <view class="detail-meds" wx:if="{{item.medications.length > 0}}">
+              <van-tag
+                wx:for="{{item.medications}}"
+                wx:key="*this"
+                wx:for-item="med"
+                type="primary"
+                plain
+                size="small"
+                custom-class="med-tag"
+              >{{med}}</van-tag>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>
+
+<!-- 月份选择器 -->
+<van-action-sheet
+  show="{{showMonthPicker}}"
+  actions="{{monthColumns}}"
+  bind:select="onMonthSelect"
+  bind:close="onMonthPickerCancel"
+  title="选择统计月份"
+/>

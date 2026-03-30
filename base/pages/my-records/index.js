@@ -1,5 +1,5 @@
 // pages/my-records/index.js
-const { listMedicationRecords, listSeizureRecords, listOtherRecords } = require('../../utils/database.js')
+const { listMedicationRecords, listSeizureRecords, listOtherRecords, listMonthlyReports } = require('../../utils/database.js')
 
 Page({
   /**
@@ -163,6 +163,12 @@ Page({
         console.log('其他记录获取结果:', otherRecords.length, '条')
         allRecords = allRecords.concat(otherRecords)
       }
+
+      if (this.data.activeTab === 'monthly') {
+        const monthlyRecords = await this.fetchMonthlyReports()
+        console.log('月度汇报获取结果:', monthlyRecords.length, '条')
+        allRecords = allRecords.concat(monthlyRecords)
+      }
       
       console.log('合并后总记录数:', allRecords.length)
       console.log('今天的记录样例:', allRecords.filter(r => r.datetime.includes('今天') || r.datetime.includes('刚刚') || r.datetime.includes('分钟前') || r.datetime.includes('小时前')))
@@ -300,6 +306,53 @@ Page({
       console.error('获取其他记录失败:', error)
     }
     return []
+  },
+
+  /**
+   * 获取月度汇报列表
+   */
+  async fetchMonthlyReports() {
+    try {
+      const result = await listMonthlyReports(100, 0)
+      if (result.data && result.data.records) {
+        return result.data.records.map(report => {
+          const seizureCount = parseInt(report.seizure_summary?.total_count) || 0
+          const medicationCount = report.medications?.length || 0
+          const milestoneCount = report.milestones?.checked_items?.length || 0
+          const medicationNames = (report.medications || [])
+            .map(m => m.medication_name)
+            .filter(Boolean)
+            .join('、')
+
+          return {
+            id: report._id,
+            type: 'monthly',
+            reportMonth: report.report_month,
+            status: report.status,
+            statusText: report.status === 'submitted' ? '已提交' : '草稿',
+            seizureCount,
+            medicationCount,
+            milestoneCount,
+            medicationNames: medicationNames || '未记录',
+            datetime: report.report_month,
+            rawTime: report.updated_at || report.created_at
+          }
+        })
+      }
+    } catch (error) {
+      console.error('获取月度汇报失败:', error)
+    }
+    return []
+  },
+
+  /**
+   * 点击月度汇报跳转到编辑/查看
+   */
+  goToMonthlyReport(event) {
+    const month = event.currentTarget.dataset.month
+    wx.navigateTo({
+      url: `/pages/monthly-report/index?month=${month}`
+    })
   },
 
   /**

@@ -1,9 +1,14 @@
-// 管理员面板 - 数据库管理
+// 管理员面板 - 数据库管理 + 权限管理
 const app = getApp()
 const { initDatabase, checkDatabaseStatus, initRecordsDatabase, checkRecordsStatus } = require('../../utils/database.js')
 
 Page({
   data: {
+    // 权限
+    adminRole: '',
+    isAdmin: false,
+    isSuperAdmin: false,
+
     // 基础数据库状态
     basicDbStatus: {
       initialized: false,
@@ -22,10 +27,16 @@ Page({
     },
     // 操作状态
     initializing: false,
-    lastUpdateTime: ''
+    lastUpdateTime: '',
+
+    // 用户管理
+    showUserManagement: false,
+    userList: [],
+    loadingUsers: false
   },
 
   onLoad() {
+    this.checkAdminPermission()
     this.checkAllDatabaseStatus()
   },
 
@@ -33,7 +44,16 @@ Page({
     // 通知tabbar组件更新状态（基于当前页面URL）
     this.updateTabBarState()
     // 每次显示时刷新数据库状态
+    this.checkAdminPermission()
     this.checkAllDatabaseStatus()
+  },
+
+  // 检查管理员权限
+  checkAdminPermission() {
+    const adminRole = wx.getStorageSync('adminRole') || ''
+    const isAdmin = adminRole === 'admin' || adminRole === 'superadmin'
+    const isSuperAdmin = adminRole === 'superadmin'
+    this.setData({ adminRole, isAdmin, isSuperAdmin })
   },
 
   // 更新tabbar状态
@@ -148,6 +168,85 @@ Page({
           } finally {
             this.setData({ initializing: false })
           }
+        }
+      }
+    })
+  },
+
+  // 跳转到月度汇报统计看板
+  goToMonthlyStats() {
+    if (!this.data.isAdmin) {
+      wx.showToast({ title: '需要管理员权限', icon: 'none' })
+      return
+    }
+    wx.navigateTo({
+      url: '/pages/admin-monthly-stats/index'
+    })
+  },
+
+  // 切换用户管理面板
+  toggleUserManagement() {
+    if (!this.data.isSuperAdmin) {
+      wx.showToast({ title: '仅超级管理员可操作', icon: 'none' })
+      return
+    }
+    if (!this.data.showUserManagement) {
+      this.loadUserList()
+    }
+    this.setData({ showUserManagement: !this.data.showUserManagement })
+  },
+
+  // 加载用户列表
+  async loadUserList() {
+    this.setData({ loadingUsers: true })
+    try {
+      const result = await new Promise((resolve, reject) => {
+        wx.cloud.callFunction({
+          name: 'monthlyReport',
+          data: { action: 'listUsers', pageSize: 200, pageIndex: 0 },
+          success: (res) => res.result && res.result.success ? resolve(res.result) : reject(new Error('获取失败')),
+          fail: reject
+        })
+      })
+      this.setData({ userList: result.data.users })
+    } catch (error) {
+      console.error('加载用户列表失败:', error)
+      wx.showToast({ title: '加载失败', icon: 'error' })
+    } finally {
+      this.setData({ loadingUsers: false })
+    }
+  },
+
+  // 设置/取消管理员
+  toggleAdminRole(event) {
+    const targetUserId = event.currentTarget.dataset.userid
+    const currentRole = event.currentTarget.dataset.role
+    const userName = event.currentTarget.dataset.name
+    const newRole = currentRole === 'admin' ? '' : 'admin'
+    const actionText = newRole === 'admin' ? '设为管理员' : '取消管理员'
+
+    wx.showModal({
+      title: '确认操作',
+      content: `确定将「${userName}」${actionText}吗？`,
+      success: async (res) => {
+        if (!res.confirm) return
+        try {
+          const result = await new Promise((resolve, reject) => {
+            wx.cloud.callFunction({
+              name: 'monthlyReport',
+              data: {
+                action: 'setAdminRole',
+                data: { targetUserId, adminRole: newRole },
+                userId: wx.getStorageSync('userId') || 'default_user'
+              },
+              success: (res) => res.result && res.result.success ? resolve(res.result) : reject(new Error(res.result?.message || '操作失败')),
+              fail: reject
+            })
+          })
+          wx.showToast({ title: result.message, icon: 'success' })
+          this.loadUserList()
+        } catch (error) {
+          wx.showToast({ title: error.message || '操作失败', icon: 'none' })
         }
       }
     })

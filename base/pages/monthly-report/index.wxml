@@ -1,0 +1,404 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+
+<!-- 页面标题 -->
+<view class="page-header">
+  <view class="header-title-row">
+    <text class="header-title">月度汇报</text>
+    <button class="home-btn" bindtap="onBack">
+      <text class="home-icon">🏠</text>
+      <text class="home-text">主页</text>
+    </button>
+  </view>
+  <view class="header-subtitle">每月记录用药、发作和发育情况</view>
+</view>
+
+<!-- 月份选择 -->
+<view class="month-selector" bindtap="showMonthPicker">
+  <van-icon name="calendar-o" size="18" color="#34BFA3" />
+  <text class="month-text">{{reportMonthDisplay}}</text>
+  <van-icon name="arrow-down" size="14" color="#999" />
+</view>
+
+<!-- 进度步骤条 -->
+<view class="steps-container">
+  <view class="step-bar">
+    <view class="step-item {{currentStep >= 0 ? 'active' : ''}}" bindtap="prevStep" wx:if="{{currentStep > 0}}">
+      <view class="step-dot">1</view>
+      <text class="step-label">用药追踪</text>
+    </view>
+    <view class="step-item {{currentStep >= 0 ? 'active' : ''}}" wx:if="{{currentStep === 0}}">
+      <view class="step-dot current">1</view>
+      <text class="step-label">用药追踪</text>
+    </view>
+
+    <view class="step-line {{currentStep >= 1 ? 'active' : ''}}"></view>
+
+    <view class="step-item {{currentStep >= 1 ? 'active' : ''}}">
+      <view class="step-dot {{currentStep === 1 ? 'current' : ''}}">2</view>
+      <text class="step-label">发作统计</text>
+    </view>
+
+    <view class="step-line {{currentStep >= 2 ? 'active' : ''}}"></view>
+
+    <view class="step-item {{currentStep >= 2 ? 'active' : ''}}">
+      <view class="step-dot {{currentStep === 2 ? 'current' : ''}}">3</view>
+      <text class="step-label">发育里程碑</text>
+    </view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view wx:if="{{loading}}" class="loading-container">
+  <van-empty description="加载中..." />
+</view>
+
+<!-- ========== Step 1: 用药追踪 ========== -->
+<view class="form-container" wx:if="{{!loading && currentStep === 0}}">
+  <view class="section-card" wx:for="{{medications}}" wx:key="index">
+    <view class="medication-card-header">
+      <text class="medication-card-title">💊 {{item.medication_name || '新药物'}}</text>
+      <van-icon
+        wx:if="{{medications.length > 1}}"
+        name="delete-o"
+        size="20"
+        color="#ee0a24"
+        bindtap="removeMedication"
+        data-index="{{index}}"
+      />
+    </view>
+
+    <!-- 药物名称 -->
+    <van-field
+      label="药物名称"
+      value="{{item.medication_name}}"
+      placeholder="请输入药物名称"
+      bind:input="onMedicationNameInput"
+      data-index="{{index}}"
+    />
+
+    <!-- 当前剂量 + 单位 -->
+    <view class="dosage-row">
+      <van-field
+        label="当前剂量"
+        value="{{item.dosage}}"
+        placeholder="剂量"
+        type="digit"
+        bind:input="onDosageInput"
+        data-index="{{index}}"
+        custom-style="flex: 1;"
+      />
+      <van-cell
+        title="单位"
+        value="{{item.unit || '选择'}}"
+        is-link
+        bind:click="showUnitPicker"
+        data-index="{{index}}"
+        custom-style="flex: 0 0 180rpx;"
+      />
+    </view>
+
+    <!-- 服用频率 -->
+    <van-cell
+      title="服用频率"
+      value="{{item.frequency || '选择'}}"
+      is-link
+      bind:click="showFrequencyPicker"
+      data-index="{{index}}"
+    />
+
+    <!-- 本月是否调整剂量 -->
+    <view class="toggle-row" bindtap="toggleDosageChanged" data-index="{{index}}">
+      <text class="toggle-label">本月是否调整过剂量</text>
+      <van-tag type="{{item.dosage_changed ? 'warning' : 'default'}}" size="medium">
+        {{item.dosage_changed ? '是' : '否'}}
+      </van-tag>
+    </view>
+
+    <!-- 调整前剂量（条件显示） -->
+    <van-field
+      wx:if="{{item.dosage_changed}}"
+      label="调整前剂量"
+      value="{{item.previous_dosage}}"
+      placeholder="调整前的剂量"
+      type="digit"
+      bind:input="onPreviousDosageInput"
+      data-index="{{index}}"
+    />
+
+    <!-- 依从性 -->
+    <view class="compliance-row">
+      <text class="compliance-label">用药依从性</text>
+      <view class="compliance-options">
+        <van-tag
+          type="{{item.compliance === 'good' ? 'success' : 'default'}}"
+          size="medium"
+          bindtap="selectCompliance"
+          data-index="{{index}}"
+          data-value="good"
+          custom-class="compliance-tag"
+        >好</van-tag>
+        <van-tag
+          type="{{item.compliance === 'fair' ? 'warning' : 'default'}}"
+          size="medium"
+          bindtap="selectCompliance"
+          data-index="{{index}}"
+          data-value="fair"
+          custom-class="compliance-tag"
+        >一般</van-tag>
+        <van-tag
+          type="{{item.compliance === 'poor' ? 'danger' : 'default'}}"
+          size="medium"
+          bindtap="selectCompliance"
+          data-index="{{index}}"
+          data-value="poor"
+          custom-class="compliance-tag"
+        >差</van-tag>
+      </view>
+    </view>
+
+    <!-- 副作用 -->
+    <van-field
+      label="副作用"
+      value="{{item.side_effects}}"
+      placeholder="本月是否有副作用？（可选）"
+      type="textarea"
+      autosize
+      bind:input="onSideEffectsInput"
+      data-index="{{index}}"
+    />
+  </view>
+
+  <!-- 添加药物按钮 -->
+  <view class="add-medication-btn" bindtap="showAddMedication">
+    <van-icon name="plus" size="16" color="#34BFA3" />
+    <text class="add-medication-text">添加追踪药物</text>
+  </view>
+</view>
+
+<!-- ========== Step 2: 发作统计 ========== -->
+<view class="form-container" wx:if="{{!loading && currentStep === 1}}">
+  <view class="section-card">
+    <view class="section-title-row">
+      <van-icon name="warning-o" size="18" color="#EE6363" />
+      <text class="section-title">本月发作概况</text>
+    </view>
+
+    <van-field
+      label="总发作次数"
+      value="{{seizureSummary.total_count}}"
+      placeholder="请输入次数"
+      type="number"
+      bind:input="onTotalCountInput"
+      required
+    />
+
+    <!-- 与上月对比 -->
+    <view class="compared-row">
+      <text class="compared-label">与上月相比</text>
+      <view class="compared-options">
+        <van-tag
+          type="{{seizureSummary.compared_to_last_month === 'better' ? 'success' : 'default'}}"
+          size="medium"
+          bindtap="selectCompared"
+          data-value="better"
+          custom-class="compared-tag"
+        >📉 减少</van-tag>
+        <van-tag
+          type="{{seizureSummary.compared_to_last_month === 'same' ? 'primary' : 'default'}}"
+          size="medium"
+          bindtap="selectCompared"
+          data-value="same"
+          custom-class="compared-tag"
+        >➡️ 持平</van-tag>
+        <van-tag
+          type="{{seizureSummary.compared_to_last_month === 'worse' ? 'danger' : 'default'}}"
+          size="medium"
+          bindtap="selectCompared"
+          data-value="worse"
+          custom-class="compared-tag"
+        >📈 增加</van-tag>
+      </view>
+    </view>
+  </view>
+
+  <!-- 各类型发作次数 -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <van-icon name="chart-trending-o" size="18" color="#FF9800" />
+      <text class="section-title">各类型发作次数（可选）</text>
+    </view>
+
+    <van-field
+      wx:for="{{seizureSummary.seizure_types}}"
+      wx:key="type"
+      label="{{item.type}}"
+      value="{{item.count}}"
+      placeholder="次数"
+      type="number"
+      bind:input="onSeizureTypeCountInput"
+      data-index="{{index}}"
+    />
+  </view>
+
+  <!-- 详细描述 -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <van-icon name="edit" size="18" color="#2196F3" />
+      <text class="section-title">详细描述</text>
+    </view>
+
+    <van-field
+      label="最严重的一次"
+      value="{{seizureSummary.worst_episode}}"
+      placeholder="描述本月最严重的一次发作（可选）"
+      type="textarea"
+      autosize
+      bind:input="onWorstEpisodeInput"
+    />
+
+    <van-field
+      label="常见诱因"
+      value="{{seizureSummary.triggers_summary}}"
+      placeholder="本月常见的发作诱因（可选）"
+      type="textarea"
+      autosize
+      bind:input="onTriggersSummaryInput"
+    />
+  </view>
+</view>
+
+<!-- ========== Step 3: 发育里程碑 ========== -->
+<view class="form-container" wx:if="{{!loading && currentStep === 2}}">
+  <!-- 里程碑打卡 -->
+  <view class="section-card" wx:for="{{milestoneCategories}}" wx:key="name" wx:for-item="category" wx:for-index="categoryIndex">
+    <view class="section-title-row">
+      <text class="section-title">{{category.name}}</text>
+    </view>
+
+    <view class="milestone-grid">
+      <view
+        class="milestone-item {{item.checked ? 'checked' : ''}}"
+        wx:for="{{category.items}}"
+        wx:key="id"
+        wx:for-index="itemIndex"
+        bindtap="toggleMilestone"
+        data-category-index="{{categoryIndex}}"
+        data-item-index="{{itemIndex}}"
+      >
+        <view class="milestone-checkbox">
+          <van-icon wx:if="{{item.checked}}" name="success" size="14" color="#fff" />
+        </view>
+        <text class="milestone-label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 补充描述 -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <van-icon name="smile-o" size="18" color="#4CAF50" />
+      <text class="section-title">补充信息</text>
+    </view>
+
+    <van-field
+      label="新达成能力"
+      value="{{newAchievements}}"
+      placeholder="本月宝宝新学会了什么？（可选）"
+      type="textarea"
+      autosize
+      bind:input="onNewAchievementsInput"
+    />
+
+    <van-field
+      label="发育担忧"
+      value="{{developmentConcerns}}"
+      placeholder="发育方面有什么担忧？（可选）"
+      type="textarea"
+      autosize
+      bind:input="onConcernsInput"
+    />
+
+    <van-field
+      label="补充备注"
+      value="{{additionalNotes}}"
+      placeholder="其他需要记录的信息（可选）"
+      type="textarea"
+      autosize
+      bind:input="onNotesInput"
+    />
+  </view>
+</view>
+
+<!-- 底部操作按钮 -->
+<view class="bottom-actions" wx:if="{{!loading}}">
+  <van-button
+    wx:if="{{currentStep > 0}}"
+    type="default"
+    size="small"
+    bind:click="prevStep"
+    custom-class="action-btn"
+  >← 上一步</van-button>
+
+  <van-button
+    type="info"
+    size="small"
+    bind:click="saveDraft"
+    loading="{{submitting}}"
+    custom-class="action-btn"
+  >保存草稿</van-button>
+
+  <van-button
+    wx:if="{{currentStep < 2}}"
+    type="primary"
+    size="small"
+    bind:click="nextStep"
+    custom-class="action-btn"
+  >下一步 →</van-button>
+
+  <van-button
+    wx:if="{{currentStep === 2}}"
+    type="primary"
+    size="small"
+    bind:click="submitReport"
+    loading="{{submitting}}"
+    custom-class="action-btn"
+  >提交汇报 ✓</van-button>
+</view>
+
+<!-- 月份选择器 -->
+<van-action-sheet
+  show="{{showMonthPicker}}"
+  actions="{{monthColumns}}"
+  bind:select="onMonthSelect"
+  bind:close="onMonthPickerCancel"
+  title="选择汇报月份"
+/>
+
+<!-- 单位选择器 -->
+<van-action-sheet
+  show="{{showUnitPicker}}"
+  actions="{{unitOptions}}"
+  bind:select="onUnitSelect"
+  bind:close="onUnitCancel"
+  title="选择单位"
+/>
+
+<!-- 频率选择器 -->
+<van-action-sheet
+  show="{{showFrequencyPicker}}"
+  actions="{{frequencyOptions}}"
+  bind:select="onFrequencySelect"
+  bind:close="onFrequencyCancel"
+  title="选择服用频率"
+/>
+
+<!-- 添加药物选择器 -->
+<van-action-sheet
+  show="{{showAddMedicationSheet}}"
+  actions="{{commonMedicationOptions}}"
+  bind:select="onAddMedicationSelect"
+  bind:close="onAddMedicationCancel"
+  title="选择追踪药物"
+  description="选择要添加的药物"
+/>

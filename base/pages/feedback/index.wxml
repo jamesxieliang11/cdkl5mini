@@ -1,0 +1,116 @@
+<!-- 自定义导航栏 -->
+<view class="status-bar"></view>
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" size="20" color="#333" />
+  </view>
+  <view class="nav-title">反馈意见</view>
+  <view class="nav-placeholder"></view>
+</view>
+
+<view class="page-container">
+  <!-- Tab 切换：提交反馈 / 我的反馈 -->
+  <van-tabs active="{{activeTab}}" bind:change="onTabChange" color="#34BFA3" title-active-color="#34BFA3">
+    <van-tab title="提交反馈">
+      <view class="form-section">
+        <!-- 反馈类型选择 -->
+        <view class="section-label">反馈类型</view>
+        <view class="type-grid">
+          <view
+            wx:for="{{feedbackTypes}}"
+            wx:key="value"
+            class="type-item {{selectedType === item.value ? 'type-active' : ''}}"
+            bindtap="selectType"
+            data-value="{{item.value}}"
+          >
+            <van-icon name="{{item.icon}}" size="24" color="{{selectedType === item.value ? '#fff' : '#34BFA3'}}" />
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+
+        <!-- 反馈内容 -->
+        <view class="section-label">反馈内容 <text class="required">*</text></view>
+        <view class="textarea-wrapper">
+          <textarea
+            class="feedback-textarea"
+            placeholder="请详细描述您的问题或建议，以便我们更好地改进..."
+            value="{{content}}"
+            bindinput="onContentInput"
+            maxlength="500"
+          />
+          <view class="word-count">{{content.length}}/500</view>
+        </view>
+
+        <!-- 图片上传 -->
+        <view class="section-label">上传截图（可选）</view>
+        <view class="image-upload-area">
+          <view class="image-list">
+            <view wx:for="{{images}}" wx:key="index" class="image-item">
+              <image src="{{item}}" mode="aspectFill" class="preview-image" bindtap="previewImage" data-url="{{item}}" />
+              <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">
+                <van-icon name="cross" size="12" color="#fff" />
+              </view>
+            </view>
+            <view class="image-add" bindtap="chooseImage" wx:if="{{images.length < 3}}">
+              <van-icon name="photograph" size="28" color="#ccc" />
+              <text class="add-text">添加图片</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 联系方式 -->
+        <view class="section-label">联系方式（可选）</view>
+        <van-field
+          value="{{contact}}"
+          placeholder="手机号或微信号，方便我们联系您"
+          bind:change="onContactInput"
+          border="{{false}}"
+          custom-class="contact-field"
+        />
+
+        <!-- 提交按钮 -->
+        <van-button
+          type="primary"
+          block
+          round
+          loading="{{submitting}}"
+          disabled="{{!selectedType || !content}}"
+          bind:click="submitFeedback"
+          custom-class="submit-btn"
+          color="#34BFA3"
+        >
+          提交反馈
+        </van-button>
+      </view>
+    </van-tab>
+
+    <van-tab title="我的反馈">
+      <view class="feedback-list" wx:if="{{feedbackList.length > 0}}">
+        <view
+          wx:for="{{feedbackList}}"
+          wx:key="_id"
+          class="feedback-card"
+          bindtap="viewFeedbackDetail"
+          data-id="{{item._id}}"
+        >
+          <view class="card-header">
+            <van-tag
+              type="{{item.status === 'replied' ? 'success' : 'warning'}}"
+              round
+            >
+              {{item.status === 'replied' ? '已回复' : '待处理'}}
+            </van-tag>
+            <van-tag plain round color="#34BFA3">{{item.typeLabel}}</van-tag>
+            <text class="card-time">{{item.displayTime}}</text>
+          </view>
+          <view class="card-content">{{item.content}}</view>
+          <view class="card-reply" wx:if="{{item.reply}}">
+            <van-icon name="chat-o" size="14" color="#34BFA3" />
+            <text class="reply-text">{{item.reply}}</text>
+          </view>
+        </view>
+      </view>
+      <van-empty wx:else description="暂无反馈记录" image="search" />
+    </van-tab>
+  </van-tabs>
+</view>

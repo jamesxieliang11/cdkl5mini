@@ -1,0 +1,336 @@
+/* 月度汇报页面样式 */
+
+.page-header {
+  padding: 20rpx 30rpx 10rpx;
+  background: linear-gradient(135deg, #34BFA3, #2da88e);
+}
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 主页按钮 */
+.home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+  border-radius: 30rpx;
+  padding: 8rpx 20rpx;
+  font-size: 24rpx;
+  color: #fff;
+  line-height: 1.4;
+}
+
+.home-btn::after {
+  border: none;
+}
+
+.home-icon {
+  font-size: 28rpx;
+}
+
+.home-text {
+  font-size: 24rpx;
+  color: #fff;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.header-subtitle {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8rpx;
+  padding-left: 36rpx;
+}
+
+/* 月份选择器 */
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 20rpx;
+  margin: 20rpx 30rpx 0;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.month-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 步骤条 */
+.steps-container {
+  padding: 20rpx 30rpx;
+}
+
+.step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.step-dot {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #e8e8e8;
+  color: #999;
+  font-size: 24rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-item.active .step-dot {
+  background: #d4f0e8;
+  color: #34BFA3;
+}
+
+.step-dot.current {
+  background: #34BFA3 !important;
+  color: #fff !important;
+  box-shadow: 0 4rpx 12rpx rgba(52, 191, 163, 0.4);
+}
+
+.step-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.step-item.active .step-label {
+  color: #34BFA3;
+}
+
+.step-line {
+  width: 80rpx;
+  height: 4rpx;
+  background: #e8e8e8;
+  margin: 0 12rpx;
+  margin-bottom: 30rpx;
+}
+
+.step-line.active {
+  background: #34BFA3;
+}
+
+/* 加载状态 */
+.loading-container {
+  padding: 100rpx 0;
+}
+
+/* 表单容器 */
+.form-container {
+  padding: 0 30rpx 200rpx;
+}
+
+/* 卡片样式 */
+.section-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 药物卡片头部 */
+.medication-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 12rpx;
+}
+
+.medication-card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 剂量行 */
+.dosage-row {
+  display: flex;
+  align-items: center;
+}
+
+/* 切换行 */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 32rpx;
+  border-bottom: 1rpx solid #f7f8fa;
+}
+
+.toggle-label {
+  font-size: 28rpx;
+  color: #646566;
+}
+
+/* 依从性 */
+.compliance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 32rpx;
+  border-bottom: 1rpx solid #f7f8fa;
+}
+
+.compliance-label {
+  font-size: 28rpx;
+  color: #646566;
+}
+
+.compliance-options {
+  display: flex;
+  gap: 12rpx;
+}
+
+.compliance-tag {
+  margin: 0 4rpx;
+}
+
+/* 添加药物按钮 */
+.add-medication-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  border: 2rpx dashed #34BFA3;
+  margin-bottom: 20rpx;
+}
+
+.add-medication-text {
+  font-size: 28rpx;
+  color: #34BFA3;
+  font-weight: 500;
+}
+
+/* 区块标题行 */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 12rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 与上月对比 */
+.compared-row {
+  padding: 20rpx 32rpx;
+  border-bottom: 1rpx solid #f7f8fa;
+}
+
+.compared-label {
+  font-size: 28rpx;
+  color: #646566;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.compared-options {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}
+
+.compared-tag {
+  margin: 0 4rpx;
+}
+
+/* 里程碑网格 */
+.milestone-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  padding: 12rpx 0;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 12rpx 20rpx;
+  background: #f7f8fa;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.milestone-item.checked {
+  background: #e8f8f3;
+  border-color: #34BFA3;
+}
+
+.milestone-checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 8rpx;
+  background: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.milestone-item.checked .milestone-checkbox {
+  background: #34BFA3;
+}
+
+.milestone-label {
+  font-size: 26rpx;
+  color: #333;
+}
+
+/* 底部操作按钮 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  z-index: 100;
+}
+
+.action-btn {
+  flex: 1;
+}

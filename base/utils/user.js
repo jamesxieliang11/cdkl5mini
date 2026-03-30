@@ -54,12 +54,14 @@ function getOpenId() {
  */
 function userLogin(params = {}) {
   return new Promise((resolve, reject) => {
-    const { userInfo, userRole } = params
+    const { userInfo, userRole, silent } = params
     
-    wx.showLoading({
-      title: '登录中...',
-      mask: true
-    })
+    if (!silent) {
+      wx.showLoading({
+        title: '登录中...',
+        mask: true
+      })
+    }
 
     wx.cloud.callFunction({
       name: 'userLogin',
@@ -68,7 +70,7 @@ function userLogin(params = {}) {
         userRole: userRole
       },
       success: (res) => {
-        wx.hideLoading()
+        if (!silent) wx.hideLoading()
         console.log('用户登录结果:', res)
         
         if (res.result && res.result.success) {
@@ -77,32 +79,39 @@ function userLogin(params = {}) {
           wx.setStorageSync('userInfo', userData)
           wx.setStorageSync('openid', userData.openid)
           wx.setStorageSync('userRole', userData.userRole)
-          wx.setStorageSync('userId', userData._id) // 保存用户ID
+          wx.setStorageSync('userId', userData._id)
+          wx.setStorageSync('adminRole', userData.adminRole || '')
           
-          wx.showToast({
-            title: res.result.message,
-            icon: 'success',
-            duration: 2000
-          })
+          if (!silent) {
+            wx.showToast({
+              title: res.result.message,
+              icon: 'success',
+              duration: 2000
+            })
+          }
           resolve(res.result)
         } else {
           const errorMsg = res.result ? res.result.message : '登录失败'
-          wx.showToast({
-            title: errorMsg,
-            icon: 'error',
-            duration: 3000
-          })
+          if (!silent) {
+            wx.showToast({
+              title: errorMsg,
+              icon: 'error',
+              duration: 3000
+            })
+          }
           reject(new Error(errorMsg))
         }
       },
       fail: (error) => {
-        wx.hideLoading()
-        console.error('调用userLogin云函数失败:', error)
-        wx.showToast({
-          title: '网络错误，请重试',
-          icon: 'error',
-          duration: 3000
-        })
+        if (!silent) {
+          wx.hideLoading()
+          console.error('调用userLogin云函数失败:', error)
+          wx.showToast({
+            title: '网络错误，请重试',
+            icon: 'error',
+            duration: 3000
+          })
+        }
         reject(error)
       }
     })
@@ -118,12 +127,14 @@ function getUserInfo() {
   const openid = wx.getStorageSync('openid')
   const userRole = wx.getStorageSync('userRole')
   const userId = wx.getStorageSync('userId')
+  const adminRole = wx.getStorageSync('adminRole')
   
   return {
     userInfo: userInfo || null,
     openid: openid || '',
     userRole: userRole || '',
-    userId: userId || ''
+    userId: userId || '',
+    adminRole: adminRole || ''
   }
 }
 
@@ -145,6 +156,7 @@ function logout() {
   wx.removeStorageSync('openid')
   wx.removeStorageSync('userRole')
   wx.removeStorageSync('userId') // 清除用户ID
+  wx.removeStorageSync('adminRole') // 清除管理员角色
   
   // 清除全局数据
   const app = getApp()
@@ -165,7 +177,7 @@ function logout() {
  * @param {boolean} needUserInfo 是否需要获取用户详细信息，默认false
  * @returns {Promise} 返回登录结果
  */
-function wxLogin(userRole = 'patient', needUserInfo = false) {
+function wxLogin(userRole = 'patient', needUserInfo = false, silent = false) {
   return new Promise((resolve, reject) => {
     // 先调用wx.login获取code
     wx.login({
@@ -186,14 +198,14 @@ function wxLogin(userRole = 'patient', needUserInfo = false) {
                 userInfo = userInfoRes.userInfo
               } catch (error) {
                 console.log('用户取消授权或获取用户信息失败:', error)
-                // 不强制要求用户信息，继续登录流程
               }
             }
             
             // 调用登录云函数
             const loginResult = await userLogin({
               userInfo: userInfo,
-              userRole: userRole
+              userRole: userRole,
+              silent: silent
             })
             
             resolve(loginResult)

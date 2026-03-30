@@ -555,6 +555,221 @@ function searchOtherRecords(searchParams, pageSize = 10, pageIndex = 0) {
   })
 }
 
+/**
+ * 调用月度汇报云函数
+ * @param {string} action 操作类型
+ * @param {Object} params 参数对象
+ * @returns {Promise} 返回操作结果
+ */
+function callMonthlyReportFunction(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'monthlyReport',
+      data: {
+        action: action,
+        ...params
+      },
+      success: (res) => {
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          const errorMsg = res.result ? res.result.message : '操作失败'
+          reject(new Error(errorMsg))
+        }
+      },
+      fail: (error) => {
+        console.error('调用月度汇报云函数失败:', error)
+        reject(error)
+      }
+    })
+  })
+}
+
+/**
+ * 创建月度汇报
+ * @param {Object} reportData 汇报数据
+ * @returns {Promise} 返回创建结果
+ */
+function createMonthlyReport(reportData) {
+  return callMonthlyReportFunction('create', {
+    data: reportData,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 更新月度汇报
+ * @param {string} reportId 汇报ID
+ * @param {Object} reportData 更新数据
+ * @returns {Promise} 返回更新结果
+ */
+function updateMonthlyReport(reportId, reportData) {
+  return callMonthlyReportFunction('update', {
+    reportId: reportId,
+    data: reportData,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取指定月份的汇报
+ * @param {string} month 月份（YYYY-MM）
+ * @returns {Promise} 返回汇报数据
+ */
+function getMonthlyReport(month) {
+  return callMonthlyReportFunction('get', {
+    month: month,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取月度汇报列表
+ * @param {number} pageSize 每页数量
+ * @param {number} pageIndex 页码
+ * @returns {Promise} 返回汇报列表
+ */
+function listMonthlyReports(pageSize = 10, pageIndex = 0) {
+  return callMonthlyReportFunction('list', {
+    userId: wx.getStorageSync('userId') || 'default_user',
+    pageSize: pageSize,
+    pageIndex: pageIndex
+  })
+}
+
+/**
+ * 获取上月汇报（用于预填充）
+ * @returns {Promise} 返回上月汇报数据
+ */
+function getLastMonthReport() {
+  return callMonthlyReportFunction('getLastReport', {
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取用户追踪药物配置
+ * @returns {Promise} 返回追踪药物列表
+ */
+function getTrackedMedications() {
+  return callMonthlyReportFunction('getTrackedMedications', {
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 更新用户追踪药物配置
+ * @param {Array} medications 药物配置列表
+ * @returns {Promise} 返回更新结果
+ */
+function updateTrackedMedications(medications) {
+  return callMonthlyReportFunction('updateTrackedMedications', {
+    data: { medications: medications },
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 检查指定月份是否已提交汇报
+ * @param {string} month 月份（YYYY-MM），不传则检查当月
+ * @returns {Promise} 返回是否已提交
+ */
+function checkMonthlyReportSubmitted(month) {
+  return callMonthlyReportFunction('checkMonthSubmitted', {
+    month: month,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取管理员月度汇报统计概览
+ * @param {string} month 月份（YYYY-MM），不传则统计当月
+ * @returns {Promise} 返回统计数据
+ */
+function getAdminMonthlyStats(month) {
+  return callMonthlyReportFunction('adminStats', { month })
+}
+
+/**
+ * 获取管理员月度汇报详细列表
+ * @param {string} month 月份（YYYY-MM）
+ * @param {number} pageSize 每页数量
+ * @param {number} pageIndex 页码
+ * @returns {Promise} 返回用户提交详情列表
+ */
+function getAdminMonthlyDetail(month, pageSize = 100, pageIndex = 0) {
+  return callMonthlyReportFunction('adminDetail', { month, pageSize, pageIndex })
+}
+
+/**
+ * 调用反馈意见云函数
+ * @param {string} action 操作类型：create, list, get, adminList, reply
+ * @param {Object} params 参数对象
+ * @returns {Promise} 返回操作结果
+ */
+function callFeedbackFunction(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'feedback',
+      data: {
+        action: action,
+        ...params
+      },
+      success: (res) => {
+        console.log('反馈意见云函数调用结果:', res)
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          const errorMsg = res.result ? res.result.message : '操作失败'
+          reject(new Error(errorMsg))
+        }
+      },
+      fail: (error) => {
+        console.error('调用反馈意见云函数失败:', error)
+        reject(error)
+      }
+    })
+  })
+}
+
+/**
+ * 提交反馈意见
+ * @param {Object} feedbackData 反馈数据
+ * @returns {Promise} 返回提交结果
+ */
+function createFeedback(feedbackData) {
+  return callFeedbackFunction('create', {
+    data: feedbackData,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取用户反馈列表
+ * @param {number} pageSize 每页数量
+ * @param {number} pageIndex 页码
+ * @returns {Promise} 返回反馈列表
+ */
+function listFeedbacks(pageSize = 10, pageIndex = 0) {
+  return callFeedbackFunction('list', {
+    userId: wx.getStorageSync('userId') || 'default_user',
+    pageSize: pageSize,
+    pageIndex: pageIndex
+  })
+}
+
+/**
+ * 获取反馈详情
+ * @param {string} feedbackId 反馈ID
+ * @returns {Promise} 返回反馈详情
+ */
+function getFeedback(feedbackId) {
+  return callFeedbackFunction('get', {
+    feedbackId: feedbackId,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
 // 使用 CommonJS 语法导出函数
 module.exports = {
   initDatabase,
@@ -586,5 +801,21 @@ module.exports = {
   deleteOtherRecord,
   getOtherRecord,
   listOtherRecords,
-  searchOtherRecords
+  searchOtherRecords,
+  // 月度汇报相关函数
+  createMonthlyReport,
+  updateMonthlyReport,
+  getMonthlyReport,
+  listMonthlyReports,
+  getLastMonthReport,
+  getTrackedMedications,
+  updateTrackedMedications,
+  checkMonthlyReportSubmitted,
+  // 管理员统计相关函数
+  getAdminMonthlyStats,
+  getAdminMonthlyDetail,
+  // 反馈意见相关函数
+  createFeedback,
+  listFeedbacks,
+  getFeedback
 }

@@ -44,12 +44,13 @@ Component({
     // 显示添加记录选择弹窗
     showAddRecordModal() {
       wx.showActionSheet({
-        itemList: ['调药记录', '发作记录', '其他记录'],
+        itemList: ['调药记录', '发作记录', '其他记录', '📋 月度汇报'],
         success: (res) => {
           const recordTypes = [
             '/pages/medication-record/index',
             '/pages/seizure-record/index', 
-            '/pages/other-record/index'
+            '/pages/other-record/index',
+            '/pages/monthly-report/index'
           ]
           
           if (res.tapIndex >= 0) {

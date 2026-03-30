@@ -8,7 +8,10 @@
     "pages/my-records/index",
     "pages/reports/index",
     "pages/user-profile/index",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/monthly-report/index",
+    "pages/admin-monthly-stats/index",
+    "pages/feedback/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

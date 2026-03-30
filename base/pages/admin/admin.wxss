@@ -98,6 +98,53 @@
   font-weight: bold;
 }
 
+/* 权限标识 */
+.admin-role-bar {
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+/* 用户管理 */
+.user-list {
+  padding: 0 32rpx;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.user-item:last-child {
+  border-bottom: none;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.user-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.user-baby {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.user-actions {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
 .label {
   font-size: 28rpx;
   color: #666;

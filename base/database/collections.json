@@ -221,6 +221,35 @@
           "keys": { "stat_date": -1 }
         }
       ]
+    },
+    {
+      "name": "monthly_reports",
+      "description": "月度汇报记录集合",
+      "indexes": [
+        {
+          "keys": { "user_id": 1 }
+        },
+        {
+          "keys": { "report_month": -1 }
+        },
+        {
+          "keys": { "user_id": 1, "report_month": 1 },
+          "options": { "unique": true }
+        },
+        {
+          "keys": { "status": 1 }
+        }
+      ]
+    },
+    {
+      "name": "tracked_medications",
+      "description": "用户追踪药物配置集合",
+      "indexes": [
+        {
+          "keys": { "user_id": 1 },
+          "options": { "unique": true }
+        }
+      ]
     }
   ]
 }

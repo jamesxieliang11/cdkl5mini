@@ -366,9 +366,31 @@
   background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
 
+.record-type-tag.monthly {
+  background: linear-gradient(135deg, #34BFA3 0%, #2da88e 100%);
+}
+
 .record-type-tag.other {
   background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
   color: #333;
+}
+
+/* 月度汇报状态标签 */
+.monthly-status {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-left: 12rpx;
+}
+
+.monthly-status.submitted {
+  background: #e8f8f3;
+  color: #07c160;
+}
+
+.monthly-status.draft {
+  background: #fff7e6;
+  color: #FF9800;
 }
 
 .tag-icon {

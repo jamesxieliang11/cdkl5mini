@@ -34,6 +34,10 @@
           <text class="tab-icon">📄</text>
           <text class="tab-text">其他</text>
         </view>
+        <view class="tab-item {{activeTab === 'monthly' ? 'active' : ''}}" bindtap="switchTab" data-tab="monthly">
+          <text class="tab-icon">📋</text>
+          <text class="tab-text">月度汇报</text>
+        </view>
       </view>
     </view>
 
@@ -133,8 +137,40 @@
           </view>
         </view>
 
+        <!-- 月度汇报 -->
+        <view wx:elif="{{item.type === 'monthly'}}" class="monthly-record" bindtap="goToMonthlyReport" data-month="{{item.reportMonth}}" catchtap="goToMonthlyReport">
+          <view class="record-header">
+            <view class="record-type-info">
+              <text class="record-type-tag monthly">
+                <text class="tag-icon">📋</text>
+                <text class="tag-text">月度汇报</text>
+              </text>
+              <text class="monthly-status {{item.status}}">{{item.statusText}}</text>
+            </view>
+            <text class="record-time">{{item.reportMonth}}</text>
+          </view>
+          <view class="record-content">
+            <view class="content-item">
+              <text class="content-icon">💊</text>
+              <text>{{item.medicationCount}}种药物: {{item.medicationNames}}</text>
+            </view>
+            <view class="content-item">
+              <text class="content-icon">⚡</text>
+              <text>发作 {{item.seizureCount}} 次</text>
+            </view>
+            <view class="content-item">
+              <text class="content-icon">🎯</text>
+              <text>{{item.milestoneCount}} 项里程碑达成</text>
+            </view>
+          </view>
+          <view class="record-action-hint">
+            <text class="action-text">点击查看/编辑</text>
+            <text class="action-icon">✏️</text>
+          </view>
+        </view>
+
         <!-- 其他记录 -->
-        <view wx:else class="other-record">
+        <view wx:elif="{{item.type === 'other'}}" class="other-record">
           <view class="record-header">
             <view class="record-type-info">
               <text class="record-type-tag other">

@@ -39,6 +39,8 @@ App({
   onShow: function () {
     // 检查是否有新消息
     this.checkNewMessages()
+    // 检查月度汇报提醒
+    this.checkMonthlyReportReminder()
   },
 
   // 初始化用户登录状态
@@ -52,8 +54,12 @@ App({
         this.globalData.userInfo = localUserInfo.userInfo
         this.globalData.userRole = localUserInfo.userRole
         this.globalData.openid = localUserInfo.openid
+        this.globalData.adminRole = localUserInfo.adminRole || ''
         
         console.log('用户已登录:', localUserInfo)
+        
+        // 后台静默刷新登录信息（确保 adminRole 等字段同步最新）
+        this.performLogin(localUserInfo.userRole, false)
       } else {
         // 本地没有用户信息，需要登录
         console.log('用户未登录，执行登录')
@@ -76,23 +82,24 @@ App({
     }
   },
 
-  // 执行登录
-  async performLogin(userRole = 'patient') {
+  // 执行登录（silent=true 时不显示 loading/toast）
+  async performLogin(userRole = 'patient', silent = false) {
     try {
-      const loginResult = await wxLogin(userRole)
+      const loginResult = await wxLogin(userRole, false, silent)
       
       // 更新全局数据
       this.globalData.userInfo = loginResult.data
       this.globalData.userRole = loginResult.data.userRole
       this.globalData.openid = loginResult.data.openid
       this.globalData.userId = loginResult.data._id
+      this.globalData.adminRole = loginResult.data.adminRole || ''
       
-      console.log('登录成功:', loginResult)
+      console.log('登录成功, adminRole:', loginResult.data.adminRole)
       
       return loginResult
     } catch (error) {
       console.error('登录失败:', error)
-      throw error
+      if (!silent) throw error
     }
   },
 
@@ -100,6 +107,50 @@ App({
   setUserRole: function(role) {
     this.globalData.userRole = role
     wx.setStorageSync('userRole', role)
+  },
+
+  // 检查月度汇报提醒（每月25号之后弹窗提醒）
+  checkMonthlyReportReminder: function() {
+    const now = new Date()
+    const dayOfMonth = now.getDate()
+
+    // 每月25号之后才提醒
+    if (dayOfMonth < 25) return
+
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const lastReminder = wx.getStorageSync('lastMonthlyReminder')
+
+    // 同一月份只提醒一次弹窗
+    if (lastReminder === currentMonth) return
+
+    // 调用云函数检查本月是否已提交
+    wx.cloud.callFunction({
+      name: 'monthlyReport',
+      data: {
+        action: 'checkMonthSubmitted',
+        month: currentMonth,
+        userId: wx.getStorageSync('userId') || 'default_user'
+      },
+      success: (res) => {
+        if (res.result && res.result.success && !res.result.data.submitted) {
+          wx.showModal({
+            title: '月度汇报提醒',
+            content: '本月的用药和发作汇报还未提交，是否现在填写？',
+            confirmText: '去填写',
+            cancelText: '稍后',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                wx.navigateTo({ url: '/pages/monthly-report/index' })
+              }
+              wx.setStorageSync('lastMonthlyReminder', currentMonth)
+            }
+          })
+        }
+      },
+      fail: (error) => {
+        console.warn('检查月度汇报状态失败:', error)
+      }
+    })
   },
 
   // 检查新消息

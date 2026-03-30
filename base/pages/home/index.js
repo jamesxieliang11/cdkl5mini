@@ -1,5 +1,5 @@
 const app = getApp()
-const { listMedicationRecords, listSeizureRecords, listOtherRecords } = require('../../utils/database.js')
+const { listMedicationRecords, listSeizureRecords, listOtherRecords, checkMonthlyReportSubmitted } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -7,7 +7,8 @@ Page({
     todayMedications: [],            // 今日用药
     recentSeizures: [],              // 近期发作记录
     recentOthers: [],                // 近期其他记录
-    noticeText: '欢迎来到希舞之家'    // 通知文案
+    noticeText: '欢迎来到希舞之家',   // 通知文案
+    showMonthlyReminder: false       // 是否显示月度汇报提醒
   },
 
   onLoad(options) {
@@ -18,7 +19,17 @@ Page({
 
   onShow() {
     this.refreshAllData()
+    this.checkMonthlyReportStatus()
     this.updateTabBarState()
+    this.checkAdminRole()
+  },
+
+  // 检查管理员角色
+  checkAdminRole() {
+    const adminRole = wx.getStorageSync('adminRole') || ''
+    this.setData({
+      isAdmin: adminRole === 'admin' || adminRole === 'superadmin'
+    })
   },
 
   // 更新tabbar状态
@@ -219,6 +230,25 @@ Page({
     }
   },
 
+  // 检查月度汇报提交状态
+  async checkMonthlyReportStatus() {
+    try {
+      const result = await checkMonthlyReportSubmitted()
+      if (result && result.data) {
+        this.setData({ showMonthlyReminder: !result.data.submitted })
+      }
+    } catch (error) {
+      console.warn('检查月度汇报状态失败:', error)
+    }
+  },
+
+  // 导航到月度汇报
+  goToMonthlyReport() {
+    wx.navigateTo({
+      url: '/pages/monthly-report/index'
+    })
+  },
+
   // 导航到我的记录
   goToMyRecords() {
     wx.switchTab({
@@ -235,9 +265,15 @@ Page({
 
   // 导航到反馈意见
   goToFeedback() {
-    wx.showToast({
-      title: '开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/feedback/index'
+    })
+  },
+
+  // 导航到管理面板
+  goToAdmin() {
+    wx.switchTab({
+      url: '/pages/admin/admin'
     })
   },
 

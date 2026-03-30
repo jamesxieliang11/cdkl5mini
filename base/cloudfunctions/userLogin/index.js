@@ -63,14 +63,22 @@ exports.main = async (event, context) => {
       
       console.log('用户信息更新成功:', result)
       
-      const existingUserData = existingUser.data[0]
+      // 更新后重新查询，确保拿到最新数据（包括手动设置的 adminRole 等）
+      const latestUser = await db.collection('users').where({
+        openid: openid
+      }).get()
+      const latestUserData = latestUser.data[0]
+      
+      console.log('重新查询用户数据, adminRole:', latestUserData.adminRole, '完整数据字段:', Object.keys(latestUserData))
+      
       const responseData = {
         ...userData,
-        _id: existingUserData._id,
+        _id: latestUserData._id,
         isNewUser: false,
-        hasCompleteProfile: !!(existingUserData.patientInfo && existingUserData.patientInfo.babyName),
-        patientInfo: existingUserData.patientInfo || null,
-        medicalFiles: existingUserData.medicalFiles || []
+        adminRole: latestUserData.adminRole || '',
+        hasCompleteProfile: !!(latestUserData.patientInfo && latestUserData.patientInfo.babyName),
+        patientInfo: latestUserData.patientInfo || null,
+        medicalFiles: latestUserData.medicalFiles || []
       }
       
       return {

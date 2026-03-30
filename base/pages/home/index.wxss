@@ -1,3 +1,27 @@
+/* 月度汇报提醒 */
+.monthly-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 30rpx;
+  margin: 20rpx 30rpx 0;
+  background: linear-gradient(135deg, #fff7e6, #fff1cc);
+  border-radius: 16rpx;
+  border-left: 6rpx solid #FF9800;
+}
+
+.reminder-content {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.reminder-text {
+  font-size: 26rpx;
+  color: #8a6d3b;
+  font-weight: 500;
+}
+
 .home-container {
   background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 100%);
   min-height: 100vh;

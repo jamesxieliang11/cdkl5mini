@@ -1,0 +1,15 @@
+{
+  "navigationBarTitleText": "反馈意见",
+  "usingComponents": {
+    "van-button": "/miniprogram_npm/@vant/weapp/button/index",
+    "van-field": "/miniprogram_npm/@vant/weapp/field/index",
+    "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
+    "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
+    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index",
+    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
+    "van-tab": "/miniprogram_npm/@vant/weapp/tab/index",
+    "van-tabs": "/miniprogram_npm/@vant/weapp/tabs/index",
+    "van-action-sheet": "/miniprogram_npm/@vant/weapp/action-sheet/index"
+  }
+}
