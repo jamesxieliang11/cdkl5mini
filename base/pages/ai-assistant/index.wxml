@@ -1,0 +1,179 @@
+<!-- 状态栏 -->
+<view class="status-bar"></view>
+
+<!-- 自定义导航栏 -->
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" size="20" color="#333" />
+  </view>
+  <view class="nav-title">{{sceneConfig.icon}} {{sceneConfig.title}}</view>
+  <view class="nav-action" bindtap="clearChat">
+    <van-icon name="delete-o" size="20" color="#666" />
+  </view>
+</view>
+
+<!-- 主容器 -->
+<view class="chat-container">
+  <!-- 免责声明横幅 -->
+  <view class="disclaimer-banner">
+    <van-icon name="info-o" size="14" color="#FF9800" />
+    <text class="disclaimer-text">AI 生成内容仅供参考，不构成医学建议，请遵医嘱</text>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view 
+    class="message-list" 
+    scroll-y 
+    scroll-into-view="{{scrollToMessage}}"
+    scroll-with-animation
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <!-- 场景引导卡片（仅在无消息时显示） -->
+    <view class="guide-card" wx:if="{{messages.length === 0}}">
+      <view class="guide-icon">{{sceneConfig.icon}}</view>
+      <view class="guide-title">{{sceneConfig.title}}</view>
+      <view class="guide-desc">{{sceneConfig.description}}</view>
+
+      <!-- 基因报告场景：上传按钮 -->
+      <view class="guide-upload" wx:if="{{scene === 'gene_report'}}">
+        <van-button 
+          type="primary" 
+          size="small" 
+          icon="photograph"
+          custom-class="upload-btn"
+          bind:click="uploadGeneReport"
+        >上传基因报告图片</van-button>
+        <text class="upload-hint">支持拍照或从相册选择</text>
+      </view>
+
+      <!-- 病历生成场景：时间范围选择 -->
+      <view class="guide-time-range" wx:if="{{scene === 'medical_record'}}">
+        <view class="time-range-label">选择病历时间范围：</view>
+        <view class="time-range-options">
+          <van-tag 
+            wx:for="{{timeRangeOptions}}" 
+            wx:key="value"
+            plain="{{selectedTimeRange !== item.value}}"
+            type="primary"
+            size="medium"
+            custom-class="time-tag {{selectedTimeRange === item.value ? 'time-tag-active' : ''}}"
+            bindtap="selectTimeRange"
+            data-value="{{item.value}}"
+          >{{item.label}}</van-tag>
+        </view>
+        <van-button 
+          type="primary" 
+          size="small"
+          custom-class="generate-btn"
+          bind:click="generateMedicalRecord"
+          loading="{{generating}}"
+          disabled="{{generating}}"
+        >开始生成病历</van-button>
+      </view>
+
+      <!-- 快捷问题 -->
+      <view class="quick-questions">
+        <view class="quick-title">💬 试试这样问：</view>
+        <view 
+          class="quick-item" 
+          wx:for="{{sceneConfig.quickQuestions}}" 
+          wx:key="index"
+          bindtap="sendQuickQuestion"
+          data-question="{{item}}"
+        >
+          <text>{{item}}</text>
+          <van-icon name="arrow" size="12" color="#999" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 对话消息 -->
+    <view 
+      class="message-item {{item.role === 'user' ? 'message-user' : 'message-ai'}}" 
+      wx:for="{{messages}}" 
+      wx:key="index"
+      id="msg-{{index}}"
+    >
+      <!-- AI 消息 -->
+      <view class="message-bubble" wx:if="{{item.role === 'assistant'}}">
+        <view class="ai-avatar">🤖</view>
+        <view class="bubble-content ai-bubble">
+          <view class="message-text">{{item.content}}</view>
+          <!-- AI 正在输入的动画 -->
+          <view class="typing-indicator" wx:if="{{item.typing}}">
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+          </view>
+          <!-- 复制按钮 -->
+          <view class="message-actions" wx:if="{{!item.typing && item.content}}">
+            <view class="action-btn" bindtap="copyMessage" data-content="{{item.content}}">
+              <van-icon name="description" size="14" color="#999" />
+              <text>复制</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 用户消息 -->
+      <view class="message-bubble user-bubble-wrap" wx:if="{{item.role === 'user'}}">
+        <view class="bubble-content user-bubble">
+          <!-- 如果有图片 -->
+          <image 
+            wx:if="{{item.image}}" 
+            class="message-image" 
+            src="{{item.image}}" 
+            mode="widthFix"
+            bindtap="previewImage"
+            data-src="{{item.image}}"
+          />
+          <view class="message-text">{{item.content}}</view>
+        </view>
+        <view class="user-avatar">👤</view>
+      </view>
+    </view>
+
+    <!-- 底部占位 -->
+    <view class="message-bottom-spacer" id="msg-bottom"></view>
+  </scroll-view>
+
+  <!-- 底部输入区 -->
+  <view class="input-area">
+    <!-- 调药场景额外提示 -->
+    <view class="drug-warning" wx:if="{{scene === 'drug_adjustment'}}">
+      <text>⚠️ 调药建议仅供参考，请务必遵医嘱</text>
+    </view>
+    <view class="input-row">
+      <!-- 基因报告场景的图片上传按钮 -->
+      <view 
+        class="input-upload-btn" 
+        wx:if="{{scene === 'gene_report'}}"
+        bindtap="uploadGeneReport"
+      >
+        <van-icon name="photograph" size="22" color="#34BFA3" />
+      </view>
+      <input 
+        class="message-input" 
+        placeholder="{{inputPlaceholder}}"
+        value="{{inputValue}}"
+        bindinput="onInputChange"
+        bindconfirm="sendMessage"
+        confirm-type="send"
+        disabled="{{isAIResponding}}"
+        adjust-position="{{true}}"
+        cursor-spacing="20"
+      />
+      <view 
+        class="send-btn {{(inputValue || isAIResponding) ? 'send-btn-active' : ''}}" 
+        bindtap="{{isAIResponding ? 'stopResponse' : 'sendMessage'}}"
+      >
+        <van-icon 
+          name="{{isAIResponding ? 'pause-circle-o' : 'guide-o'}}" 
+          size="24" 
+          color="{{(inputValue || isAIResponding) ? '#fff' : '#ccc'}}" 
+        />
+      </view>
+    </view>
+  </view>
+</view>

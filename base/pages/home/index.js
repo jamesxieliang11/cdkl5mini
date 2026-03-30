@@ -8,7 +8,14 @@ Page({
     recentSeizures: [],              // 近期发作记录
     recentOthers: [],                // 近期其他记录
     noticeText: '欢迎来到希舞之家',   // 通知文案
-    showMonthlyReminder: false       // 是否显示月度汇报提醒
+    showMonthlyReminder: false,      // 是否显示月度汇报提醒
+    showAIActionSheet: false,        // AI 功能选择面板
+    aiActions: [
+      { name: '🧬 AI 解读基因报告', subname: '上传报告，解读突变位点与致病性', scene: 'gene_report' },
+      { name: '📋 AI 生成病历', subname: '汇总记录数据，生成标准化病历', scene: 'medical_record' },
+      { name: '💊 AI 调药参考', subname: '基于用药和发作数据提供参考（仅供参考）', scene: 'drug_adjustment' },
+      { name: '💡 CDKL5 知识问答', subname: '疾病知识、康复训练、日常护理', scene: 'knowledge_qa' }
+    ]
   },
 
   onLoad(options) {
@@ -303,5 +310,26 @@ Page({
     this.loadTodayMedications()
     this.loadRecentSeizures()
     this.loadRecentOthers()
+  },
+
+  // ==================== AI 助手相关 ====================
+
+  // 显示 AI 功能选择面板
+  showAIMenu() {
+    this.setData({ showAIActionSheet: true })
+  },
+
+  // 关闭 AI 功能选择面板
+  onAIActionSheetClose() {
+    this.setData({ showAIActionSheet: false })
+  },
+
+  // 选择 AI 功能
+  onAIActionSelect(event) {
+    const { scene } = event.detail
+    this.setData({ showAIActionSheet: false })
+    wx.navigateTo({
+      url: `/pages/ai-assistant/index?scene=${scene}`
+    })
   }
 })

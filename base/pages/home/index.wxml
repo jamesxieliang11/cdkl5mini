@@ -65,6 +65,12 @@
         custom-class="function-item"
       />
       <van-grid-item 
+        icon="robot-o" 
+        text="AI 助手"
+        bind:click="showAIMenu"
+        custom-class="function-item ai-function-item"
+      />
+      <van-grid-item 
         wx:if="{{isAdmin}}"
         icon="manager-o" 
         text="管理面板"
@@ -326,6 +332,18 @@
     </van-cell-group>
   </view>
 </view>
+
+<!-- AI 功能选择面板 -->
+<van-action-sheet
+  show="{{showAIActionSheet}}"
+  title="🤖 AI 智能助手"
+  actions="{{aiActions}}"
+  bind:close="onAIActionSheetClose"
+  bind:select="onAIActionSelect"
+  cancel-text="取消"
+  bind:cancel="onAIActionSheetClose"
+  description="选择您需要的 AI 功能"
+/>
 
 <!-- 自定义tabbar -->
 <custom-tabbar id="tabbar" />

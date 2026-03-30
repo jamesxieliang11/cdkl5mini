@@ -11,7 +11,8 @@
     "pages/admin/admin",
     "pages/monthly-report/index",
     "pages/admin-monthly-stats/index",
-    "pages/feedback/index"
+    "pages/feedback/index",
+    "pages/ai-assistant/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

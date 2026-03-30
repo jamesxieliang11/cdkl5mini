@@ -9,6 +9,18 @@
     </button>
   </view>
 
+  <!-- AI 生成病历入口 -->
+  <view class="ai-medical-record-entry" bindtap="goToAIMedicalRecord">
+    <view class="ai-entry-left">
+      <text class="ai-entry-icon">🤖</text>
+      <view class="ai-entry-text">
+        <text class="ai-entry-title">AI 生成病历</text>
+        <text class="ai-entry-desc">基于记录数据自动生成标准化病历摘要</text>
+      </view>
+    </view>
+    <text class="ai-entry-arrow">›</text>
+  </view>
+
   <!-- 宝宝信息卡片 -->
   <view class="baby-info-card">
     <view class="card-header">

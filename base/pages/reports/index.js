@@ -588,6 +588,15 @@ Page({
   },
 
   /**
+   * 跳转到 AI 生成病历页面
+   */
+  goToAIMedicalRecord() {
+    wx.navigateTo({
+      url: '/pages/ai-assistant/index?scene=medical_record'
+    })
+  },
+
+  /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh() {
