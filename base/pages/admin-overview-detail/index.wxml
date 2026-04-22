@@ -1,0 +1,166 @@
+<!-- 数据趋势概览页 -->
+<view class="page-header">
+  <view class="header-row">
+    <van-icon name="arrow-left" size="20" color="#fff" bindtap="onBack" />
+    <text class="header-title">数据趋势</text>
+    <view style="width: 40rpx;"></view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view wx:if="{{loading}}" class="loading-container">
+  <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+</view>
+
+<view class="stats-container" wx:if="{{!loading && overview}}">
+
+  <!-- ========== 总览数据 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="chart-trending-o" size="18" color="#34BFA3" />
+      <text class="section-title">数据总览</text>
+    </view>
+    <view class="overview-grid">
+      <view class="overview-item">
+        <text class="overview-value primary">{{overview.totalUsers || 0}}</text>
+        <text class="overview-label">总用户</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value success">{{overview.activeUsers || 0}}</text>
+        <text class="overview-label">活跃用户</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value warning">{{overview.recordCounts.total || 0}}</text>
+        <text class="overview-label">记录总量</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 各类记录分布 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="bar-chart-o" size="18" color="#1989fa" />
+      <text class="section-title">记录分布</text>
+      <van-tag type="primary" size="medium">共{{overview.recordCounts.total || 0}}条</van-tag>
+    </view>
+    <view class="bar-list">
+      <view class="bar-item">
+        <view class="bar-label">⚡ 发作</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{overview.recordCounts.total > 0 ? overview.recordCounts.seizure / overview.recordCounts.total * 100 : 0}}%; background: linear-gradient(90deg, #ee0a24, #c41d7f);"></view>
+        </view>
+        <view class="bar-count">{{overview.recordCounts.seizure || 0}}条 ({{overview.recordCounts.total > 0 ? (overview.recordCounts.seizure / overview.recordCounts.total * 100).toFixed(1) : 0}}%)</view>
+      </view>
+      <view class="bar-item">
+        <view class="bar-label">💊 用药</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{overview.recordCounts.total > 0 ? overview.recordCounts.medication / overview.recordCounts.total * 100 : 0}}%; background: linear-gradient(90deg, #1989fa, #1565c0);"></view>
+        </view>
+        <view class="bar-count">{{overview.recordCounts.medication || 0}}条 ({{overview.recordCounts.total > 0 ? (overview.recordCounts.medication / overview.recordCounts.total * 100).toFixed(1) : 0}}%)</view>
+      </view>
+      <view class="bar-item">
+        <view class="bar-label">📝 其他</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{overview.recordCounts.total > 0 ? overview.recordCounts.other / overview.recordCounts.total * 100 : 0}}%; background: linear-gradient(90deg, #ff976a, #ee6723);"></view>
+        </view>
+        <view class="bar-count">{{overview.recordCounts.other || 0}}条 ({{overview.recordCounts.total > 0 ? (overview.recordCounts.other / overview.recordCounts.total * 100).toFixed(1) : 0}}%)</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 最近月度趋势 ========== -->
+  <view class="section-card" wx:if="{{overview.monthlyTrends && overview.monthlyTrends.length > 0}}">
+    <view class="section-header">
+      <van-icon name="ascending" size="18" color="#FF9800" />
+      <text class="section-title">月度提交趋势</text>
+    </view>
+    <view class="trend-chart">
+      <view class="trend-row" wx:for="{{overview.monthlyTrends}}" wx:key="month">
+        <view class="trend-month">{{item.month}}</view>
+        <view class="trend-bar-area">
+          <view class="trend-bar-track">
+            <view class="trend-bar-fill trend-bar-submitted" style="width: {{maxMonthlySubmitted > 0 ? (item.submitted || 0) / maxMonthlySubmitted * 100 : 0}}%;"></view>
+          </view>
+        </view>
+        <view class="trend-value">{{item.submitted || 0}}份</view>
+      </view>
+    </view>
+    <view class="trend-legend">
+      <view class="legend-item">
+        <view class="legend-dot" style="background: #34BFA3;"></view>
+        <text class="legend-text">提交数</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 月度提交率趋势 ========== -->
+  <view class="section-card" wx:if="{{overview.monthlyTrends && overview.monthlyTrends.length > 0}}">
+    <view class="section-header">
+      <van-icon name="chart-trending-o" size="18" color="#07c160" />
+      <text class="section-title">月度提交率</text>
+    </view>
+    <view class="trend-chart">
+      <view class="trend-row" wx:for="{{overview.monthlyTrends}}" wx:key="month">
+        <view class="trend-month">{{item.month}}</view>
+        <view class="trend-bar-area">
+          <view class="trend-bar-track">
+            <view class="trend-bar-fill trend-bar-rate" style="width: {{item.submissionRate || 0}}%;"></view>
+          </view>
+        </view>
+        <view class="trend-value">{{item.submissionRate || 0}}%</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 月度发作总次数趋势 ========== -->
+  <view class="section-card" wx:if="{{overview.monthlyTrends && overview.monthlyTrends.length > 0}}">
+    <view class="section-header">
+      <van-icon name="warning-o" size="18" color="#EE6363" />
+      <text class="section-title">月度发作次数</text>
+    </view>
+    <view class="trend-chart">
+      <view class="trend-row" wx:for="{{overview.monthlyTrends}}" wx:key="month">
+        <view class="trend-month">{{item.month}}</view>
+        <view class="trend-bar-area">
+          <view class="trend-bar-track">
+            <view class="trend-bar-fill trend-bar-seizure" style="width: {{maxMonthlySeizure > 0 ? (item.seizureTotal || item.seizure_total || 0) / maxMonthlySeizure * 100 : 0}}%;"></view>
+          </view>
+        </view>
+        <view class="trend-value">{{item.seizureTotal || item.seizure_total || 0}}次</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 活跃用户统计 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="friends-o" size="18" color="#9C27B0" />
+      <text class="section-title">用户活跃度</text>
+    </view>
+    <view class="active-stats">
+      <view class="active-row">
+        <text class="active-label">总注册用户</text>
+        <text class="active-value">{{overview.totalUsers || 0}}</text>
+      </view>
+      <view class="active-row">
+        <text class="active-label">活跃用户</text>
+        <text class="active-value highlight">{{overview.activeUsers || 0}}</text>
+      </view>
+      <view class="active-row">
+        <text class="active-label">活跃率</text>
+        <view class="active-rate-bar">
+          <view class="progress-bar">
+            <view class="progress-fill" style="width: {{overview.totalUsers > 0 ? overview.activeUsers / overview.totalUsers * 100 : 0}}%"></view>
+          </view>
+          <text class="active-rate-text">{{overview.totalUsers > 0 ? (overview.activeUsers / overview.totalUsers * 100).toFixed(1) : 0}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>
+
+<!-- 无数据状态 -->
+<view wx:if="{{!loading && !overview}}" class="empty-container">
+  <van-empty description="暂无数据" />
+</view>

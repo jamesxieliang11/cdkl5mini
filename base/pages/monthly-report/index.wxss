@@ -1,7 +1,7 @@
-/* 月度汇报页面样式 */
+/* 月度汇报页面样式 — 适老化优化 */
 
 .page-header {
-  padding: 20rpx 30rpx 10rpx;
+  padding: 24rpx 30rpx 14rpx;
   background: linear-gradient(135deg, #34BFA3, #2da88e);
 }
 
@@ -12,15 +12,16 @@
 }
 
 /* 主页按钮 */
+/* 主页按钮 — 适老化放大 */
 .home-btn {
   display: flex;
   align-items: center;
-  gap: 6rpx;
+  gap: 8rpx;
   background: rgba(255, 255, 255, 0.25);
   border: 1rpx solid rgba(255, 255, 255, 0.4);
   border-radius: 30rpx;
-  padding: 8rpx 20rpx;
-  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  font-size: 28rpx;
   color: #fff;
   line-height: 1.4;
 }
@@ -34,18 +35,18 @@
 }
 
 .home-text {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #fff;
 }
 
 .header-title {
-  font-size: 36rpx;
+  font-size: 40rpx;
   font-weight: bold;
   color: #fff;
 }
 
 .header-subtitle {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: rgba(255, 255, 255, 0.8);
   margin-top: 8rpx;
   padding-left: 36rpx;
@@ -89,13 +90,14 @@
   gap: 8rpx;
 }
 
+/* 步骤圆点 — 适老化放大 */
 .step-dot {
-  width: 48rpx;
-  height: 48rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   background: #e8e8e8;
   color: #999;
-  font-size: 24rpx;
+  font-size: 28rpx;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -113,8 +115,9 @@
   box-shadow: 0 4rpx 12rpx rgba(52, 191, 163, 0.4);
 }
 
+/* 步骤标签文字 — 适老化：22rpx -> 32rpx */
 .step-label {
-  font-size: 22rpx;
+  font-size: 32rpx;
   color: #999;
 }
 
@@ -144,12 +147,12 @@
   padding: 0 30rpx 200rpx;
 }
 
-/* 卡片样式 */
+/* 卡片样式 — 适老化：增加卡片间距 */
 .section-card {
   background: #fff;
   border-radius: 16rpx;
-  padding: 24rpx;
-  margin-bottom: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 32rpx;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
@@ -163,8 +166,9 @@
   margin-bottom: 12rpx;
 }
 
+/* 药物卡片标题 — 适老化：30rpx -> 34rpx */
 .medication-card-title {
-  font-size: 30rpx;
+  font-size: 34rpx;
   font-weight: 600;
   color: #333;
 }
@@ -184,8 +188,9 @@
   border-bottom: 1rpx solid #f7f8fa;
 }
 
+/* 切换标签 — 适老化放大 */
 .toggle-label {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #646566;
 }
 
@@ -198,8 +203,9 @@
   border-bottom: 1rpx solid #f7f8fa;
 }
 
+/* 依从性标签 — 适老化放大 */
 .compliance-label {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #646566;
 }
 
@@ -226,7 +232,7 @@
 }
 
 .add-medication-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #34BFA3;
   font-weight: 500;
 }
@@ -241,8 +247,9 @@
   margin-bottom: 12rpx;
 }
 
+/* 区块标题 — 适老化放大 */
 .section-title {
-  font-size: 30rpx;
+  font-size: 34rpx;
   font-weight: 600;
   color: #333;
 }
@@ -254,7 +261,7 @@
 }
 
 .compared-label {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #646566;
   margin-bottom: 16rpx;
   display: block;
@@ -278,11 +285,12 @@
   padding: 12rpx 0;
 }
 
+/* 里程碑项目 — 适老化增加内边距 */
 .milestone-item {
   display: flex;
   align-items: center;
-  gap: 10rpx;
-  padding: 12rpx 20rpx;
+  gap: 12rpx;
+  padding: 16rpx 24rpx;
   background: #f7f8fa;
   border-radius: 12rpx;
   border: 2rpx solid transparent;
@@ -294,9 +302,10 @@
   border-color: #34BFA3;
 }
 
+/* 里程碑勾选框 — 适老化放大 */
 .milestone-checkbox {
-  width: 36rpx;
-  height: 36rpx;
+  width: 44rpx;
+  height: 44rpx;
   border-radius: 8rpx;
   background: #ddd;
   display: flex;
@@ -309,12 +318,13 @@
   background: #34BFA3;
 }
 
+/* 里程碑标签 — 适老化：26rpx -> 32rpx */
 .milestone-label {
-  font-size: 26rpx;
+  font-size: 32rpx;
   color: #333;
 }
 
-/* 底部操作按钮 */
+/* 底部操作按钮 — 适老化：增大按钮高度和字号 */
 .bottom-actions {
   position: fixed;
   bottom: 0;
@@ -333,4 +343,8 @@
 
 .action-btn {
   flex: 1;
+  --button-default-height: 92rpx !important;
+  --button-default-font-size: 34rpx !important;
+  --button-small-height: 92rpx !important;
+  --button-small-font-size: 34rpx !important;
 }

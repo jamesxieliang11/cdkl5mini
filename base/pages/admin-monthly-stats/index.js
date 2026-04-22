@@ -62,6 +62,14 @@ Page({
       social_imitate: '能模仿动作'
     },
 
+    // 与上月对比数据
+    previousMonthStats: null,
+    comparison: {
+      submissionRateChange: 0,
+      avgSeizureChange: 0,
+      dosageChangeCount: 0
+    },
+
     // 状态
     loading: true,
     loadingDetail: false
@@ -119,12 +127,65 @@ Page({
           'milestone.ranking': milestoneRanking,
           'milestone.totalChecked': statsData.milestone.totalChecked
         })
+
+        // 同时加载上月数据进行对比
+        this.loadPreviousMonthData()
       }
     } catch (error) {
       console.error('加载统计数据失败:', error)
       wx.showToast({ title: '加载失败', icon: 'error' })
     } finally {
       this.setData({ loading: false })
+    }
+  },
+
+  // 获取上一个月的月份字符串
+  getPreviousMonth(currentMonth) {
+    const [year, month] = currentMonth.split('-').map(Number)
+    const prevDate = new Date(year, month - 2, 1)
+    const prevYear = prevDate.getFullYear()
+    const prevMonth = prevDate.getMonth() + 1
+    return `${prevYear}-${String(prevMonth).padStart(2, '0')}`
+  },
+
+  // 加载上月数据并计算对比
+  async loadPreviousMonthData() {
+    const previousMonth = this.getPreviousMonth(this.data.reportMonth)
+
+    try {
+      const result = await this.callMonthlyReportFunction('adminStats', {
+        month: previousMonth
+      })
+
+      if (result.success) {
+        const prevData = result.data
+        const currentOverview = this.data.overview
+        const currentSeizure = this.data.seizure
+
+        // 计算提交率变化（百分点）
+        const prevSubmissionRate = prevData.overview ? prevData.overview.submissionRate : 0
+        const submissionRateChange = Math.round((currentOverview.submissionRate - prevSubmissionRate) * 10) / 10
+
+        // 计算平均发作次数变化
+        const prevAvgCount = prevData.seizure ? prevData.seizure.avgCount : 0
+        const avgSeizureChange = Math.round((currentSeizure.avgCount - prevAvgCount) * 10) / 10
+
+        // 用药调整人数
+        const dosageChangeCount = this.data.medication.totalDosageChanged || 0
+
+        this.setData({
+          previousMonthStats: prevData,
+          comparison: {
+            submissionRateChange,
+            avgSeizureChange,
+            dosageChangeCount
+          }
+        })
+      }
+    } catch (error) {
+      console.error('加载上月数据失败:', error)
+      // 上月数据加载失败不影响主流程，静默处理
+      this.setData({ previousMonthStats: null })
     }
   },
 

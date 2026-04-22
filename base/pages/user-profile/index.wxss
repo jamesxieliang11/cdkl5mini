@@ -1,6 +1,6 @@
-/* 用户信息完善页面样式 */
+/* 用户信息完善页面样式 — 适老化优化 */
 .container {
-  padding: 20rpx;
+  padding: 24rpx;
   background-color: #f7f8fa;
   min-height: 100vh;
 }
@@ -14,20 +14,23 @@
   color: white;
 }
 
+/* 页面标题 — 适老化放大 */
 .title {
-  font-size: 48rpx;
+  font-size: 52rpx;
   font-weight: bold;
   display: block;
-  margin-bottom: 10rpx;
+  margin-bottom: 12rpx;
 }
 
+/* 副标题 — 适老化放大 */
 .subtitle {
-  font-size: 28rpx;
+  font-size: 30rpx;
   opacity: 0.9;
 }
 
+/* 分组区块 — 适老化：增加间距 */
 .section {
-  margin-bottom: 40rpx;
+  margin-bottom: 48rpx;
 }
 
 .section-title {
@@ -42,14 +45,16 @@
   color: #1989fa;
 }
 
+/* 分组标题文字 — 适老化放大 */
 .section-title text {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: bold;
   color: #323233;
 }
 
+/* 分组副标题 — 适老化放大 */
 .section-subtitle {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #969799;
   margin-left: auto;
 }
@@ -99,16 +104,17 @@
   flex: 1;
 }
 
+/* 文件名 — 适老化放大 */
 .file-name {
   display: block;
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #323233;
   margin-bottom: 8rpx;
   word-break: break-all;
 }
 
 .file-size {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #969799;
 }
 
@@ -118,16 +124,19 @@
   padding: 10rpx;
 }
 
+/* 操作按钮区域 — 适老化：增大按钮高度和字号 */
 .actions {
   margin-top: 60rpx;
   padding: 0 20rpx;
 }
 
 .actions .van-button {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   border-radius: 50rpx;
-  height: 88rpx;
-  line-height: 88rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  --button-large-height: 96rpx !important;
+  --button-default-font-size: 34rpx !important;
 }
 
 .skip-btn {
@@ -135,27 +144,31 @@
   border-color: #ebedf0 !important;
 }
 
-/* 表单样式优化 */
+/* 表单样式优化 — 适老化：标签 30rpx，输入值 32rpx */
 .van-field__label {
   color: #646566 !important;
   font-weight: 500 !important;
+  font-size: 30rpx !important;
 }
 
 .van-field__control {
   color: #323233 !important;
+  font-size: 32rpx !important;
 }
 
 .van-cell {
-  padding: 24rpx 32rpx !important;
+  padding: 28rpx 32rpx !important;
 }
 
 .van-cell__title {
   color: #646566 !important;
   font-weight: 500 !important;
+  font-size: 30rpx !important;
 }
 
 .van-cell__value {
   color: #323233 !important;
+  font-size: 32rpx !important;
 }
 
 /* 必填项标识 */

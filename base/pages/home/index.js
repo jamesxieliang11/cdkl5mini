@@ -1,5 +1,5 @@
 const app = getApp()
-const { listMedicationRecords, listSeizureRecords, listOtherRecords, checkMonthlyReportSubmitted } = require('../../utils/database.js')
+const { listMedicationRecords, listSeizureRecords, listOtherRecords, checkMonthlyReportSubmitted, checkQuestionnaireSubmitted } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -9,6 +9,7 @@ Page({
     recentOthers: [],                // 近期其他记录
     noticeText: '欢迎来到希舞之家',   // 通知文案
     showMonthlyReminder: false,      // 是否显示月度汇报提醒
+    showQuestionnaireReminder: false,  // 是否显示问卷填写提醒
     showAIActionSheet: false,        // AI 功能选择面板
     aiActions: [
       { name: '🧬 AI 解读基因报告', subname: '上传报告，解读突变位点与致病性', scene: 'gene_report' },
@@ -37,6 +38,7 @@ Page({
   onShow() {
     this.refreshAllData()
     this.checkMonthlyReportStatus()
+    this.checkQuestionnaireStatus()
     this.updateTabBarState()
     this.checkAdminRole()
   },
@@ -257,6 +259,25 @@ Page({
     } catch (error) {
       console.warn('检查月度汇报状态失败:', error)
     }
+  },
+
+  // 检查问卷填写状态
+  async checkQuestionnaireStatus() {
+    try {
+      const result = await checkQuestionnaireSubmitted()
+      if (result && result.data) {
+        this.setData({ showQuestionnaireReminder: !result.data.submitted })
+      }
+    } catch (error) {
+      console.warn('检查问卷状态失败:', error)
+    }
+  },
+
+  // 导航到家庭问卷
+  goToQuestionnaire() {
+    wx.navigateTo({
+      url: '/pages/family-questionnaire/index'
+    })
   },
 
   // 导航到月度汇报

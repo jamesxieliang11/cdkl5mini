@@ -1,16 +1,17 @@
-/* pages/reports/index.wxss */
+/* pages/reports/index.wxss — 适老化优化 */
 
-/* AI 生成病历入口 */
+/* AI 生成病历入口 — 适老化：更大更醒目 */
 .ai-medical-record-entry {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 20rpx 30rpx;
-  padding: 24rpx 28rpx;
+  margin: 24rpx 30rpx;
+  padding: 32rpx 32rpx;
   background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
   border-radius: 20rpx;
   border: 2rpx solid rgba(52, 191, 163, 0.2);
   box-shadow: 0 4rpx 16rpx rgba(52, 191, 163, 0.15);
+  min-height: 96rpx;
 }
 
 .ai-entry-left {
@@ -30,19 +31,21 @@
   gap: 4rpx;
 }
 
+/* AI入口标题 — 适老化放大 */
 .ai-entry-title {
-  font-size: 30rpx;
+  font-size: 34rpx;
   font-weight: 600;
   color: #2e7d32;
 }
 
+/* AI入口描述 — 适老化放大 */
 .ai-entry-desc {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #66bb6a;
 }
 
 .ai-entry-arrow {
-  font-size: 40rpx;
+  font-size: 48rpx;
   color: #66bb6a;
   font-weight: 300;
 }
@@ -63,22 +66,24 @@
   align-items: center;
 }
 
+/* 页面标题 — 适老化放大 */
 .page-title {
-  font-size: 36rpx;
+  font-size: 40rpx;
   font-weight: bold;
 }
 
 /* 返回主页按钮 */
+/* 返回主页按钮 — 适老化放大 */
 .home-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 2rpx solid rgba(255, 255, 255, 0.3);
   border-radius: 50rpx;
-  padding: 16rpx 24rpx;
+  padding: 16rpx 28rpx;
   display: flex;
   align-items: center;
   gap: 8rpx;
   color: white;
-  font-size: 24rpx;
+  font-size: 28rpx;
   line-height: 1;
   transition: all 0.3s ease;
 }
@@ -93,7 +98,7 @@
 }
 
 .home-text {
-  font-size: 24rpx;
+  font-size: 28rpx;
   font-weight: 500;
 }
 
@@ -113,19 +118,21 @@
   margin-bottom: 30rpx;
 }
 
+/* 卡片标题 — 适老化放大 */
 .card-title {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: bold;
   color: #333;
 }
 
+/* 编辑按钮 — 适老化放大 */
 .edit-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 50rpx;
-  padding: 12rpx 24rpx;
-  font-size: 24rpx;
+  padding: 14rpx 28rpx;
+  font-size: 28rpx;
 }
 
 .baby-info-content {
@@ -139,15 +146,16 @@
   align-items: center;
 }
 
+/* 信息标签 — 适老化放大 */
 .info-label {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #666;
-  width: 160rpx;
+  width: 180rpx;
   flex-shrink: 0;
 }
 
 .info-value {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #333;
   font-weight: 500;
 }
@@ -164,8 +172,9 @@
   margin-bottom: 20rpx;
 }
 
+/* 区块标题 — 适老化放大 */
 .section-title {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: bold;
   color: #333;
 }
@@ -177,11 +186,12 @@
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
 }
 
+/* 时间过滤器 — 适老化放大 */
 .picker-display {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
 }
 
@@ -244,14 +254,16 @@
   gap: 8rpx;
 }
 
+/* 概览卡片数字 — 适老化：36rpx -> 48rpx */
 .card-number {
-  font-size: 36rpx;
+  font-size: 48rpx;
   font-weight: bold;
   color: #333;
 }
 
+/* 概览卡片标签 — 适老化：24rpx -> 30rpx */
 .card-label {
-  font-size: 24rpx;
+  font-size: 30rpx;
   color: #666;
 }
 
@@ -260,24 +272,30 @@
   margin: 20rpx;
 }
 
-/* 统计类型选择 */
+/* 统计类型选择 — 适老化放大 */
 .stats-tabs {
   display: flex;
   background: white;
   border-radius: 12rpx;
-  padding: 6rpx;
+  padding: 8rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
+/* Tab项 — 适老化：高度 72rpx，字号 30rpx */
 .tab-item {
   flex: 1;
   text-align: center;
-  padding: 16rpx 20rpx;
-  font-size: 26rpx;
+  padding: 20rpx 20rpx;
+  font-size: 30rpx;
   color: #666;
   border-radius: 8rpx;
   transition: all 0.3s ease;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72rpx;
 }
 
 .tab-item.active {
@@ -308,8 +326,9 @@
   margin-bottom: 30rpx;
 }
 
+/* 图表标题 — 适老化放大 */
 .chart-title {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: bold;
   color: #333;
 }
@@ -319,12 +338,18 @@
   gap: 20rpx;
 }
 
+/* 图表周期选择按钮 — 适老化：放大到 100x64rpx */
 .period-item {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
-  padding: 8rpx 16rpx;
+  padding: 14rpx 28rpx;
   border-radius: 20rpx;
   transition: all 0.3s ease;
+  min-width: 100rpx;
+  min-height: 64rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .period-item.active {
@@ -391,8 +416,9 @@
   background: linear-gradient(to top, #96ceb4 0%, #27ae60 100%);
 }
 
+/* 图表底部标签 — 适老化：20rpx -> 24rpx */
 .bar-label {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #666;
 }
 
@@ -410,8 +436,9 @@
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
+/* 洞察标题 — 适老化放大 */
 .insight-title {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: bold;
   color: #333;
   margin-bottom: 20rpx;
@@ -447,15 +474,16 @@
   background: #96ceb4;
 }
 
+/* 洞察标签 — 适老化放大 */
 .insight-label {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #333;
   font-weight: 500;
   flex: 1;
 }
 
 .insight-value {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
 }
 
@@ -467,8 +495,9 @@
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
+/* 时间轴标题 — 适老化放大 */
 .timeline-title {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: bold;
   color: #333;
   margin-bottom: 20rpx;
@@ -513,13 +542,14 @@
   flex: 1;
 }
 
+/* 时间轴时间 — 适老化放大 */
 .timeline-time {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #999;
 }
 
 .timeline-desc {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #333;
   line-height: 1.4;
 }

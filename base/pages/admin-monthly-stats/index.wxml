@@ -62,6 +62,31 @@
     </view>
   </view>
 
+  <!-- ========== 与上月对比 ========== -->
+  <view class="section-card comparison-card" wx:if="{{previousMonthStats}}">
+    <view class="section-header">
+      <text class="section-title">📈 与上月对比</text>
+    </view>
+    <view class="comparison-grid">
+      <view class="comparison-item">
+        <view class="comparison-value {{comparison.submissionRateChange >= 0 ? 'positive' : 'negative'}}">
+          {{comparison.submissionRateChange > 0 ? '+' : ''}}{{comparison.submissionRateChange}}%
+        </view>
+        <view class="comparison-label">提交率变化</view>
+      </view>
+      <view class="comparison-item">
+        <view class="comparison-value {{comparison.avgSeizureChange <= 0 ? 'positive' : 'negative'}}">
+          {{comparison.avgSeizureChange > 0 ? '+' : ''}}{{comparison.avgSeizureChange}}
+        </view>
+        <view class="comparison-label">人均发作变化</view>
+      </view>
+      <view class="comparison-item">
+        <view class="comparison-value">{{comparison.dosageChangeCount}}</view>
+        <view class="comparison-label">用药调整人数</view>
+      </view>
+    </view>
+  </view>
+
   <!-- ========== 用药统计 ========== -->
   <view class="section-card">
     <view class="section-header">
@@ -70,19 +95,14 @@
       <van-tag type="primary" size="medium">{{medication.totalEntries}}条记录</van-tag>
     </view>
 
-    <!-- 药物使用排行 -->
-    <view class="ranking-list" wx:if="{{medication.ranking.length > 0}}">
-      <view class="ranking-item" wx:for="{{medication.ranking}}" wx:key="name">
-        <view class="ranking-left">
-          <text class="ranking-index">{{index + 1}}</text>
-          <text class="ranking-name">{{item.name}}</text>
+    <!-- 药物使用排行（柱状条可视化） -->
+    <view class="med-bar-list" wx:if="{{medication.ranking.length > 0}}">
+      <view class="med-bar-item" wx:for="{{medication.ranking}}" wx:key="name">
+        <view class="med-bar-label">{{item.name}}</view>
+        <view class="med-bar-track">
+          <view class="med-bar-fill" style="width: {{item.percentage}}%; background: #34BFA3;"></view>
         </view>
-        <view class="ranking-right">
-          <view class="mini-bar-wrapper">
-            <view class="mini-bar" style="width: {{item.percentage}}%"></view>
-          </view>
-          <text class="ranking-count">{{item.count}}人 ({{item.percentage}}%)</text>
-        </view>
+        <view class="med-bar-count">{{item.count}}人 ({{item.percentage}}%)</view>
       </view>
     </view>
     <view wx:else class="empty-hint">暂无用药数据</view>
@@ -120,13 +140,22 @@
       </view>
     </view>
 
-    <!-- 与上月对比分布 -->
+    <!-- 与上月对比分布（颜色编码） -->
     <view class="sub-section">
       <text class="sub-title">与上月对比</text>
-      <view class="tag-row">
-        <van-tag type="success" size="medium" custom-class="stat-tag">📉 减少: {{seizure.compared.better}}</van-tag>
-        <van-tag type="primary" size="medium" custom-class="stat-tag">➡️ 持平: {{seizure.compared.same}}</van-tag>
-        <van-tag type="danger" size="medium" custom-class="stat-tag">📈 增加: {{seizure.compared.worse}}</van-tag>
+      <view class="trend-list">
+        <view class="trend-item trend-better">
+          <view class="trend-dot" style="background: #27ae60"></view>
+          <text>减少 {{seizure.compared.better}}人</text>
+        </view>
+        <view class="trend-item trend-same">
+          <view class="trend-dot" style="background: #f39c12"></view>
+          <text>持平 {{seizure.compared.same}}人</text>
+        </view>
+        <view class="trend-item trend-worse">
+          <view class="trend-dot" style="background: #e74c3c"></view>
+          <text>增加 {{seizure.compared.worse}}人</text>
+        </view>
       </view>
     </view>
 
@@ -150,17 +179,15 @@
       <van-tag type="success" size="medium">{{milestone.totalChecked}}项达成</van-tag>
     </view>
 
-    <view class="milestone-stats" wx:if="{{milestone.ranking.length > 0}}">
-      <view class="milestone-stat-item" wx:for="{{milestone.ranking}}" wx:key="id">
-        <view class="milestone-stat-left">
-          <text class="milestone-stat-label">{{item.label}}</text>
+    <!-- 里程碑 TOP10 排行榜 -->
+    <view class="milestone-ranking" wx:if="{{milestone.ranking.length > 0}}">
+      <view class="milestone-item" wx:for="{{milestone.ranking}}" wx:key="id" wx:if="{{index < 10}}">
+        <view class="milestone-rank">{{index + 1}}</view>
+        <view class="milestone-label">{{item.label}}</view>
+        <view class="milestone-bar-track">
+          <view class="milestone-bar-fill" style="width: {{item.percentage}}%; background: linear-gradient(90deg, #34BFA3, #2da88e);"></view>
         </view>
-        <view class="milestone-stat-right">
-          <view class="mini-bar-wrapper green">
-            <view class="mini-bar green" style="width: {{item.percentage}}%"></view>
-          </view>
-          <text class="milestone-stat-count">{{item.count}}人 ({{item.percentage}}%)</text>
-        </view>
+        <view class="milestone-count">{{item.count}}人</view>
       </view>
     </view>
     <view wx:else class="empty-hint">暂无里程碑数据</view>

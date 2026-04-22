@@ -75,24 +75,34 @@ const SYSTEM_PROMPTS = {
 
 ⚠️ 重要声明：你的解读仅供参考，不构成医学诊断。建议家长将报告带给专业的遗传学医生进行确认和解读。`,
 
-  medical_record: `你是一位专业的病历整理助手，专门帮助 CDKL5 综合征患儿家庭整理和生成标准化病历摘要。
+  medical_record: `你是一名资深儿童神经科医生的助手。请根据以下患者数据生成一份简洁的门诊病历摘要。
 
-你的工作原则：
-1. 根据提供的发作记录、用药记录、其他记录等数据，生成结构化的病历摘要
-2. 病历格式应包含以下部分：
-   - **基本信息**：患儿姓名、年龄、体重等
-   - **主诉**：主要症状和就诊原因概述
-   - **现病史**：按时间线整理发作情况、用药变化等
-   - **用药方案**：当前使用的所有抗癫痫药物及剂量
-   - **发作情况统计**：发作类型、频率、持续时间等统计
-   - **副作用记录**：用药期间出现的副作用
-   - **其他重要记录**：康复训练、检查结果等
-   - **病情趋势**：整体病情变化趋势分析
-3. 语言要专业、简洁，符合医学病历书写规范
-4. 对数据进行合理的统计和归纳，突出重要信息
-5. 如果数据不完整，标注"信息待补充"而非编造
+## 输出要求
+- 总字数控制在600-800字
+- 严格按照以下格式分段输出
+- 关键数据前置（发作频率、当前用药）
+- 使用专业医学术语，数据用具体数字
 
-生成的病历摘要将帮助家长在就医时更高效地与医生沟通。`,
+## 输出格式
+
+### 患者信息
+姓名/性别/年龄/体重（一行）
+
+### 主诉
+1-2句概括（如：CDKL5基因突变相关癫痫，近X月发作Y次/月，现服Z种抗癫痫药物）
+
+### 现病史
+- 癫痫发作：近N月月均发作X次，主要类型为XX，典型持续X分钟，趋势为（增加/减少/稳定）
+- 当前用药（表格）：
+| 药物 | 剂量 | 频次 | 依从性 |
+- 近期调药：XX
+- 发育状况：已达里程碑XX，近期新进展XX
+
+### 既往史
+基因检测 / 首次发作年龄 / 伴随症状（简要）
+
+### 评估与建议
+基于数据趋势的2-3条简要建议`,
 
   drug_adjustment: `你是一位药学参考助手，专注于 CDKL5 综合征（CDKL5 缺乏症）的抗癫痫药物治疗参考。
 
@@ -195,6 +205,237 @@ async function streamChat(systemPrompt, messages, onChunk, onComplete, onError) 
     }
     throw error
   }
+}
+
+// ==================== 里程碑 ID 到中文标签映射 ====================
+
+const MILESTONE_LABELS = {
+  gross_head_control: '能抬头',
+  gross_roll_over: '能翻身',
+  gross_sit: '能独坐',
+  gross_crawl: '能爬行',
+  gross_stand_support: '能扶站',
+  gross_stand_alone: '能独站',
+  gross_walk_support: '能扶走',
+  gross_walk_alone: '能独走',
+  fine_grasp: '能抓握',
+  fine_transfer: '能传递',
+  fine_pincer: '能拇食指捏',
+  fine_spoon: '能用勺子',
+  lang_eye_contact: '有眼神交流',
+  lang_vocalize: '能发出声音',
+  lang_single_word: '能说单字',
+  lang_phrases: '能说词组',
+  lang_understand: '能理解简单指令',
+  lang_recognize_family: '能认识家人',
+  social_smile: '有社交微笑',
+  social_stranger_anxiety: '能认生',
+  social_separation_anxiety: '有分离焦虑',
+  social_imitate: '能模仿动作'
+}
+
+// ==================== 数据预处理辅助函数 ====================
+
+/**
+ * 汇总发作统计
+ * @param {Array} records 发作记录列表
+ * @param {number} days 统计天数
+ * @returns {Object} 统计摘要
+ */
+function summarizeSeizureStats(records, days) {
+  if (!records || records.length === 0) {
+    return { summary: `近${days}天内暂无发作记录`, total: 0 }
+  }
+
+  const total = records.length
+  const months = Math.max(days / 30, 1)
+  const monthlyAvg = (total / months).toFixed(1)
+
+  // 类型分布（百分比）
+  const typeCount = {}
+  let totalDuration = 0
+  let durationCount = 0
+  records.forEach(record => {
+    const seizureType = record.seizure_type || '未知类型'
+    typeCount[seizureType] = (typeCount[seizureType] || 0) + 1
+    const dur = parseFloat(record.duration)
+    if (!isNaN(dur) && dur > 0) {
+      totalDuration += dur
+      durationCount++
+    }
+  })
+
+  const typeDistribution = Object.entries(typeCount)
+    .sort((a, b) => b[1] - a[1])
+    .map(([type, count]) => `${type} ${Math.round(count / total * 100)}%`)
+    .join('，')
+
+  const avgDuration = durationCount > 0 ? (totalDuration / durationCount).toFixed(1) : '未知'
+
+  // 趋势分析：对比前半期和后半期的频率
+  const midIndex = Math.floor(records.length / 2)
+  // 记录按时间排序（假设已排序，最新在前）
+  const sortedRecords = [...records].sort((a, b) =>
+    new Date(b.record_time).getTime() - new Date(a.record_time).getTime()
+  )
+  const recentHalf = sortedRecords.slice(0, midIndex).length
+  const earlierHalf = sortedRecords.slice(midIndex).length
+  let trend = '稳定'
+  if (total >= 4) {
+    const ratio = recentHalf / Math.max(earlierHalf, 1)
+    if (ratio > 1.3) trend = '增加'
+    else if (ratio < 0.7) trend = '减少'
+  }
+
+  const summary = `发作统计（近${days}天）：
+- 总计${total}次，月均${monthlyAvg}次
+- 类型分布：${typeDistribution}
+- 平均持续时间：${avgDuration}分钟
+- 趋势：${trend}`
+
+  return { summary, total, monthlyAvg, typeDistribution, avgDuration, trend }
+}
+
+/**
+ * 汇总当前用药方案
+ * @param {Array} medRecords 用药记录
+ * @param {Array} monthlyReports 月度汇报（可为空）
+ * @returns {Object} 用药摘要
+ */
+function summarizeCurrentMedications(medRecords, monthlyReports) {
+  // 优先从最新月度汇报中提取用药方案（数据更结构化）
+  let medications = []
+  let recentChanges = '无近期调药记录'
+
+  if (monthlyReports && monthlyReports.length > 0) {
+    // 按月份降序，取最新的
+    const sorted = [...monthlyReports].sort((a, b) =>
+      (b.report_month || '').localeCompare(a.report_month || '')
+    )
+    const latest = sorted[0]
+    if (latest.medications && latest.medications.length > 0) {
+      medications = latest.medications.map(med => ({
+        name: med.medication_name || med.name || '未知药物',
+        dosage: med.dosage || '',
+        unit: med.unit || '',
+        frequency: med.frequency || '',
+        compliance: med.compliance || '',
+        sideEffects: med.side_effects || '',
+        dosageChanged: med.dosage_changed || false
+      }))
+    }
+
+    // 提取近期调药信息
+    const changes = []
+    sorted.slice(0, 3).forEach(report => {
+      if (report.medications) {
+        report.medications.forEach(med => {
+          if (med.dosage_changed) {
+            changes.push(`${report.report_month} ${med.medication_name || med.name}剂量调整`)
+          }
+        })
+      }
+    })
+    if (changes.length > 0) recentChanges = changes.join('；')
+  }
+
+  // 如果月度汇报无数据，从用药记录中提取
+  if (medications.length === 0 && medRecords && medRecords.length > 0) {
+    const latestRecord = medRecords[0] // 假设按时间降序
+    if (latestRecord.medications) {
+      medications = latestRecord.medications.map(med => ({
+        name: med.medication_name || '未知药物',
+        dosage: med.dosage || '',
+        unit: med.unit || '',
+        frequency: '',
+        compliance: '',
+        sideEffects: '',
+        dosageChanged: false
+      }))
+    }
+    // 提取副作用
+    const sideEffectsSet = new Set()
+    medRecords.slice(0, 5).forEach(record => {
+      if (record.side_effects) {
+        record.side_effects.split(/[,、，]/).forEach(effect => {
+          const trimmed = effect.trim()
+          if (trimmed && trimmed !== '无副作用') sideEffectsSet.add(trimmed)
+        })
+      }
+    })
+    if (sideEffectsSet.size > 0) {
+      medications.forEach(med => {
+        if (!med.sideEffects) med.sideEffects = Array.from(sideEffectsSet).join('、')
+      })
+    }
+  }
+
+  if (medications.length === 0) {
+    return { summary: '暂无用药记录', recentChanges, medications: [] }
+  }
+
+  // 生成表格格式摘要
+  const complianceMap = { good: '好', fair: '一般', poor: '差' }
+  let table = '当前用药方案：\n| 药物 | 剂量 | 频次 | 依从性 | 副作用 |\n'
+  medications.forEach(med => {
+    const compliance = complianceMap[med.compliance] || med.compliance || '-'
+    table += `| ${med.name} | ${med.dosage}${med.unit} | ${med.frequency || '-'} | ${compliance} | ${med.sideEffects || '无'} |\n`
+  })
+  table += `\n近期调药：${recentChanges}`
+
+  return { summary: table, recentChanges, medications }
+}
+
+/**
+ * 汇总发育里程碑
+ * @param {Array} monthlyReports 月度汇报列表
+ * @returns {string} 里程碑摘要
+ */
+function summarizeMilestones(monthlyReports) {
+  if (!monthlyReports || monthlyReports.length === 0) {
+    return '暂无里程碑数据'
+  }
+
+  // 按月份降序排列
+  const sorted = [...monthlyReports].sort((a, b) =>
+    (b.report_month || '').localeCompare(a.report_month || '')
+  )
+
+  const latest = sorted[0]
+  const milestones = latest.milestones || {}
+  const checkedItems = milestones.checked_items || []
+  const newAchievements = milestones.new_achievements || ''
+
+  // 将 ID 转换为中文标签
+  const checkedLabels = checkedItems
+    .map(id => MILESTONE_LABELS[id] || id)
+    .join('、')
+
+  // 对比前后两期，找出新增里程碑
+  let newMilestones = ''
+  if (sorted.length >= 2) {
+    const previous = sorted[1]
+    const prevChecked = (previous.milestones?.checked_items) || []
+    const newItems = checkedItems.filter(id => !prevChecked.includes(id))
+    if (newItems.length > 0) {
+      newMilestones = newItems.map(id => MILESTONE_LABELS[id] || id).join('、')
+    }
+  }
+
+  let summary = `发育里程碑：${checkedLabels || '暂无已达里程碑'}`
+  if (newMilestones) {
+    summary += `\n近期新进展：${newMilestones}`
+  } else if (newAchievements) {
+    summary += `\n近期新进展：${newAchievements}`
+  } else {
+    summary += `\n近期新进展：暂无新进展`
+  }
+
+  if (milestones.concerns) {
+    summary += `\n关注事项：${milestones.concerns}`
+  }
+
+  return summary
 }
 
 // ==================== 上下文数据构建 ====================
@@ -365,28 +606,51 @@ async function fetchBabyInfo() {
  * @param {number} days - 时间范围（天数）
  */
 async function buildMedicalRecordContext(days = 30) {
-  const [babyInfo, seizureSummary, medicationSummary, otherSummary] = await Promise.all([
+  // 并行获取所有数据源（新增月度汇报）
+  const [babyInfoResult, seizureResult, medicationResult, otherSummary, monthlyReportResult] = await Promise.all([
     fetchBabyInfo(),
-    fetchSeizureSummary(days),
-    fetchMedicationSummary(days),
-    fetchOtherRecordsSummary(days)
+    listSeizureRecords(200, 0).catch(() => ({ success: false })),
+    listMedicationRecords(200, 0).catch(() => ({ success: false })),
+    fetchOtherRecordsSummary(days),
+    listMonthlyReports(10, 0).catch(() => ({ success: false }))
   ])
 
-  return `请根据以下患儿信息和记录数据，生成一份标准化的病历摘要：
+  // 过滤时间范围内的发作记录
+  const cutoffTime = Date.now() - days * 24 * 60 * 60 * 1000
+  const allSeizureRecords = (seizureResult.success && seizureResult.data?.records) || []
+  const recentSeizureRecords = allSeizureRecords.filter(
+    record => new Date(record.record_time).getTime() >= cutoffTime
+  )
 
-【患儿基本信息】
-${babyInfo}
+  // 过滤时间范围内的用药记录
+  const allMedRecords = (medicationResult.success && medicationResult.data?.records) || []
+  const recentMedRecords = allMedRecords.filter(
+    record => new Date(record.record_time).getTime() >= cutoffTime
+  )
 
-【发作记录】
-${seizureSummary}
+  // 获取最近3个月的月度汇报
+  const monthlyReports = (monthlyReportResult.success && monthlyReportResult.data?.records) || []
+  const recentMonthlyReports = monthlyReports.slice(0, 3)
 
-【用药记录】
-${medicationSummary}
+  // 使用辅助函数预处理数据
+  const seizureStats = summarizeSeizureStats(recentSeizureRecords, days)
+  const medSummary = summarizeCurrentMedications(recentMedRecords, recentMonthlyReports)
+  const milestonesSummary = summarizeMilestones(recentMonthlyReports)
+
+  // 构建统计摘要+关键数据表格格式的上下文
+  return `请根据以下患者数据生成一份简洁的门诊病历摘要：
+
+=== 患者数据 ===
+基本信息：${babyInfoResult}
+
+${seizureStats.summary}
+
+${medSummary.summary}
+
+${milestonesSummary}
 
 【其他记录】
-${otherSummary}
-
-请按照标准病历格式生成摘要，包含：基本信息、主诉、现病史、用药方案、发作情况统计、副作用记录、其他重要记录、病情趋势分析。`
+${otherSummary}`
 }
 
 /**

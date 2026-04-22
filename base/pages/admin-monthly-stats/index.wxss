@@ -428,3 +428,169 @@
   font-size: 26rpx;
   color: #999;
 }
+
+/* ========== 与上月对比 ========== */
+.comparison-card {
+  border-left: 6rpx solid #34BFA3;
+}
+
+.comparison-grid {
+  display: flex;
+  justify-content: space-around;
+  padding: 16rpx 0;
+}
+
+.comparison-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.comparison-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+.comparison-value.positive {
+  color: #27ae60;
+}
+
+.comparison-value.negative {
+  color: #e74c3c;
+}
+
+.comparison-label {
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+}
+
+/* ========== 用药柱状条 ========== */
+.med-bar-list {
+  padding: 8rpx 0;
+}
+
+.med-bar-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.med-bar-label {
+  width: 150rpx;
+  font-size: 26rpx;
+  flex-shrink: 0;
+  color: #333;
+}
+
+.med-bar-track {
+  flex: 1;
+  height: 28rpx;
+  background: #f0f0f0;
+  border-radius: 14rpx;
+  overflow: hidden;
+  margin: 0 16rpx;
+}
+
+.med-bar-fill {
+  height: 100%;
+  border-radius: 14rpx;
+  transition: width 0.3s;
+  min-width: 4rpx;
+}
+
+.med-bar-count {
+  font-size: 24rpx;
+  color: #666;
+  flex-shrink: 0;
+  width: 160rpx;
+  text-align: right;
+}
+
+/* ========== 发作趋势颜色编码 ========== */
+.trend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.trend-item {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.trend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.trend-item.trend-better {
+  color: #27ae60;
+}
+
+.trend-item.trend-same {
+  color: #f39c12;
+}
+
+.trend-item.trend-worse {
+  color: #e74c3c;
+}
+
+/* ========== 里程碑排行榜 ========== */
+.milestone-ranking {
+  padding: 4rpx 0;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.milestone-rank {
+  width: 48rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #34BFA3;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.milestone-label {
+  width: 180rpx;
+  font-size: 26rpx;
+  flex-shrink: 0;
+  color: #333;
+}
+
+.milestone-bar-track {
+  flex: 1;
+  height: 24rpx;
+  background: #f0f0f0;
+  border-radius: 12rpx;
+  overflow: hidden;
+  margin: 0 12rpx;
+}
+
+.milestone-bar-fill {
+  height: 100%;
+  border-radius: 12rpx;
+  min-width: 4rpx;
+}
+
+.milestone-count {
+  font-size: 24rpx;
+  color: #666;
+  flex-shrink: 0;
+  min-width: 60rpx;
+  text-align: right;
+}

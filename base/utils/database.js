@@ -770,6 +770,95 @@ function getFeedback(feedbackId) {
   })
 }
 
+// ==================== 问卷相关函数 ====================
+
+/**
+ * 调用问卷云函数
+ * @param {string} action 操作类型
+ * @param {Object} params 参数对象
+ * @returns {Promise} 返回操作结果
+ */
+function callQuestionnaireFunction(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'questionnaire',
+      data: {
+        action: action,
+        ...params
+      },
+      success: (res) => {
+        console.log('问卷云函数调用结果:', res)
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          const errorMsg = res.result ? res.result.message : '操作失败'
+          reject(new Error(errorMsg))
+        }
+      },
+      fail: (error) => {
+        console.error('调用问卷云函数失败:', error)
+        reject(error)
+      }
+    })
+  })
+}
+
+/**
+ * 提交/更新问卷
+ * @param {Object} formData 问卷数据
+ * @param {string} status 状态（draft/submitted）
+ * @returns {Promise} 返回提交结果
+ */
+function submitQuestionnaire(formData, status = 'submitted') {
+  return callQuestionnaireFunction('submit', {
+    data: formData,
+    status: status,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 获取当前用户的问卷
+ * @returns {Promise} 返回问卷数据
+ */
+function getQuestionnaire() {
+  return callQuestionnaireFunction('get', {})
+}
+
+/**
+ * 检查当前用户是否已提交问卷
+ * @returns {Promise} 返回 { submitted: boolean }
+ */
+function checkQuestionnaireSubmitted() {
+  return callQuestionnaireFunction('check', {})
+}
+
+/**
+ * 获取问卷管理统计数据
+ * @returns {Promise} 返回问卷统计
+ */
+function getQuestionnaireAdminStats() {
+  return callQuestionnaireFunction('adminStats', {})
+}
+
+/**
+ * 获取问卷管理列表
+ * @param {number} pageSize 每页数量
+ * @param {number} pageIndex 页码
+ * @returns {Promise} 返回问卷列表
+ */
+function getQuestionnaireAdminList(pageSize = 100, pageIndex = 0) {
+  return callQuestionnaireFunction('list', { pageSize, pageIndex })
+}
+
+/**
+ * 获取管理员概览统计数据
+ * @returns {Promise} 返回概览统计
+ */
+function getAdminOverview() {
+  return callMonthlyReportFunction('adminOverview', {})
+}
+
 // 使用 CommonJS 语法导出函数
 module.exports = {
   initDatabase,
@@ -817,5 +906,14 @@ module.exports = {
   // 反馈意见相关函数
   createFeedback,
   listFeedbacks,
-  getFeedback
+  getFeedback,
+  // 问卷相关函数
+  submitQuestionnaire,
+  getQuestionnaire,
+  checkQuestionnaireSubmitted,
+  // 问卷管理统计函数
+  getQuestionnaireAdminStats,
+  getQuestionnaireAdminList,
+  // 管理员概览函数
+  getAdminOverview
 }

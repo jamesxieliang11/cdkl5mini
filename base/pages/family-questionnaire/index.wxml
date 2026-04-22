@@ -1,0 +1,454 @@
+<!-- 自定义导航栏 -->
+<view class="status-bar"></view>
+<view class="nav-bar">
+  <view class="nav-back" bindtap="onBack">
+    <van-icon name="arrow-left" size="20" color="#333" />
+  </view>
+  <view class="nav-title">{{isEdit ? '编辑' : '填写'}}家庭基础信息</view>
+  <view class="nav-action" bindtap="saveDraftToCloud">
+    <text class="save-draft-text">保存草稿</text>
+  </view>
+</view>
+
+<!-- 进度条 -->
+<view class="progress-section">
+  <view class="step-info">
+    <text class="step-label">第 {{currentStep}}/{{totalSteps}} 步</text>
+    <text class="step-title">{{stepTitle}}</text>
+  </view>
+  <van-progress percentage="{{progressPercent}}" color="#34BFA3" stroke-width="6" show-pivot="{{false}}" />
+</view>
+
+<!-- 加载中 -->
+<view class="loading-mask" wx:if="{{loading}}">
+  <van-icon name="loading" size="40" color="#34BFA3" />
+  <text class="loading-text">加载中...</text>
+</view>
+
+<!-- ==================== Step 1: 基本信息 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 1}}">
+  <view class="section-card">
+    <view class="card-title">👶 孩子与家长基本信息</view>
+
+    <van-cell-group>
+      <van-field
+        value="{{formData.child_name}}"
+        label="孩子姓名"
+        placeholder="请输入孩子姓名"
+        required
+        data-field="child_name"
+        bind:input="onFieldInput"
+      />
+
+      <van-field
+        value="{{formData.wechat_group_nickname}}"
+        label="微信群昵称"
+        placeholder="须与微信群备注名一致"
+        required
+        data-field="wechat_group_nickname"
+        bind:input="onFieldInput"
+      />
+
+      <view class="form-item">
+        <view class="form-label required">孩子性别</view>
+        <van-radio-group value="{{formData.child_gender}}" direction="horizontal" data-field="child_gender" bind:change="onRadioChange">
+          <van-radio wx:for="{{options.gender}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+        </van-radio-group>
+      </view>
+
+      <picker mode="date" value="{{formData.birth_date}}" end="{{currentDate}}" data-field="birth_date" bind:change="onDateChange">
+        <van-cell title="出生日期" value="{{formData.birth_date || '请选择'}}" is-link required />
+      </picker>
+
+      <picker mode="region" data-field="region" bind:change="onRegionChange">
+        <van-cell title="所在地区" value="{{formData.region || '请选择省市'}}" is-link required />
+      </picker>
+
+      <van-field
+        value="{{formData.parent_name}}"
+        label="家长姓名"
+        placeholder="进群家属姓名"
+        required
+        data-field="parent_name"
+        bind:input="onFieldInput"
+      />
+
+      <van-field
+        value="{{formData.parent_contact}}"
+        label="联系方式"
+        placeholder="微信号或手机号"
+        required
+        data-field="parent_contact"
+        bind:input="onFieldInput"
+      />
+
+      <view class="form-item">
+        <view class="form-label required">第几胎</view>
+        <van-radio-group value="{{formData.birth_order}}" direction="horizontal" data-field="birth_order" bind:change="onRadioChange">
+          <van-radio wx:for="{{options.birthOrder}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+        </van-radio-group>
+      </view>
+    </van-cell-group>
+  </view>
+</view>
+
+<!-- ==================== Step 2: 孕产信息 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 2}}">
+  <view class="section-card">
+    <view class="card-title">🤰 孕产信息</view>
+
+    <view class="form-item">
+      <view class="form-label required">怀孕方式</view>
+      <van-radio-group value="{{formData.pregnancy_method}}" direction="horizontal" data-field="pregnancy_method" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.pregnancyMethod}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">怀孕时是否保胎</view>
+      <van-radio-group value="{{formData.pregnancy_protection}}" direction="horizontal" data-field="pregnancy_protection" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.pregnancyProtection}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">分娩方式</view>
+      <van-radio-group value="{{formData.delivery_method}}" direction="horizontal" data-field="delivery_method" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.deliveryMethod}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">是否被当作脑瘫或其他疾病治疗</view>
+      <van-radio-group value="{{formData.misdiagnosed_as_cp}}" direction="horizontal" data-field="misdiagnosed_as_cp" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.misdiagnosedAsCp}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== Step 3: 家庭背景 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 3}}">
+  <view class="section-card">
+    <view class="card-title">👨‍👩‍👧 家庭背景信息</view>
+
+    <picker range="{{options.education}}" data-field="mother_education" data-options="education" bind:change="onPickerChange">
+      <van-cell title="母亲学历" value="{{formData.mother_education || '请选择'}}" is-link required />
+    </picker>
+
+    <van-field
+      value="{{formData.mother_occupation}}"
+      label="母亲职业"
+      placeholder="请输入母亲职业"
+      required
+      data-field="mother_occupation"
+      bind:input="onFieldInput"
+    />
+
+    <picker range="{{options.education}}" data-field="father_education" data-options="education" bind:change="onPickerChange">
+      <van-cell title="父亲学历" value="{{formData.father_education || '请选择'}}" is-link required />
+    </picker>
+
+    <van-field
+      value="{{formData.father_occupation}}"
+      label="父亲职业"
+      placeholder="请输入父亲职业"
+      required
+      data-field="father_occupation"
+      bind:input="onFieldInput"
+    />
+
+    <view class="form-item">
+      <view class="form-label required">家庭成员有无因照顾孩子而辞职</view>
+      <van-radio-group value="{{formData.family_member_resigned}}" data-field="family_member_resigned" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.familyResigned}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <picker range="{{options.monthlyIncome}}" data-field="monthly_income" data-options="monthlyIncome" bind:change="onPickerChange">
+      <van-cell title="家庭月收入" value="{{formData.monthly_income || '请选择'}}" is-link required />
+    </picker>
+
+    <picker range="{{options.treatmentCost}}" data-field="treatment_cost" data-options="treatmentCost" bind:change="onPickerChange">
+      <van-cell title="每月治疗费用" value="{{formData.treatment_cost || '请选择'}}" is-link required />
+    </picker>
+
+    <picker range="{{options.rehabCost}}" data-field="rehab_cost" data-options="rehabCost" bind:change="onPickerChange">
+      <van-cell title="每月康复费用" value="{{formData.rehab_cost || '请选择'}}" is-link required />
+    </picker>
+  </view>
+</view>
+
+<!-- ==================== Step 4: 诊断与症状 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 4}}">
+  <view class="section-card">
+    <view class="card-title">🏥 诊断与症状</view>
+
+    <van-field
+      value="{{formData.diagnosis_age}}"
+      label="诊断年龄"
+      placeholder="如：6个月、1岁半"
+      required
+      data-field="diagnosis_age"
+      bind:input="onFieldInput"
+    />
+
+    <van-field
+      value="{{formData.first_seizure_age}}"
+      label="首次发作年龄"
+      placeholder="如：出生3天、2个月"
+      required
+      data-field="first_seizure_age"
+      bind:input="onFieldInput"
+    />
+
+    <view class="form-item">
+      <view class="form-label required">其他症状（多选）</view>
+      <van-checkbox-group value="{{selectedSymptoms}}" bind:change="onSymptomsChange">
+        <view class="checkbox-grid">
+          <van-checkbox wx:for="{{options.otherSymptoms}}" wx:key="*this" name="{{item}}" shape="square" custom-class="checkbox-item">{{item}}</van-checkbox>
+        </view>
+      </van-checkbox-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">主要移动方式</view>
+      <van-radio-group value="{{formData.mobility_method}}" data-field="mobility_method" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.mobilityMethod}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <picker range="{{options.swallowingDifficulty}}" data-field="swallowing_difficulty" data-options="swallowingDifficulty" bind:change="onPickerChange">
+      <van-cell title="吞咽困难程度" value="{{formData.swallowing_difficulty || '请选择'}}" is-link required />
+    </picker>
+
+    <picker range="{{options.sleepDisorder}}" data-field="sleep_disorder" data-options="sleepDisorder" bind:change="onPickerChange">
+      <van-cell title="睡眠障碍程度" value="{{formData.sleep_disorder || '请选择'}}" is-link required />
+    </picker>
+
+    <view class="form-item">
+      <view class="form-label required">睡眠中不安静/动太多</view>
+      <van-radio-group value="{{formData.sleep_restlessness}}" direction="horizontal" data-field="sleep_restlessness" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.sleepRestlessness}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <picker range="{{options.developmentStatus}}" data-field="development_status" data-options="developmentStatus" bind:change="onPickerChange">
+      <van-cell title="发育状态" value="{{formData.development_status || '请选择'}}" is-link required />
+    </picker>
+  </view>
+</view>
+
+<!-- ==================== Step 5: 基因检测 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 5}}">
+  <view class="section-card">
+    <view class="card-title">🧬 基因检测信息</view>
+
+    <view class="form-item">
+      <view class="form-label required">是否已接受基因检测</view>
+      <van-radio-group value="{{formData.gene_test_done}}" direction="horizontal" data-field="gene_test_done" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.geneTestDone}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item" wx:if="{{formData.gene_test_done === '是'}}">
+      <view class="form-label">上传基因报告照片</view>
+      <van-uploader
+        file-list="{{geneReportFiles}}"
+        max-count="5"
+        accept="image"
+        bind:after-read="onGeneReportUpload"
+        bind:delete="onGeneReportDelete"
+        upload-text="上传报告"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">基因变异来源</view>
+      <van-radio-group value="{{formData.mutation_source}}" data-field="mutation_source" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.mutationSource}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">突变类型</view>
+      <van-radio-group value="{{formData.mutation_type}}" data-field="mutation_type" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.mutationType}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== Step 6: 癫痫与治疗 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 6}}">
+  <view class="section-card">
+    <view class="card-title">💊 癫痫控制与治疗</view>
+
+    <view class="form-item">
+      <view class="form-label required">目前癫痫是否得到控制</view>
+      <van-radio-group value="{{formData.seizure_control}}" data-field="seizure_control" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.seizureControl}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <van-field
+      value="{{formData.recent_seizure_type}}"
+      label="最近发作形式"
+      placeholder="如：强直阵挛、痉挛"
+      required
+      data-field="recent_seizure_type"
+      bind:input="onFieldInput"
+    />
+
+    <picker range="{{options.recentSeizureDuration}}" data-field="recent_seizure_duration" data-options="recentSeizureDuration" bind:change="onPickerChange">
+      <van-cell title="发作持续时间" value="{{formData.recent_seizure_duration || '请选择'}}" is-link required />
+    </picker>
+
+    <view class="form-item">
+      <view class="form-label required">发作强度</view>
+      <van-radio-group value="{{formData.recent_seizure_intensity}}" direction="horizontal" data-field="recent_seizure_intensity" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.recentSeizureIntensity}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">已采取的治疗措施（多选）</view>
+      <van-checkbox-group value="{{selectedTreatments}}" bind:change="onTreatmentsChange">
+        <view class="checkbox-grid">
+          <van-checkbox wx:for="{{options.treatmentMethods}}" wx:key="*this" name="{{item}}" shape="square" custom-class="checkbox-item">{{item}}</van-checkbox>
+        </view>
+      </van-checkbox-group>
+    </view>
+
+    <van-field
+      value="{{formData.current_medications}}"
+      label="目前服药情况"
+      type="textarea"
+      placeholder="几种药物，名称及剂量"
+      required autosize
+      data-field="current_medications"
+      bind:input="onFieldInput"
+    />
+
+    <van-field
+      value="{{formData.worsening_medications}}"
+      label="服用后加重的药物"
+      type="textarea"
+      placeholder="哪些药物服用后症状加重"
+      required autosize
+      data-field="worsening_medications"
+      bind:input="onFieldInput"
+    />
+
+    <van-field
+      value="{{formData.ineffective_medications}}"
+      label="服用后无效的药物"
+      type="textarea"
+      placeholder="哪些药物服用后无效"
+      required autosize
+      data-field="ineffective_medications"
+      bind:input="onFieldInput"
+    />
+  </view>
+</view>
+
+<!-- ==================== Step 7: 药浴与其他 ==================== -->
+<view class="step-container" wx:if="{{currentStep === 7}}">
+  <view class="section-card">
+    <view class="card-title">🛁 药浴与其他信息</view>
+
+    <view class="form-item">
+      <view class="form-label required">是否坚持给宝宝热浴</view>
+      <van-radio-group value="{{formData.hot_bath}}" direction="horizontal" data-field="hot_bath" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.hotBath}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">药浴频率</view>
+      <van-radio-group value="{{formData.bath_frequency}}" data-field="bath_frequency" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.bathFrequency}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">热浴时长</view>
+      <van-radio-group value="{{formData.bath_duration}}" direction="horizontal" data-field="bath_duration" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.bathDuration}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <van-field
+      value="{{formData.bath_benefits}}"
+      label="药浴帮助"
+      type="textarea"
+      placeholder="您认为药浴对宝宝有哪些帮助（选填）"
+      autosize
+      data-field="bath_benefits"
+      bind:input="onFieldInput"
+    />
+
+    <van-field
+      value="{{formData.treatment_effect_description}}"
+      label="治疗效果"
+      type="textarea"
+      placeholder="描述孩子的治疗效果及目前面临的困难（选填）"
+      autosize
+      data-field="treatment_effect_description"
+      bind:input="onFieldInput"
+    />
+
+    <view class="form-item">
+      <view class="form-label">是否愿意做希舞团队志愿者</view>
+      <van-radio-group value="{{formData.volunteer_willingness}}" direction="horizontal" data-field="volunteer_willingness" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.volunteerWillingness}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+
+    <van-field
+      value="{{formData.resources_skills}}"
+      label="资源/特长"
+      type="textarea"
+      placeholder="如新闻媒体/分子生物学/视频剪辑等（选填）"
+      autosize
+      data-field="resources_skills"
+      bind:input="onFieldInput"
+    />
+
+    <view class="form-item">
+      <view class="form-label required">通过什么渠道找到我们</view>
+      <van-radio-group value="{{formData.referral_source}}" data-field="referral_source" bind:change="onRadioChange">
+        <van-radio wx:for="{{options.referralSource}}" wx:key="*this" name="{{item}}" custom-class="radio-item">{{item}}</van-radio>
+      </van-radio-group>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== 底部导航按钮 ==================== -->
+<view class="bottom-actions">
+  <van-button
+    wx:if="{{currentStep > 1}}"
+    type="default"
+    size="large"
+    custom-class="btn-prev"
+    bind:click="prevStep"
+  >上一步</van-button>
+
+  <van-button
+    wx:if="{{currentStep < totalSteps}}"
+    type="primary"
+    size="large"
+    custom-class="btn-next"
+    bind:click="nextStep"
+  >下一步</van-button>
+
+  <van-button
+    wx:if="{{currentStep === totalSteps}}"
+    type="primary"
+    size="large"
+    custom-class="btn-submit"
+    loading="{{submitting}}"
+    disabled="{{submitting}}"
+    bind:click="onSubmit"
+  >{{submitting ? '提交中...' : '提交问卷'}}</van-button>
+</view>

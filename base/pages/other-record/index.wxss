@@ -3,7 +3,7 @@
 .other-record-container {
   min-height: 100vh;
   background-color: #f5f5f5;
-  padding-bottom: 120rpx;
+  padding-bottom: 160rpx;
 }
 
 /* 页面标题 */
@@ -28,7 +28,7 @@
 }
 
 .header-subtitle {
-  font-size: 28rpx;
+  font-size: 30rpx;
   opacity: 0.9;
 }
 
@@ -44,26 +44,36 @@
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08) !important;
 }
 
-/* 提交按钮 */
+/* 适老化 - 提交按钮放大 */
 .submit-container {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 30rpx 40rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
   background: white;
   border-top: 1rpx solid #eee;
   box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
-/* Vant 组件样式覆盖 */
+.submit-container .van-button {
+  height: 96rpx !important;
+  font-size: 36rpx !important;
+  font-weight: 600;
+  border-radius: 50rpx;
+}
+
+/* 适老化 - Vant 组件字号放大 */
 .van-field__label {
-  color: #333 !important;
+  font-size: 30rpx !important;
+  color: #444 !important;
   font-weight: 500 !important;
 }
 
 .van-field__value {
   color: #666 !important;
+  font-size: 30rpx !important;
 }
 
 .van-field--readonly .van-field__value {
@@ -73,7 +83,7 @@
 .van-cell-group__title {
   color: #333 !important;
   font-weight: 600 !important;
-  font-size: 32rpx !important;
+  font-size: 34rpx !important;
   padding: 0 0 20rpx 0 !important;
 }
 
@@ -95,9 +105,32 @@
   font-size: 32rpx !important;
 }
 
-/* 图片上传样式 */
+.van-field__input {
+  font-size: 32rpx !important;
+}
+
+.van-field__textarea {
+  font-size: 32rpx !important;
+  min-height: 160rpx !important;
+}
+
+/* 适老化 - 选择器/Picker 点击区域放大 */
+.van-cell {
+  min-height: 88rpx !important;
+  line-height: 1.5 !important;
+}
+
+.van-cell__title {
+  font-size: 30rpx !important;
+}
+
+.van-cell__value--alone {
+  font-size: 30rpx !important;
+}
+
+/* 适老化 - 图片上传样式 */
 .image-upload-section {
-  padding: 20rpx;
+  padding: 28rpx;
 }
 
 .image-upload-tips {
@@ -105,20 +138,21 @@
 }
 
 .tips-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #666;
 }
 
 .image-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20rpx;
+  gap: 24rpx;
 }
 
+/* 适老化 - 图片缩略图放大 */
 .image-item {
   position: relative;
-  width: 160rpx;
-  height: 160rpx;
+  width: 220rpx;
+  height: 220rpx;
   border-radius: 12rpx;
   overflow: hidden;
   background-color: #f5f5f5;
@@ -138,15 +172,16 @@
 
 .delete-icon {
   color: #ff4444;
-  font-size: 32rpx;
+  font-size: 40rpx;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  padding: 4rpx;
+  padding: 6rpx;
 }
 
+/* 适老化 - 上传按钮放大 */
 .image-upload-btn {
-  width: 160rpx;
-  height: 160rpx;
+  width: 220rpx;
+  height: 220rpx;
   border: 2rpx dashed #ddd;
   border-radius: 12rpx;
   display: flex;
@@ -163,7 +198,7 @@
 }
 
 .upload-text {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
 }
 
@@ -196,7 +231,7 @@
   
   .image-item,
   .image-upload-btn {
-    width: 140rpx;
-    height: 140rpx;
+    width: 200rpx;
+    height: 200rpx;
   }
 }

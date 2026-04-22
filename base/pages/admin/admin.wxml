@@ -15,24 +15,178 @@
     <van-tag wx:else type="default" size="large">普通用户（无管理权限）</van-tag>
   </view>
 
-  <!-- 操作按钮区域 -->
-  <view class="action-bar">
-    <van-button 
-      wx:if="{{isAdmin}}"
-      type="info" 
-      size="small" 
-      bind:click="goToMonthlyStats"
-      icon="chart-trending-o"
-    >
-      月度统计
-    </van-button>
+  <!-- ========== 全局概览 ========== -->
+  <view class="section-card" wx:if="{{isAdmin}}">
+    <view class="section-card-title">📊 全局概览</view>
+    <view wx:if="{{overviewLoading}}" class="loading-placeholder">
+      <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+    </view>
+    <view wx:else class="overview-grid">
+      <view class="overview-item">
+        <view class="overview-number">{{overviewData.totalUsers}}</view>
+        <view class="overview-label">注册用户</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-number">{{overviewData.activeUsers}}</view>
+        <view class="overview-label">活跃用户</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-number">{{questionnaireStats.completionRate}}%</view>
+        <view class="overview-label">问卷完成率</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-number">{{overviewData.recordCounts.total}}</view>
+        <view class="overview-label">记录总量</view>
+      </view>
+    </view>
+
+    <!-- 查看数据趋势入口 -->
+    <view class="detail-btn-wrapper">
+      <van-button plain type="primary" size="small" bind:tap="goToOverviewDetail" custom-style="border-color: #34BFA3; color: #34BFA3;">
+        📊 查看数据趋势
+      </van-button>
+    </view>
+  </view>
+
+  <!-- ========== 问卷数据分析 ========== -->
+  <view class="section-card" wx:if="{{isAdmin}}">
+    <view class="section-card-title">📋 问卷数据分析</view>
+    <view wx:if="{{questionnaireLoading}}" class="loading-placeholder">
+      <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+    </view>
+    <view wx:else>
+      <!-- 完成进度条 -->
+      <view class="stat-row">
+        <view class="stat-row-label">完成进度</view>
+        <view class="stat-row-detail">{{questionnaireStats.submittedCount}} / {{questionnaireStats.totalUsers}} 人</view>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{questionnaireStats.completionRate}}%;"></view>
+      </view>
+
+      <!-- 性别分布 -->
+      <view class="stat-row" style="margin-top: 24rpx;">
+        <view class="stat-row-label">性别分布</view>
+      </view>
+      <view class="gender-row">
+        <view class="gender-item" wx:if="{{questionnaireStats.genderDistribution.male !== undefined}}">
+          <text class="gender-dot male"></text>
+          <text>男 {{questionnaireStats.genderDistribution.male || 0}}人</text>
+        </view>
+        <view class="gender-item" wx:if="{{questionnaireStats.genderDistribution.female !== undefined}}">
+          <text class="gender-dot female"></text>
+          <text>女 {{questionnaireStats.genderDistribution.female || 0}}人</text>
+        </view>
+        <view class="gender-item" wx:if="{{questionnaireStats.genderDistribution.unknown !== undefined}}">
+          <text class="gender-dot unknown"></text>
+          <text>未知 {{questionnaireStats.genderDistribution.unknown || 0}}人</text>
+        </view>
+      </view>
+
+      <!-- 地区 TOP5 -->
+      <view class="stat-row" style="margin-top: 24rpx;">
+        <view class="stat-row-label">地区 TOP5</view>
+      </view>
+      <view class="region-list">
+        <view class="region-item" wx:for="{{questionnaireStats.regionTop10}}" wx:key="region" wx:if="{{index < 5}}">
+          <view class="region-rank">{{index + 1}}</view>
+          <view class="region-name">{{item.region || '未知'}}</view>
+          <view class="region-count">{{item.count}}人</view>
+        </view>
+        <view wx:if="{{!questionnaireStats.regionTop10 || questionnaireStats.regionTop10.length === 0}}" class="empty-text">暂无数据</view>
+      </view>
+
+      <!-- 癫痫控制状态分布 -->
+      <view class="stat-row" style="margin-top: 24rpx;">
+        <view class="stat-row-label">癫痫控制状态</view>
+      </view>
+      <view class="bar-chart">
+        <view class="bar-chart-item" wx:for="{{questionnaireStats.seizureControlDistribution}}" wx:for-index="key" wx:for-item="val" wx:key="key">
+          <view class="bar-label">{{key}}</view>
+          <view class="bar-track">
+            <view class="bar-fill bar-fill-green" style="width: {{questionnaireStats.submittedCount > 0 ? val / questionnaireStats.submittedCount * 100 : 0}}%;"></view>
+          </view>
+          <view class="bar-value">{{val}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 查看问卷详情入口 -->
+    <view class="detail-btn-wrapper">
+      <van-button plain type="primary" size="small" bind:tap="goToQuestionnaireDetail" custom-style="border-color: #34BFA3; color: #34BFA3;">
+        📋 查看问卷详情列表
+      </van-button>
+    </view>
+  </view>
+
+  <!-- ========== 月度汇报概览 ========== -->
+  <view class="section-card" wx:if="{{isAdmin}}">
+    <view class="section-card-title">📅 月度汇报概览</view>
+    <view wx:if="{{monthlyStatsLoading}}" class="loading-placeholder">
+      <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+    </view>
+    <view wx:elif="{{currentMonthStats}}" class="monthly-overview">
+      <!-- 当月提交进度 -->
+      <view class="stat-row">
+        <view class="stat-row-label">当月提交</view>
+        <view class="stat-row-detail">{{currentMonthStats.overview.totalSubmitted || 0}} / {{currentMonthStats.overview.totalUsers || 0}} 人</view>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{currentMonthStats.overview.totalUsers > 0 ? currentMonthStats.overview.totalSubmitted / currentMonthStats.overview.totalUsers * 100 : 0}}%;"></view>
+      </view>
+
+      <!-- 记录量统计 -->
+      <view class="stat-row" style="margin-top: 24rpx;">
+        <view class="stat-row-label">记录量统计</view>
+      </view>
+      <view class="bar-chart">
+        <view class="bar-chart-item">
+          <view class="bar-label">发作</view>
+          <view class="bar-track">
+            <view class="bar-fill bar-fill-red" style="width: {{overviewData.recordCounts.total > 0 ? overviewData.recordCounts.seizure / overviewData.recordCounts.total * 100 : 0}}%;"></view>
+          </view>
+          <view class="bar-value">{{overviewData.recordCounts.seizure}}</view>
+        </view>
+        <view class="bar-chart-item">
+          <view class="bar-label">用药</view>
+          <view class="bar-track">
+            <view class="bar-fill bar-fill-blue" style="width: {{overviewData.recordCounts.total > 0 ? overviewData.recordCounts.medication / overviewData.recordCounts.total * 100 : 0}}%;"></view>
+          </view>
+          <view class="bar-value">{{overviewData.recordCounts.medication}}</view>
+        </view>
+        <view class="bar-chart-item">
+          <view class="bar-label">其他</view>
+          <view class="bar-track">
+            <view class="bar-fill bar-fill-orange" style="width: {{overviewData.recordCounts.total > 0 ? overviewData.recordCounts.other / overviewData.recordCounts.total * 100 : 0}}%;"></view>
+          </view>
+          <view class="bar-value">{{overviewData.recordCounts.other}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty-text" style="padding: 32rpx;">暂无当月统计数据</view>
+
+    <!-- 跳转详细统计 -->
+    <view class="section-card-footer">
+      <van-button 
+        type="info" 
+        size="small" 
+        bind:click="goToMonthlyStats"
+        icon="chart-trending-o"
+        block
+        plain
+      >
+        查看详细月度统计
+      </van-button>
+    </view>
   </view>
 
   <!-- 用户管理（仅超管可见） -->
   <view class="db-section" wx:if="{{isSuperAdmin}}">
     <view class="section-title" bindtap="toggleUserManagement">
-      <van-icon name="friends-o" />
-      <text>用户管理</text>
+      <view>
+        <van-icon name="friends-o" />
+        <text style="margin-left: 12rpx;">用户管理</text>
+      </view>
       <van-icon name="{{showUserManagement ? 'arrow-up' : 'arrow-down'}}" />
     </view>
 

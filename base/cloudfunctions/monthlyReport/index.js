@@ -37,6 +37,8 @@ exports.main = async (event, context) => {
         return await listUsers(pageSize, pageIndex)
       case 'setAdminRole':
         return await setAdminRole(data, userId)
+      case 'adminOverview':
+        return await getAdminOverview()
       default:
         return { success: false, message: '不支持的操作类型' }
     }
@@ -602,5 +604,98 @@ async function setAdminRole(data, operatorUserId) {
   return {
     success: true,
     message: `已将用户设置为${roleText}`
+  }
+}
+
+// ========== 管理员总览统计 ==========
+
+// 获取管理员总览数据（记录数量、活跃用户、月度趋势）
+async function getAdminOverview() {
+  // 1. 获取各类型记录总量
+  const [seizureCount, medicationCount, otherCount, totalUsers] = await Promise.all([
+    db.collection('seizure_records').count(),
+    db.collection('medication_records').count(),
+    db.collection('other_records').count(),
+    db.collection('users').count()
+  ])
+
+  // 2. 获取最近6个月的月度汇报统计
+  const now = new Date()
+  const monthlyTrends = []
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+    const monthReports = await db.collection('monthly_reports')
+      .where({ report_month: monthStr, status: 'submitted' })
+      .count()
+
+    // 分批获取该月所有已提交汇报的发作数据（云数据库单次 get 最多100条）
+    let monthReportsData = []
+    const batchSize = 100
+    let batchIndex = 0
+    while (true) {
+      const batch = await db.collection('monthly_reports')
+        .where({ report_month: monthStr, status: 'submitted' })
+        .field({ seizure_summary: true })
+        .skip(batchIndex * batchSize)
+        .limit(batchSize)
+        .get()
+      monthReportsData = monthReportsData.concat(batch.data)
+      if (batch.data.length < batchSize) break
+      batchIndex++
+    }
+
+    // 计算该月发作总次数
+    let totalSeizures = 0
+    monthReportsData.forEach(report => {
+      if (report.seizure_summary && report.seizure_summary.total_count) {
+        totalSeizures += parseInt(report.seizure_summary.total_count) || 0
+      }
+    })
+
+    monthlyTrends.push({
+      month: monthStr,
+      submittedCount: monthReports.total,
+      submissionRate: totalUsers.total > 0 ? Math.round(monthReports.total / totalUsers.total * 100) : 0,
+      totalSeizures
+    })
+  }
+
+  // 3. 获取活跃用户数（最近30天有提交记录的用户）
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  // 用 monthly_reports 最近更新的来近似活跃用户
+  let recentReportsData = []
+  let recentBatchIndex = 0
+  while (true) {
+    const batch = await db.collection('monthly_reports')
+      .where({
+        updated_at: _.gte(thirtyDaysAgo)
+      })
+      .field({ user_id: true })
+      .skip(recentBatchIndex * 100)
+      .limit(100)
+      .get()
+    recentReportsData = recentReportsData.concat(batch.data)
+    if (batch.data.length < 100) break
+    recentBatchIndex++
+  }
+
+  const activeUserIds = new Set(recentReportsData.map(r => r.user_id).filter(Boolean))
+
+  return {
+    success: true,
+    data: {
+      recordCounts: {
+        seizure: seizureCount.total,
+        medication: medicationCount.total,
+        other: otherCount.total,
+        total: seizureCount.total + medicationCount.total + otherCount.total
+      },
+      totalUsers: totalUsers.total,
+      activeUsers: activeUserIds.size,
+      monthlyTrends
+    }
   }
 }

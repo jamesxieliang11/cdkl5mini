@@ -34,7 +34,8 @@ Page({
     // 内部状态
     _chatHistory: [],
     _systemPrompt: '',
-    _stopRequested: false
+    _stopRequested: false,
+    _contextLoaded: false
   },
 
   onLoad(options) {
@@ -69,6 +70,7 @@ Page({
       wx.showLoading({ title: '加载用药数据...' })
       const contextMessage = await buildDrugAdjustmentContext()
       this.data._chatHistory.push({ role: 'user', content: contextMessage })
+      this.setData({ _contextLoaded: true })
 
       this.addAIMessage('正在分析您的用药数据...')
       await this.callAI()
@@ -92,7 +94,25 @@ Page({
 
     this.setData({ inputValue: '' })
     this.addUserMessage(content)
-    this.data._chatHistory.push({ role: 'user', content })
+
+    // 病历生成场景：如果还没加载用户数据上下文，先加载后再追加用户问题
+    if (this.data.scene === 'medical_record' && !this.data._contextLoaded) {
+      try {
+        wx.showLoading({ title: '正在收集数据...' })
+        const contextMessage = await buildMedicalRecordContext(this.data.selectedTimeRange)
+        wx.hideLoading()
+        this.data._chatHistory.push({ role: 'user', content: contextMessage })
+        this.data._chatHistory.push({ role: 'user', content })
+        this.setData({ _contextLoaded: true })
+      } catch (error) {
+        wx.hideLoading()
+        console.error('加载病历上下文失败:', error)
+        // 降级：不加载上下文，仅发送用户问题
+        this.data._chatHistory.push({ role: 'user', content })
+      }
+    } else {
+      this.data._chatHistory.push({ role: 'user', content })
+    }
 
     this.addAIMessage('')
     await this.callAI()
@@ -100,6 +120,15 @@ Page({
 
   sendQuickQuestion(event) {
     const question = event.currentTarget.dataset.question
+
+    // 病历生成场景：从快捷问题中解析时间范围，走 generateMedicalRecord 流程
+    if (this.data.scene === 'medical_record') {
+      const days = parseTimeRangeToDays(question)
+      this.setData({ selectedTimeRange: days })
+      this.generateMedicalRecord()
+      return
+    }
+
     this.setData({ inputValue: question })
     this.sendMessage()
   },
@@ -167,6 +196,7 @@ Page({
 
       this.addUserMessage(`请生成${rangeLabel}的病历摘要`)
       this.data._chatHistory.push({ role: 'user', content: contextMessage })
+      this.setData({ _contextLoaded: true })
 
       this.addAIMessage('')
       await this.callAI()
@@ -354,7 +384,7 @@ Page({
       content: '确定要清空当前对话记录吗？',
       success: (res) => {
         if (res.confirm) {
-          this.setData({ messages: [] })
+          this.setData({ messages: [], _contextLoaded: false })
           this.data._chatHistory = []
         }
       }

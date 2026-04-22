@@ -1,0 +1,319 @@
+/* 问卷详情列表页样式 - 与 admin-monthly-stats 保持一致 */
+
+.page-header {
+  padding: 20rpx 30rpx 24rpx;
+  background: linear-gradient(135deg, #34BFA3, #2da88e);
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+}
+
+/* 统计容器 */
+.stats-container {
+  padding: 20rpx 30rpx 60rpx;
+}
+
+/* 卡片 */
+.section-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 16rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+/* ========== 统计摘要概览 ========== */
+.overview-grid {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+}
+
+.overview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.overview-value {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.overview-value.primary {
+  color: #1989fa;
+}
+
+.overview-value.warning {
+  color: #FF9800;
+}
+
+.overview-value.success {
+  color: #07c160;
+}
+
+.overview-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 完成率进度条 */
+.rate-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 0 0;
+  border-top: 1rpx solid #f0f0f0;
+  margin-top: 16rpx;
+}
+
+.rate-label {
+  font-size: 24rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.progress-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 16rpx;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34BFA3, #2da88e);
+  border-radius: 8rpx;
+  transition: width 0.5s ease;
+}
+
+.rate-value {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #34BFA3;
+  flex-shrink: 0;
+}
+
+/* ========== 柱状条通用 ========== */
+.bar-list {
+  padding: 8rpx 0;
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.bar-label {
+  width: 120rpx;
+  font-size: 26rpx;
+  flex-shrink: 0;
+  color: #333;
+}
+
+.bar-track {
+  flex: 1;
+  height: 28rpx;
+  background: #f0f0f0;
+  border-radius: 14rpx;
+  overflow: hidden;
+  margin: 0 16rpx;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 14rpx;
+  transition: width 0.3s;
+  min-width: 4rpx;
+}
+
+.seizure-control-bar {
+  background: linear-gradient(90deg, #FF9800, #FFB74D);
+}
+
+.bar-count {
+  font-size: 24rpx;
+  color: #666;
+  flex-shrink: 0;
+  min-width: 160rpx;
+  text-align: right;
+}
+
+/* ========== 排行列表 ========== */
+.ranking-list {
+  padding: 8rpx 0;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.ranking-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.ranking-index {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 22rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ranking-item:first-child .ranking-index {
+  background: #FF9800;
+  color: #fff;
+}
+
+.ranking-item:nth-child(2) .ranking-index {
+  background: #9E9E9E;
+  color: #fff;
+}
+
+.ranking-item:nth-child(3) .ranking-index {
+  background: #CD7F32;
+  color: #fff;
+}
+
+.ranking-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.ranking-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+  margin-left: 20rpx;
+}
+
+.mini-bar-wrapper {
+  flex: 1;
+  height: 12rpx;
+  background: #f5f5f5;
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.mini-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #34BFA3, #2da88e);
+  border-radius: 6rpx;
+  transition: width 0.5s ease;
+  min-width: 4rpx;
+}
+
+.ranking-count {
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
+  min-width: 80rpx;
+  text-align: right;
+}
+
+/* ========== 详细列表 ========== */
+.detail-list {
+  padding: 4rpx 0;
+}
+
+.detail-item {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.detail-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.detail-body {
+  padding-left: 4rpx;
+}
+
+.detail-info {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 8rpx;
+  flex-wrap: wrap;
+}
+
+.detail-info-item {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 空状态 */
+.empty-hint {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 26rpx;
+  color: #999;
+}

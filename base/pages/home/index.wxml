@@ -24,6 +24,15 @@
     <view class="today-date">{{currentDate}}</view>
   </view>
 
+  <!-- 问卷填写提醒 -->
+  <view class="questionnaire-reminder" wx:if="{{showQuestionnaireReminder}}" bindtap="goToQuestionnaire">
+    <view class="reminder-content">
+      <van-icon name="edit" size="20" color="#34BFA3" />
+      <text class="reminder-text">📝 家庭基础信息问卷尚未填写，点击填写</text>
+    </view>
+    <van-icon name="arrow" size="16" color="#999" />
+  </view>
+
   <!-- 月度汇报提醒 -->
   <view class="monthly-reminder" wx:if="{{showMonthlyReminder}}" bindtap="goToMonthlyReport">
     <view class="reminder-content">
@@ -62,6 +71,12 @@
         icon="comment-o" 
         text="反馈意见"
         bind:click="goToFeedback"
+        custom-class="function-item"
+      />
+      <van-grid-item 
+        icon="edit" 
+        text="家庭问卷"
+        bind:click="goToQuestionnaire"
         custom-class="function-item"
       />
       <van-grid-item 

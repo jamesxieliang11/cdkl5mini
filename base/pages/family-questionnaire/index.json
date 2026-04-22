@@ -1,0 +1,14 @@
+{
+  "navigationBarTitleText": "家庭基础信息",
+  "usingComponents": {
+    "van-nav-bar": "/miniprogram_npm/@vant/weapp/nav-bar/index",
+    "van-progress": "/miniprogram_npm/@vant/weapp/progress/index",
+    "van-radio-group": "/miniprogram_npm/@vant/weapp/radio-group/index",
+    "van-radio": "/miniprogram_npm/@vant/weapp/radio/index",
+    "van-checkbox-group": "/miniprogram_npm/@vant/weapp/checkbox-group/index",
+    "van-checkbox": "/miniprogram_npm/@vant/weapp/checkbox/index",
+    "van-uploader": "/miniprogram_npm/@vant/weapp/uploader/index",
+    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
+    "van-notice-bar": "/miniprogram_npm/@vant/weapp/notice-bar/index"
+  }
+}

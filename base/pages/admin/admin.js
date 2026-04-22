@@ -1,6 +1,8 @@
-// 管理员面板 - 数据库管理 + 权限管理
+// 管理员面板 - 概览统计 + 权限管理
 const app = getApp()
-const { initDatabase, checkDatabaseStatus, initRecordsDatabase, checkRecordsStatus } = require('../../utils/database.js')
+const { 
+  getAdminOverview, getQuestionnaireAdminStats, getAdminMonthlyStats
+} = require('../../utils/database.js')
 
 Page({
   data: {
@@ -9,25 +11,30 @@ Page({
     isAdmin: false,
     isSuperAdmin: false,
 
-    // 基础数据库状态
-    basicDbStatus: {
-      initialized: false,
-      recordCount: 0,
-      loading: false
+    // 全局概览数据
+    overviewData: {
+      totalUsers: 0,
+      activeUsers: 0,
+      recordCounts: { seizure: 0, medication: 0, other: 0, total: 0 },
+      monthlyTrends: []
     },
-    // 记录数据库状态
-    recordsDbStatus: {
-      initialized: false,
-      medication_records: 0,
-      seizure_records: 0,
-      other_records: 0,
-      record_statistics: 0,
-      total: 0,
-      loading: false
+    overviewLoading: false,
+
+    // 问卷统计数据
+    questionnaireStats: {
+      totalUsers: 0,
+      submittedCount: 0,
+      completionRate: 0,
+      genderDistribution: {},
+      regionTop10: [],
+      seizureControlDistribution: {},
+      diagnosisAgeDistribution: {}
     },
-    // 操作状态
-    initializing: false,
-    lastUpdateTime: '',
+    questionnaireLoading: false,
+
+    // 月度汇报概览
+    currentMonthStats: null,
+    monthlyStatsLoading: false,
 
     // 用户管理
     showUserManagement: false,
@@ -37,15 +44,24 @@ Page({
 
   onLoad() {
     this.checkAdminPermission()
-    this.checkAllDatabaseStatus()
+    // 管理员加载看板数据
+    if (this.data.isAdmin) {
+      this.loadOverviewData()
+      this.loadQuestionnaireStats()
+      this.loadCurrentMonthStats()
+    }
   },
 
   onShow() {
     // 通知tabbar组件更新状态（基于当前页面URL）
     this.updateTabBarState()
-    // 每次显示时刷新数据库状态
     this.checkAdminPermission()
-    this.checkAllDatabaseStatus()
+    // 管理员加载看板数据
+    if (this.data.isAdmin) {
+      this.loadOverviewData()
+      this.loadQuestionnaireStats()
+      this.loadCurrentMonthStats()
+    }
   },
 
   // 检查管理员权限
@@ -67,112 +83,6 @@ Page({
     }
   },
 
-  // 检查所有数据库状态
-  async checkAllDatabaseStatus() {
-    await Promise.all([
-      this.checkBasicDatabaseStatus(),
-      this.checkRecordsDatabaseStatus()
-    ])
-    
-    this.setData({
-      lastUpdateTime: new Date().toLocaleTimeString()
-    })
-  },
-
-  // 检查基础数据库状态
-  async checkBasicDatabaseStatus() {
-    this.setData({
-      'basicDbStatus.loading': true
-    })
-
-    try {
-      const status = await checkDatabaseStatus()
-      this.setData({
-        'basicDbStatus.initialized': status.initialized,
-        'basicDbStatus.recordCount': status.recordCount,
-        'basicDbStatus.loading': false
-      })
-    } catch (error) {
-      console.error('检查基础数据库状态失败:', error)
-      this.setData({
-        'basicDbStatus.loading': false
-      })
-    }
-  },
-
-  // 检查记录数据库状态
-  async checkRecordsDatabaseStatus() {
-    this.setData({
-      'recordsDbStatus.loading': true
-    })
-
-    try {
-      const status = await checkRecordsStatus()
-      this.setData({
-        'recordsDbStatus.initialized': status.initialized,
-        'recordsDbStatus.medication_records': status.medication_records,
-        'recordsDbStatus.seizure_records': status.seizure_records,
-        'recordsDbStatus.other_records': status.other_records,
-        'recordsDbStatus.record_statistics': status.record_statistics,
-        'recordsDbStatus.total': status.total,
-        'recordsDbStatus.loading': false
-      })
-    } catch (error) {
-      console.error('检查记录数据库状态失败:', error)
-      this.setData({
-        'recordsDbStatus.loading': false
-      })
-    }
-  },
-
-  // 初始化基础数据库
-  async initBasicDatabase() {
-    if (this.data.initializing) return
-
-    wx.showModal({
-      title: '确认初始化',
-      content: '确定要初始化基础数据库吗？这将创建义诊科室、专家信息、会议议程等基础数据。',
-      success: async (res) => {
-        if (res.confirm) {
-          this.setData({ initializing: true })
-          
-          try {
-            await initDatabase()
-            await this.checkBasicDatabaseStatus()
-          } catch (error) {
-            console.error('初始化基础数据库失败:', error)
-          } finally {
-            this.setData({ initializing: false })
-          }
-        }
-      }
-    })
-  },
-
-  // 初始化记录数据库
-  async initRecordsDb() {
-    if (this.data.initializing) return
-
-    wx.showModal({
-      title: '确认初始化',
-      content: '确定要初始化记录数据库吗？这将创建调药记录、发作记录、其他记录等数据表。',
-      success: async (res) => {
-        if (res.confirm) {
-          this.setData({ initializing: true })
-          
-          try {
-            await initRecordsDatabase()
-            await this.checkRecordsDatabaseStatus()
-          } catch (error) {
-            console.error('初始化记录数据库失败:', error)
-          } finally {
-            this.setData({ initializing: false })
-          }
-        }
-      }
-    })
-  },
-
   // 跳转到月度汇报统计看板
   goToMonthlyStats() {
     if (!this.data.isAdmin) {
@@ -181,6 +91,28 @@ Page({
     }
     wx.navigateTo({
       url: '/pages/admin-monthly-stats/index'
+    })
+  },
+
+  // 跳转到问卷详情列表
+  goToQuestionnaireDetail() {
+    if (!this.data.isAdmin) {
+      wx.showToast({ title: '需要管理员权限', icon: 'none' })
+      return
+    }
+    wx.navigateTo({
+      url: '/pages/admin-questionnaire-detail/index'
+    })
+  },
+
+  // 跳转到数据趋势
+  goToOverviewDetail() {
+    if (!this.data.isAdmin) {
+      wx.showToast({ title: '需要管理员权限', icon: 'none' })
+      return
+    }
+    wx.navigateTo({
+      url: '/pages/admin-overview-detail/index'
     })
   },
 
@@ -252,22 +184,51 @@ Page({
     })
   },
 
-  // 刷新数据库状态
-  async refreshStatus() {
-    await this.checkAllDatabaseStatus()
-    wx.showToast({
-      title: '状态已刷新',
-      icon: 'success'
-    })
+  // 加载全局概览数据
+  async loadOverviewData() {
+    this.setData({ overviewLoading: true })
+    try {
+      const result = await getAdminOverview()
+      if (result.data) {
+        this.setData({ overviewData: result.data })
+      }
+    } catch (error) {
+      console.error('加载概览数据失败:', error)
+    } finally {
+      this.setData({ overviewLoading: false })
+    }
   },
 
-  // 获取状态文本
-  getStatusText(initialized) {
-    return initialized ? '已初始化' : '未初始化'
+  // 加载问卷统计
+  async loadQuestionnaireStats() {
+    this.setData({ questionnaireLoading: true })
+    try {
+      const result = await getQuestionnaireAdminStats()
+      if (result.data) {
+        this.setData({ questionnaireStats: result.data })
+      }
+    } catch (error) {
+      console.error('加载问卷统计失败:', error)
+    } finally {
+      this.setData({ questionnaireLoading: false })
+    }
   },
 
-  // 获取状态颜色
-  getStatusColor(initialized) {
-    return initialized ? '#07c160' : '#ee0a24'
-  }
+  // 加载当月汇报统计
+  async loadCurrentMonthStats() {
+    this.setData({ monthlyStatsLoading: true })
+    try {
+      const now = new Date()
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+      const result = await getAdminMonthlyStats(currentMonth)
+      if (result.data) {
+        this.setData({ currentMonthStats: result.data })
+      }
+    } catch (error) {
+      console.error('加载月度统计失败:', error)
+    } finally {
+      this.setData({ monthlyStatsLoading: false })
+    }
+  },
+
 })

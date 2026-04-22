@@ -1,0 +1,162 @@
+<!-- 问卷详情列表页 -->
+<view class="page-header">
+  <view class="header-row">
+    <van-icon name="arrow-left" size="20" color="#fff" bindtap="onBack" />
+    <text class="header-title">问卷数据详情</text>
+    <view style="width: 40rpx;"></view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view wx:if="{{loading}}" class="loading-container">
+  <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+</view>
+
+<view class="stats-container" wx:if="{{!loading}}">
+
+  <!-- ========== 统计摘要 ========== -->
+  <view class="section-card" wx:if="{{stats}}">
+    <view class="section-header">
+      <van-icon name="chart-trending-o" size="18" color="#34BFA3" />
+      <text class="section-title">统计摘要</text>
+    </view>
+    <view class="overview-grid">
+      <view class="overview-item">
+        <text class="overview-value primary">{{stats.totalUsers || 0}}</text>
+        <text class="overview-label">总用户</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value success">{{stats.submittedCount || 0}}</text>
+        <text class="overview-label">已提交</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-value warning">{{stats.completionRate || 0}}%</text>
+        <text class="overview-label">完成率</text>
+      </view>
+    </view>
+    <!-- 完成进度条 -->
+    <view class="rate-bar">
+      <text class="rate-label">完成率</text>
+      <view class="progress-wrapper">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{stats.completionRate || 0}}%"></view>
+        </view>
+        <text class="rate-value">{{stats.completionRate || 0}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 性别分布 ========== -->
+  <view class="section-card" wx:if="{{stats.genderDistribution}}">
+    <view class="section-header">
+      <text class="section-title">👫 性别分布</text>
+    </view>
+    <view class="bar-list">
+      <view class="bar-item" wx:if="{{stats.genderDistribution.male !== undefined}}">
+        <view class="bar-label">男</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{stats.submittedCount > 0 ? stats.genderDistribution.male / stats.submittedCount * 100 : 0}}%; background: linear-gradient(90deg, #1989fa, #1565c0);"></view>
+        </view>
+        <view class="bar-count">{{stats.genderDistribution.male || 0}}人 ({{stats.submittedCount > 0 ? (stats.genderDistribution.male / stats.submittedCount * 100).toFixed(1) : 0}}%)</view>
+      </view>
+      <view class="bar-item" wx:if="{{stats.genderDistribution.female !== undefined}}">
+        <view class="bar-label">女</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{stats.submittedCount > 0 ? stats.genderDistribution.female / stats.submittedCount * 100 : 0}}%; background: linear-gradient(90deg, #ee0a24, #c41d7f);"></view>
+        </view>
+        <view class="bar-count">{{stats.genderDistribution.female || 0}}人 ({{stats.submittedCount > 0 ? (stats.genderDistribution.female / stats.submittedCount * 100).toFixed(1) : 0}}%)</view>
+      </view>
+      <view class="bar-item" wx:if="{{stats.genderDistribution.unknown !== undefined}}">
+        <view class="bar-label">未知</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{stats.submittedCount > 0 ? stats.genderDistribution.unknown / stats.submittedCount * 100 : 0}}%; background: #999;"></view>
+        </view>
+        <view class="bar-count">{{stats.genderDistribution.unknown || 0}}人</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 地区分布 TOP10 ========== -->
+  <view class="section-card" wx:if="{{stats.regionTop10.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">🌍 地区分布 TOP10</text>
+    </view>
+    <view class="ranking-list">
+      <view class="ranking-item" wx:for="{{stats.regionTop10}}" wx:key="region" wx:if="{{index < 10}}">
+        <view class="ranking-left">
+          <view class="ranking-index">{{index + 1}}</view>
+          <view class="ranking-name">{{item.region || '未知'}}</view>
+        </view>
+        <view class="ranking-right">
+          <view class="mini-bar-wrapper">
+            <view class="mini-bar" style="width: {{stats.regionTop10[0].count > 0 ? item.count / stats.regionTop10[0].count * 100 : 0}}%;"></view>
+          </view>
+          <view class="ranking-count">{{item.count}}人</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 诊断年龄分布 ========== -->
+  <view class="section-card" wx:if="{{stats.diagnosisAgeDistribution}}">
+    <view class="section-header">
+      <text class="section-title">🎂 诊断年龄分布</text>
+    </view>
+    <view class="bar-list">
+      <view class="bar-item" wx:for="{{stats.diagnosisAgeDistribution}}" wx:for-index="key" wx:for-item="val" wx:key="key">
+        <view class="bar-label">{{key}}</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{stats.submittedCount > 0 ? val / stats.submittedCount * 100 : 0}}%; background: linear-gradient(90deg, #34BFA3, #2da88e);"></view>
+        </view>
+        <view class="bar-count">{{val}}人</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 癫痫控制状态分布 ========== -->
+  <view class="section-card" wx:if="{{stats.seizureControlDistribution}}">
+    <view class="section-header">
+      <text class="section-title">⚡ 癫痫控制状态</text>
+    </view>
+    <view class="bar-list">
+      <view class="bar-item" wx:for="{{stats.seizureControlDistribution}}" wx:for-index="key" wx:for-item="val" wx:key="key">
+        <view class="bar-label">{{key}}</view>
+        <view class="bar-track">
+          <view class="bar-fill seizure-control-bar" style="width: {{stats.submittedCount > 0 ? val / stats.submittedCount * 100 : 0}}%;"></view>
+        </view>
+        <view class="bar-count">{{val}}人 ({{stats.submittedCount > 0 ? (val / stats.submittedCount * 100).toFixed(1) : 0}}%)</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 已提交问卷列表 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <van-icon name="friends-o" size="18" color="#9C27B0" />
+      <text class="section-title">已提交问卷列表</text>
+      <van-tag type="primary" size="medium">{{questionnaires.length}}份</van-tag>
+    </view>
+
+    <view wx:if="{{questionnaires.length === 0}}" class="empty-hint">暂无问卷数据</view>
+
+    <view wx:else class="detail-list">
+      <view class="detail-item" wx:for="{{questionnaires}}" wx:key="index">
+        <view class="detail-header">
+          <text class="detail-name">{{item.child_name || item.childName || '未填写'}}</text>
+          <van-tag type="success" size="small">已提交</van-tag>
+        </view>
+        <view class="detail-body">
+          <view class="detail-info">
+            <text class="detail-info-item" wx:if="{{item.province || item.city}}">📍 {{item.province || ''}}{{item.city || ''}}</text>
+            <text class="detail-info-item" wx:if="{{item.diagnosis_age || item.diagnosisAge}}">🎂 诊断年龄: {{item.diagnosis_age || item.diagnosisAge || '未知'}}</text>
+          </view>
+          <view class="detail-info" wx:if="{{item.seizure_control || item.seizureControl || item.gender}}">
+            <text class="detail-info-item" wx:if="{{item.gender}}">👤 {{item.gender}}</text>
+            <text class="detail-info-item" wx:if="{{item.seizure_control || item.seizureControl}}">⚡ {{item.seizure_control || item.seizureControl}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>

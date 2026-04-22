@@ -12,7 +12,10 @@
     "pages/monthly-report/index",
     "pages/admin-monthly-stats/index",
     "pages/feedback/index",
-    "pages/ai-assistant/index"
+    "pages/ai-assistant/index",
+    "pages/family-questionnaire/index",
+    "pages/admin-questionnaire-detail/index",
+    "pages/admin-overview-detail/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -1,0 +1,69 @@
+{
+  "collection": "questionnaires",
+  "description": "家庭基础信息问卷集合 - 收集 CDKL5 患者家庭的详细基础信息",
+  "schema": {
+    "_id": { "type": "String", "description": "自动生成" },
+    "openid": { "type": "String", "description": "关联用户 openid（唯一索引）" },
+    "user_id": { "type": "String", "description": "关联 users._id" },
+    "submit_time": { "type": "Date", "description": "提交时间" },
+    "status": { "type": "String", "enum": ["draft", "submitted"], "description": "问卷状态" },
+
+    "child_name": { "type": "String", "required": true, "description": "孩子姓名" },
+    "wechat_group_nickname": { "type": "String", "required": true, "description": "微信群昵称" },
+    "child_gender": { "type": "String", "required": true, "description": "性别（男/女）" },
+    "birth_date": { "type": "String", "required": true, "description": "出生日期" },
+    "region": { "type": "String", "required": true, "description": "所在地区（省市）" },
+    "parent_name": { "type": "String", "required": true, "description": "家长姓名" },
+    "parent_contact": { "type": "String", "required": true, "description": "微信号/手机号" },
+    "birth_order": { "type": "String", "required": true, "description": "第几胎" },
+
+    "pregnancy_method": { "type": "String", "required": true, "description": "怀孕方式" },
+    "pregnancy_protection": { "type": "String", "required": true, "description": "是否保胎" },
+    "delivery_method": { "type": "String", "required": true, "description": "分娩方式" },
+    "misdiagnosed_as_cp": { "type": "String", "required": true, "description": "是否被当作脑瘫治疗" },
+
+    "mother_education": { "type": "String", "required": true, "description": "母亲学历" },
+    "mother_occupation": { "type": "String", "required": true, "description": "母亲职业" },
+    "father_education": { "type": "String", "required": true, "description": "父亲学历" },
+    "father_occupation": { "type": "String", "required": true, "description": "父亲职业" },
+    "family_member_resigned": { "type": "String", "required": true, "description": "有无辞职照顾" },
+    "monthly_income": { "type": "String", "required": true, "description": "家庭月收入" },
+    "treatment_cost": { "type": "String", "required": true, "description": "治疗费用" },
+    "rehab_cost": { "type": "String", "required": true, "description": "康复费用" },
+
+    "diagnosis_age": { "type": "String", "required": true, "description": "诊断年龄" },
+    "first_seizure_age": { "type": "String", "required": true, "description": "癫痫首发年龄" },
+    "other_symptoms": { "type": "String", "required": true, "description": "其他症状（多选）" },
+    "mobility_method": { "type": "String", "required": true, "description": "移动方式" },
+    "swallowing_difficulty": { "type": "String", "required": true, "description": "吞咽困难程度" },
+    "sleep_disorder": { "type": "String", "required": true, "description": "睡眠障碍程度" },
+    "sleep_restlessness": { "type": "String", "required": true, "description": "睡眠不安" },
+    "development_status": { "type": "String", "required": true, "description": "发育状态" },
+
+    "gene_test_done": { "type": "String", "required": true, "description": "是否基因检测" },
+    "gene_report_images": { "type": "Array<String>", "description": "基因报告图片 fileID 列表" },
+    "mutation_source": { "type": "String", "required": true, "description": "变异来源" },
+    "mutation_type": { "type": "String", "required": true, "description": "突变类型" },
+
+    "seizure_control": { "type": "String", "required": true, "description": "癫痫控制情况" },
+    "recent_seizure_type": { "type": "String", "required": true, "description": "最近发作形式" },
+    "recent_seizure_duration": { "type": "String", "required": true, "description": "发作持续时间" },
+    "recent_seizure_intensity": { "type": "String", "required": true, "description": "发作强度" },
+    "treatment_methods": { "type": "String", "required": true, "description": "治疗措施" },
+    "current_medications": { "type": "String", "required": true, "description": "目前服药情况" },
+    "worsening_medications": { "type": "String", "required": true, "description": "加重药物" },
+    "ineffective_medications": { "type": "String", "required": true, "description": "无效药物" },
+
+    "hot_bath": { "type": "String", "required": true, "description": "是否热浴" },
+    "bath_frequency": { "type": "String", "required": true, "description": "药浴频率" },
+    "bath_duration": { "type": "String", "required": true, "description": "热浴时长" },
+    "bath_benefits": { "type": "String", "required": false, "description": "药浴帮助（选填）" },
+    "treatment_effect_description": { "type": "String", "required": false, "description": "治疗效果描述（选填）" },
+    "volunteer_willingness": { "type": "String", "required": false, "description": "志愿者意愿（选填）" },
+    "resources_skills": { "type": "String", "required": false, "description": "资源特长（选填）" },
+    "referral_source": { "type": "String", "required": true, "description": "渠道来源" },
+
+    "created_at": { "type": "Date" },
+    "updated_at": { "type": "Date" }
+  }
+}

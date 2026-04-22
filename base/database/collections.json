@@ -250,6 +250,25 @@
           "options": { "unique": true }
         }
       ]
+    },
+    {
+      "name": "questionnaires",
+      "description": "家庭基础信息问卷集合",
+      "indexes": [
+        {
+          "keys": { "openid": 1 },
+          "options": { "unique": true }
+        },
+        {
+          "keys": { "user_id": 1 }
+        },
+        {
+          "keys": { "status": 1 }
+        },
+        {
+          "keys": { "created_at": -1 }
+        }
+      ]
     }
   ]
 }
