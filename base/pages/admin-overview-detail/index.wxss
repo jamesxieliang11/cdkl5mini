@@ -1,0 +1,287 @@
+/* 数据趋势概览页样式 - 与 admin-monthly-stats 保持一致 */
+
+.page-header {
+  padding: 20rpx 30rpx 24rpx;
+  background: linear-gradient(135deg, #34BFA3, #2da88e);
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+}
+
+/* 统计容器 */
+.stats-container {
+  padding: 20rpx 30rpx 60rpx;
+}
+
+/* 卡片 */
+.section-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 16rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+/* ========== 总览数据 ========== */
+.overview-grid {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+}
+
+.overview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.overview-value {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.overview-value.primary {
+  color: #1989fa;
+}
+
+.overview-value.warning {
+  color: #FF9800;
+}
+
+.overview-value.success {
+  color: #07c160;
+}
+
+.overview-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* ========== 柱状条通用 ========== */
+.bar-list {
+  padding: 8rpx 0;
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.bar-label {
+  width: 120rpx;
+  font-size: 26rpx;
+  flex-shrink: 0;
+  color: #333;
+}
+
+.bar-track {
+  flex: 1;
+  height: 28rpx;
+  background: #f0f0f0;
+  border-radius: 14rpx;
+  overflow: hidden;
+  margin: 0 16rpx;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 14rpx;
+  transition: width 0.3s;
+  min-width: 4rpx;
+}
+
+.bar-count {
+  font-size: 24rpx;
+  color: #666;
+  flex-shrink: 0;
+  min-width: 160rpx;
+  text-align: right;
+}
+
+/* ========== 月度趋势图表 ========== */
+.trend-chart {
+  padding: 8rpx 0;
+}
+
+.trend-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.trend-month {
+  width: 130rpx;
+  font-size: 24rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.trend-bar-area {
+  flex: 1;
+  margin: 0 16rpx;
+}
+
+.trend-bar-track {
+  width: 100%;
+  height: 28rpx;
+  background: #f0f0f0;
+  border-radius: 14rpx;
+  overflow: hidden;
+}
+
+.trend-bar-fill {
+  height: 100%;
+  border-radius: 14rpx;
+  transition: width 0.3s;
+  min-width: 4rpx;
+}
+
+.trend-bar-submitted {
+  background: linear-gradient(90deg, #34BFA3, #2da88e);
+}
+
+.trend-bar-rate {
+  background: linear-gradient(90deg, #07c160, #06ad56);
+}
+
+.trend-bar-seizure {
+  background: linear-gradient(90deg, #ee0a24, #c41d7f);
+}
+
+.trend-value {
+  width: 100rpx;
+  text-align: right;
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* 图例 */
+.trend-legend {
+  display: flex;
+  justify-content: center;
+  gap: 32rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+  margin-top: 8rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+}
+
+.legend-text {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* ========== 活跃用户统计 ========== */
+.active-stats {
+  padding: 8rpx 0;
+}
+
+.active-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f8f8f8;
+}
+
+.active-row:last-child {
+  border-bottom: none;
+}
+
+.active-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.active-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.active-value.highlight {
+  color: #34BFA3;
+}
+
+.active-rate-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 0.6;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 16rpx;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34BFA3, #2da88e);
+  border-radius: 8rpx;
+  transition: width 0.5s ease;
+}
+
+.active-rate-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #34BFA3;
+  flex-shrink: 0;
+}
+
+/* 空状态 */
+.empty-container {
+  padding: 100rpx 0;
+}
