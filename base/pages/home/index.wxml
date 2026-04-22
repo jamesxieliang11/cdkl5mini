@@ -65,7 +65,8 @@
         custom-class="function-item"
       />
       <van-grid-item 
-        icon="robot-o" 
+        wx:if="{{isProd}}"
+        icon="smile-comment-o" 
         text="AI 助手"
         bind:click="showAIMenu"
         custom-class="function-item ai-function-item"

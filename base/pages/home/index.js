@@ -22,6 +22,16 @@ Page({
     console.log('希舞之家首页加载')
     this.initTodayDate()
     this.loadRecentData()
+
+    // 检测环境版本，非生产环境隐藏 AI 助手入口
+    let isProd = false
+    try {
+      const accountInfo = wx.getAccountInfoSync()
+      isProd = accountInfo?.miniProgram?.envVersion === 'release'
+    } catch (error) {
+      isProd = false
+    }
+    this.setData({ isProd })
   },
 
   onShow() {

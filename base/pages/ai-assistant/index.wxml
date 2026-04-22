@@ -1,3 +1,9 @@
+<!-- 隐藏的导出 canvas，用于生成病历图片 -->
+<canvas 
+  canvas-id="exportCanvas" 
+  style="position:fixed;left:-9999px;top:-9999px;width:{{exportCanvasWidth}}px;height:{{exportCanvasHeight}}px;"
+></canvas>
+
 <!-- 状态栏 -->
 <view class="status-bar"></view>
 
@@ -99,18 +105,59 @@
       <view class="message-bubble" wx:if="{{item.role === 'assistant'}}">
         <view class="ai-avatar">🤖</view>
         <view class="bubble-content ai-bubble">
-          <view class="message-text">{{item.content}}</view>
+          <!-- 结构化 Markdown 渲染 -->
+          <view class="md-body" wx:if="{{item.parsedBlocks && item.parsedBlocks.length > 0}}">
+            <block wx:for="{{item.parsedBlocks}}" wx:key="index" wx:for-item="block">
+              <!-- H2 大标题 -->
+              <view class="md-h2" wx:if="{{block.type === 'h2'}}">
+                <text>{{block.text}}</text>
+              </view>
+              <!-- H3 标题 -->
+              <view class="md-h3" wx:if="{{block.type === 'h3'}}">
+                <view class="md-h3-bar"></view>
+                <text>{{block.text}}</text>
+              </view>
+              <!-- H4 小标题 -->
+              <view class="md-h4" wx:if="{{block.type === 'h4'}}">
+                <text>{{block.text}}</text>
+              </view>
+              <!-- 列表项 -->
+              <view class="md-list-item" wx:if="{{block.type === 'list-item'}}">
+                <view class="md-bullet"></view>
+                <view class="md-list-text">
+                  <block wx:for="{{block.segments}}" wx:key="index" wx:for-item="seg">
+                    <text class="md-bold" wx:if="{{seg.bold}}">{{seg.text}}</text>
+                    <text wx:else>{{seg.text}}</text>
+                  </block>
+                </view>
+              </view>
+              <!-- 普通段落 -->
+              <view class="md-paragraph" wx:if="{{block.type === 'paragraph'}}">
+                <block wx:for="{{block.segments}}" wx:key="index" wx:for-item="seg">
+                  <text class="md-bold" wx:if="{{seg.bold}}">{{seg.text}}</text>
+                  <text wx:else>{{seg.text}}</text>
+                </block>
+              </view>
+            </block>
+          </view>
+          <!-- 无结构化数据时降级为纯文本（流式输出中） -->
+          <view class="message-text" wx:if="{{!item.parsedBlocks || item.parsedBlocks.length === 0}}">{{item.content}}</view>
           <!-- AI 正在输入的动画 -->
           <view class="typing-indicator" wx:if="{{item.typing}}">
             <view class="typing-dot"></view>
             <view class="typing-dot"></view>
             <view class="typing-dot"></view>
           </view>
-          <!-- 复制按钮 -->
+          <!-- 操作按钮 -->
           <view class="message-actions" wx:if="{{!item.typing && item.content}}">
             <view class="action-btn" bindtap="copyMessage" data-content="{{item.content}}">
               <van-icon name="description" size="14" color="#999" />
               <text>复制</text>
+            </view>
+            <!-- 病历场景显示导出按钮 -->
+            <view class="action-btn action-btn-export" wx:if="{{scene === 'medical_record'}}" bindtap="exportMedicalRecord" data-content="{{item.content}}">
+              <van-icon name="down" size="14" color="#34BFA3" />
+              <text>保存图片</text>
             </view>
           </view>
         </view>

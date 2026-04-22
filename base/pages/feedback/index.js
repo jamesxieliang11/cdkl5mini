@@ -24,10 +24,20 @@ Page({
     images: [],
     submitting: false,
     feedbackList: [],
-    loading: false
+    loading: false,
+    isProd: false
   },
 
   onLoad() {
+    // 检测环境版本
+    let isProd = false
+    try {
+      const accountInfo = wx.getAccountInfoSync()
+      isProd = accountInfo?.miniProgram?.envVersion === 'release'
+    } catch (error) {
+      isProd = false
+    }
+    this.setData({ isProd })
     this.loadFeedbackList()
   },
 

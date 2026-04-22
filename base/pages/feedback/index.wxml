@@ -58,15 +58,17 @@
           </view>
         </view>
 
-        <!-- 联系方式 -->
-        <view class="section-label">联系方式（可选）</view>
-        <van-field
-          value="{{contact}}"
-          placeholder="手机号或微信号，方便我们联系您"
-          bind:change="onContactInput"
-          border="{{false}}"
-          custom-class="contact-field"
-        />
+        <!-- 联系方式（仅生产环境显示，避免审核问题） -->
+        <view wx:if="{{isProd}}">
+          <view class="section-label">联系方式（可选）</view>
+          <van-field
+            value="{{contact}}"
+            placeholder="微信号，方便我们联系您"
+            bind:change="onContactInput"
+            border="{{false}}"
+            custom-class="contact-field"
+          />
+        </view>
 
         <!-- 提交按钮 -->
         <van-button
