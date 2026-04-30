@@ -916,6 +916,224 @@ function getAdminOverview() {
   return callMonthlyReportFunction('adminOverview', {})
 }
 
+// ==================== 社区相关函数 ====================
+
+/**
+ * 调用社区云函数
+ * @param {string} action 操作类型
+ * @param {Object} params 参数对象
+ * @returns {Promise} 返回操作结果
+ */
+function callCommunityFunction(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'community',
+      data: {
+        action: action,
+        ...params
+      },
+      success: (res) => {
+        console.log('社区云函数调用结果:', res)
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          const errorMsg = res.result ? res.result.message : '操作失败'
+          reject(new Error(errorMsg))
+        }
+      },
+      fail: (error) => {
+        console.error('调用社区云函数失败:', error)
+        reject(error)
+      }
+    })
+  })
+}
+
+/**
+ * 发布帖子
+ * @param {Object} postData 帖子数据
+ * @returns {Promise} 返回发布结果
+ */
+function createCommunityPost(postData) {
+  return callCommunityFunction('createPost', {
+    data: postData,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取帖子详情
+ * @param {string} postId 帖子ID
+ * @returns {Promise} 返回帖子详情
+ */
+function getCommunityPost(postId) {
+  return callCommunityFunction('getPost', {
+    postId: postId,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 获取帖子列表
+ * @param {Object} options 选项 { topicId, pageSize, pageIndex }
+ * @returns {Promise} 返回帖子列表
+ */
+function listCommunityPosts(options = {}) {
+  return callCommunityFunction('listPosts', {
+    topicId: options.topicId || '',
+    pageSize: options.pageSize || 10,
+    pageIndex: options.pageIndex || 0,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 删除帖子
+ * @param {string} postId 帖子ID
+ * @param {boolean} isAdmin 是否管理员
+ * @returns {Promise} 返回删除结果
+ */
+function deleteCommunityPost(postId, isAdmin = false) {
+  return callCommunityFunction('deletePost', {
+    postId: postId,
+    userId: wx.getStorageSync('userId') || '',
+    isAdmin: isAdmin
+  })
+}
+
+/**
+ * 置顶/取消置顶帖子
+ * @param {string} postId 帖子ID
+ * @returns {Promise} 返回操作结果
+ */
+function togglePinCommunityPost(postId) {
+  return callCommunityFunction('togglePinPost', { postId: postId })
+}
+
+/**
+ * 隐藏帖子（管理员）
+ * @param {string} postId 帖子ID
+ * @returns {Promise} 返回操作结果
+ */
+function hideCommunityPost(postId) {
+  return callCommunityFunction('hidePost', { postId: postId })
+}
+
+/**
+ * 发布评论
+ * @param {string} postId 帖子ID
+ * @param {Object} commentData 评论数据
+ * @returns {Promise} 返回评论结果
+ */
+function createCommunityComment(postId, commentData) {
+  return callCommunityFunction('createComment', {
+    postId: postId,
+    data: commentData,
+    userId: wx.getStorageSync('userId') || 'default_user'
+  })
+}
+
+/**
+ * 获取评论列表
+ * @param {string} postId 帖子ID
+ * @param {number} pageSize 每页数量
+ * @param {number} pageIndex 页码
+ * @returns {Promise} 返回评论列表
+ */
+function listCommunityComments(postId, pageSize = 20, pageIndex = 0) {
+  return callCommunityFunction('listComments', {
+    postId: postId,
+    pageSize: pageSize,
+    pageIndex: pageIndex,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 删除评论
+ * @param {string} commentId 评论ID
+ * @param {string} postId 帖子ID
+ * @param {boolean} isAdmin 是否管理员
+ * @returns {Promise} 返回删除结果
+ */
+function deleteCommunityComment(commentId, postId, isAdmin = false) {
+  return callCommunityFunction('deleteComment', {
+    commentId: commentId,
+    postId: postId,
+    userId: wx.getStorageSync('userId') || '',
+    isAdmin: isAdmin
+  })
+}
+
+/**
+ * 点赞/取消点赞
+ * @param {string} itemId 目标ID（帖子或评论）
+ * @param {string} itemType 类型 'post_like' | 'comment_like'
+ * @returns {Promise} 返回点赞结果
+ */
+function toggleCommunityLike(itemId, itemType) {
+  return callCommunityFunction('toggleLike', {
+    itemId: itemId,
+    itemType: itemType,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 创建话题（管理员）
+ * @param {Object} topicData 话题数据
+ * @returns {Promise} 返回创建结果
+ */
+function createCommunityTopic(topicData) {
+  return callCommunityFunction('createTopic', {
+    data: topicData,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 获取话题列表
+ * @returns {Promise} 返回话题列表
+ */
+function listCommunityTopics() {
+  return callCommunityFunction('listTopics', {})
+}
+
+/**
+ * 编辑话题（管理员）
+ * @param {string} topicId 话题ID
+ * @param {Object} topicData 更新数据
+ * @returns {Promise} 返回更新结果
+ */
+function updateCommunityTopic(topicId, topicData) {
+  return callCommunityFunction('updateTopic', {
+    topicId: topicId,
+    data: topicData
+  })
+}
+
+/**
+ * 管理员帖子列表
+ * @param {Object} options 选项 { status, pageSize, pageIndex }
+ * @returns {Promise} 返回帖子列表
+ */
+function adminListCommunityPosts(options = {}) {
+  return callCommunityFunction('adminListPosts', {
+    status: options.status || '',
+    pageSize: options.pageSize || 20,
+    pageIndex: options.pageIndex || 0
+  })
+}
+
+/**
+ * 获取帖子分享数据（供海报生成用）
+ * @param {string} postId 帖子ID
+ * @returns {Promise} 返回分享数据
+ */
+function getCommunityShareData(postId) {
+  return callCommunityFunction('getShareData', { postId: postId })
+}
+
 // 使用 CommonJS 语法导出函数
 module.exports = {
   initDatabase,
@@ -977,5 +1195,21 @@ module.exports = {
   getQuestionnaireAdminList,
   adminBindQuestionnaire,
   // 管理员概览函数
-  getAdminOverview
+  getAdminOverview,
+  // 社区相关函数
+  createCommunityPost,
+  getCommunityPost,
+  listCommunityPosts,
+  deleteCommunityPost,
+  togglePinCommunityPost,
+  hideCommunityPost,
+  createCommunityComment,
+  listCommunityComments,
+  deleteCommunityComment,
+  toggleCommunityLike,
+  createCommunityTopic,
+  listCommunityTopics,
+  updateCommunityTopic,
+  adminListCommunityPosts,
+  getCommunityShareData
 }

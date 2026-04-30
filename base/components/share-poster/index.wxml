@@ -1,0 +1,47 @@
+<!-- 海报遮罩层 -->
+<view class="poster-mask" bindtap="onClose">
+  <view class="poster-container" catchtap="">
+    <!-- Canvas 绘制区域（隐藏在屏幕外用于生成） -->
+    <canvas
+      type="2d"
+      id="posterCanvas"
+      class="poster-canvas"
+    ></canvas>
+
+    <!-- 海报预览图 -->
+    <image
+      wx:if="{{posterImage}}"
+      class="poster-preview"
+      src="{{posterImage}}"
+      mode="widthFix"
+      show-menu-by-longpress
+    />
+
+    <!-- 加载状态 -->
+    <view class="poster-loading" wx:if="{{!posterImage}}">
+      <van-loading size="24px" color="#34BFA3">海报生成中...</van-loading>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="poster-actions" wx:if="{{posterImage}}">
+      <van-button
+        type="primary"
+        round
+        block
+        color="#34BFA3"
+        bind:click="savePoster"
+      >
+        保存到相册
+      </van-button>
+      <van-button
+        plain
+        round
+        block
+        bind:click="onClose"
+        custom-class="close-btn"
+      >
+        关闭
+      </van-button>
+    </view>
+  </view>
+</view>

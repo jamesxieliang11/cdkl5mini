@@ -362,3 +362,60 @@
   border-top: 1rpx solid #f0f0f0;
   text-align: center;
 }
+
+/* 社区话题管理 */
+.topic-form {
+  margin-bottom: 16rpx;
+}
+
+.topic-form-row {
+  margin-bottom: 12rpx;
+}
+
+.topic-input {
+  background: #f7f8fa !important;
+  border-radius: 12rpx !important;
+}
+
+.topic-manage-list {
+  margin-top: 16rpx;
+}
+
+.topic-manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f8f8f8;
+}
+
+.topic-manage-item:last-child {
+  border-bottom: none;
+}
+
+.topic-manage-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.topic-manage-icon {
+  font-size: 36rpx;
+}
+
+.topic-manage-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.topic-manage-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.topic-manage-count {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}

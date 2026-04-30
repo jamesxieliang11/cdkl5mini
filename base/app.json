@@ -16,7 +16,10 @@
     "pages/family-questionnaire/index",
     "pages/admin-questionnaire-detail/index",
     "pages/admin-overview-detail/index",
-    "pages/brochure/index"
+    "pages/brochure/index",
+    "pages/community/index",
+    "pages/community-post/index",
+    "pages/community-detail/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

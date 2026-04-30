@@ -1,0 +1,126 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" size="20" color="#333" />
+  </view>
+  <view class="nav-title">希舞宝宝社区</view>
+  <view class="nav-placeholder"></view>
+</view>
+
+<view class="page-container">
+  <!-- 话题横向滚动栏 -->
+  <scroll-view class="topic-scroll" scroll-x enable-flex>
+    <view
+      class="topic-tab {{selectedTopicId === '' ? 'topic-active' : ''}}"
+      bindtap="onTopicSelect"
+      data-topic-id=""
+    >
+      全部
+    </view>
+    <view
+      wx:for="{{topics}}"
+      wx:key="_id"
+      class="topic-tab {{selectedTopicId === item._id ? 'topic-active' : ''}}"
+      bindtap="onTopicSelect"
+      data-topic-id="{{item._id}}"
+    >
+      <text class="topic-icon">{{item.icon}}</text>
+      <text>{{item.title}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 帖子列表 -->
+  <view class="post-list" wx:if="{{posts.length > 0}}">
+    <view
+      wx:for="{{posts}}"
+      wx:key="_id"
+      class="post-card"
+      bindtap="goToDetail"
+      bindlongpress="onPostLongPress"
+      data-post-id="{{item._id}}"
+      data-user-id="{{item.user_id}}"
+      data-index="{{index}}"
+    >
+      <!-- 置顶标签 -->
+      <view class="pin-badge" wx:if="{{item.is_pinned}}">
+        <van-tag type="danger" round size="medium">置顶</van-tag>
+      </view>
+
+      <!-- 用户信息 -->
+      <view class="post-header">
+        <image
+          class="post-avatar"
+          src="{{item.is_anonymous ? '/images/anonymous-avatar.png' : item.avatar_url}}"
+          mode="aspectFill"
+        />
+        <view class="post-user-info">
+          <text class="post-nickname">{{item.is_anonymous ? '匿名希舞宝宝' : item.nick_name}}</text>
+          <text class="post-time">{{item.displayTime}}</text>
+        </view>
+      </view>
+
+      <!-- 帖子内容 -->
+      <view class="post-content">{{item.content}}</view>
+
+      <!-- 图片预览 -->
+      <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
+        <image
+          wx:for="{{item.images}}"
+          wx:for-item="img"
+          wx:for-index="imgIdx"
+          wx:key="fileID"
+          wx:if="{{imgIdx < 3}}"
+          class="post-image {{item.images.length === 1 ? 'single-image' : ''}}"
+          src="{{img.fileID}}"
+          mode="aspectFill"
+          catchtap="previewImage"
+          data-urls="{{item.images}}"
+          data-current="{{img.fileID}}"
+        />
+        <view class="image-more" wx:if="{{item.images.length > 3}}">
+          <text>+{{item.images.length - 3}}</text>
+        </view>
+      </view>
+
+      <!-- 话题标签 -->
+      <view class="post-topic-tag" wx:if="{{item.topicTitle}}">
+        <van-tag plain round color="#34BFA3" size="medium"># {{item.topicTitle}}</van-tag>
+      </view>
+
+      <!-- 底部操作栏 -->
+      <view class="post-footer">
+        <view class="post-action" catchtap="onLikePost" data-post-id="{{item._id}}" data-index="{{index}}">
+          <van-icon name="{{item.isLiked ? 'good-job' : 'good-job-o'}}" size="16" color="{{item.isLiked ? '#34BFA3' : '#999'}}" />
+          <text class="action-count {{item.isLiked ? 'liked' : ''}}">{{item.like_count || 0}}</text>
+        </view>
+        <view class="post-action">
+          <van-icon name="comment-o" size="16" color="#999" />
+          <text class="action-count">{{item.comment_count || 0}}</text>
+        </view>
+        <view class="post-action">
+          <van-icon name="eye-o" size="16" color="#999" />
+          <text class="action-count">{{item.view_count || 0}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{!hasMore && posts.length > 0 && !loading}}">
+    <text>— 没有更多了 —</text>
+  </view>
+
+  <!-- 空状态 -->
+  <van-empty wx:if="{{!loading && posts.length === 0}}" description="还没有帖子，快来发第一帖吧~" image="search" />
+</view>
+
+<!-- 浮动发帖按钮 -->
+<view class="fab-button" bindtap="goToPost">
+  <van-icon name="edit" size="24" color="#fff" />
+</view>

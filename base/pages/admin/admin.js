@@ -1,7 +1,8 @@
 // 管理员面板 - 概览统计 + 权限管理
 const app = getApp()
 const { 
-  getAdminOverview, getQuestionnaireAdminStats, getAdminMonthlyStats
+  getAdminOverview, getQuestionnaireAdminStats, getAdminMonthlyStats,
+  createCommunityTopic, listCommunityTopics
 } = require('../../utils/database.js')
 
 Page({
@@ -49,6 +50,7 @@ Page({
       this.loadOverviewData()
       this.loadQuestionnaireStats()
       this.loadCurrentMonthStats()
+      this.loadCommunityTopics()
     }
   },
 
@@ -61,6 +63,7 @@ Page({
       this.loadOverviewData()
       this.loadQuestionnaireStats()
       this.loadCurrentMonthStats()
+      this.loadCommunityTopics()
     }
   },
 
@@ -228,6 +231,70 @@ Page({
       console.error('加载月度统计失败:', error)
     } finally {
       this.setData({ monthlyStatsLoading: false })
+    }
+  },
+
+  // ==================== 社区话题管理 ====================
+
+  // 加载话题列表
+  async loadCommunityTopics() {
+    this.setData({ topicListLoading: true })
+    try {
+      const result = await listCommunityTopics()
+      if (result.data && result.data.records) {
+        this.setData({ communityTopics: result.data.records })
+      }
+    } catch (error) {
+      console.error('加载话题列表失败:', error)
+    } finally {
+      this.setData({ topicListLoading: false })
+    }
+  },
+
+  // 话题标题输入
+  onTopicTitleInput(event) {
+    this.setData({ newTopicTitle: event.detail })
+  },
+
+  // 话题描述输入
+  onTopicDescInput(event) {
+    this.setData({ newTopicDesc: event.detail })
+  },
+
+  // 话题图标输入
+  onTopicIconInput(event) {
+    this.setData({ newTopicIcon: event.detail })
+  },
+
+  // 发布新话题
+  async submitNewTopic() {
+    if (!this.data.newTopicTitle) {
+      wx.showToast({ title: '请输入话题标题', icon: 'none' })
+      return
+    }
+
+    this.setData({ topicSubmitting: true })
+    try {
+      await createCommunityTopic({
+        title: this.data.newTopicTitle,
+        description: this.data.newTopicDesc,
+        icon: this.data.newTopicIcon || '💬'
+      })
+
+      wx.showToast({ title: '话题发布成功', icon: 'success' })
+
+      // 重置表单并刷新列表
+      this.setData({
+        newTopicTitle: '',
+        newTopicDesc: '',
+        newTopicIcon: '💬'
+      })
+      this.loadCommunityTopics()
+    } catch (error) {
+      console.error('发布话题失败:', error)
+      wx.showToast({ title: '发布失败', icon: 'none' })
+    } finally {
+      this.setData({ topicSubmitting: false })
     }
   },
 

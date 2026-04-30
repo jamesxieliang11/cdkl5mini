@@ -80,8 +80,16 @@
         custom-class="function-item"
       />
       <van-grid-item 
+        wx:if="{{isProd}}"
+        icon="friends-o" 
+        text="希舞社区"
+        bind:click="goToCommunity"
+        custom-class="function-item"
+      />
+      <van-grid-item 
+        wx:if="{{isProd}}"
         icon="description" 
-        text="宣教手册"
+        text="希舞手册"
         bind:click="goToBrochure"
         custom-class="function-item"
       />

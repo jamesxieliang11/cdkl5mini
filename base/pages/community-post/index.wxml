@@ -1,0 +1,106 @@
+按x<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" size="20" color="#333" />
+  </view>
+  <view class="nav-title">发布帖子</view>
+  <view class="nav-placeholder"></view>
+</view>
+
+<view class="page-container">
+  <!-- 内容输入 -->
+  <view class="form-section">
+    <view class="textarea-wrapper">
+      <textarea
+        class="post-textarea"
+        placeholder="说说你想分享的内容吧..."
+        value="{{content}}"
+        bindinput="onContentInput"
+        maxlength="2000"
+        auto-height
+        focus="{{autoFocus}}"
+      />
+      <view class="word-count">{{content.length}}/2000</view>
+    </view>
+
+    <!-- 图片上传 -->
+    <view class="image-upload-area">
+      <view class="image-list">
+        <view wx:for="{{images}}" wx:key="index" class="image-item">
+          <image src="{{item}}" mode="aspectFill" class="preview-image" bindtap="previewImage" data-url="{{item}}" />
+          <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">
+            <van-icon name="cross" size="12" color="#fff" />
+          </view>
+        </view>
+        <view class="image-add" bindtap="chooseImage" wx:if="{{images.length < 9}}">
+          <van-icon name="photograph" size="28" color="#ccc" />
+          <text class="add-text">{{images.length}}/9</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 选择话题 -->
+    <view class="option-row" bindtap="showTopicPicker">
+      <view class="option-label">
+        <van-icon name="label-o" size="18" color="#34BFA3" />
+        <text>选择话题</text>
+      </view>
+      <view class="option-value">
+        <text wx:if="{{selectedTopic}}">{{selectedTopic.icon}} {{selectedTopic.title}}</text>
+        <text wx:else class="placeholder-text">选填</text>
+        <van-icon name="arrow" size="14" color="#ccc" />
+      </view>
+    </view>
+
+    <!-- 匿名开关 -->
+    <view class="option-row">
+      <view class="option-label">
+        <van-icon name="user-o" size="18" color="#34BFA3" />
+        <text>匿名发布</text>
+      </view>
+      <van-switch checked="{{isAnonymous}}" size="20px" active-color="#34BFA3" bind:change="onAnonymousChange" />
+    </view>
+  </view>
+
+  <!-- 发布按钮 -->
+  <van-button
+    type="primary"
+    block
+    round
+    loading="{{submitting}}"
+    bind:click="submitPost"
+    custom-class="submit-btn"
+    color="{{canSubmit ? '#34BFA3' : '#b5e8dc'}}"
+  >
+    发布
+  </van-button>
+</view>
+
+<!-- 话题选择弹窗 -->
+<van-popup show="{{showTopicPopup}}" position="bottom" round bind:close="hideTopicPicker">
+  <view class="topic-picker">
+    <view class="picker-header">
+      <text class="picker-title">选择话题</text>
+      <view class="picker-close" bindtap="hideTopicPicker">
+        <van-icon name="cross" size="18" color="#999" />
+      </view>
+    </view>
+    <view class="topic-list">
+      <view
+        class="topic-option {{selectedTopic && selectedTopic._id === item._id ? 'topic-selected' : ''}}"
+        wx:for="{{topics}}"
+        wx:key="_id"
+        bindtap="selectTopic"
+        data-index="{{index}}"
+      >
+        <text class="topic-option-icon">{{item.icon}}</text>
+        <text class="topic-option-title">{{item.title}}</text>
+        <van-icon wx:if="{{selectedTopic && selectedTopic._id === item._id}}" name="success" size="16" color="#34BFA3" />
+      </view>
+    </view>
+    <view class="picker-actions">
+      <van-button plain round size="small" bind:click="clearTopic">不选话题</van-button>
+    </view>
+  </view>
+</van-popup>

@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
+    "van-loading": "/miniprogram_npm/@vant/weapp/loading/index",
+    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
+    "share-poster": "/components/share-poster/index"
+  }
+}

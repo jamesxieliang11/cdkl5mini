@@ -233,6 +233,72 @@
 // 云存储路径: questionnaire-images/
 ```
 
+## 社区相关集合 Schema
+
+### community_posts
+```javascript
+{
+  _id: String,
+  user_id: String,                // 发帖用户 ID（索引）
+  nick_name: String,              // 昵称（冗余存储）
+  avatar_url: String,             // 头像（冗余）
+  is_anonymous: Boolean,          // 是否匿名（匿名显示为「匿名希舞宝宝」）
+  topic_id: String,               // 关联话题 ID（可选，索引）
+  content: String,                // 帖子内容（最多 2000 字）
+  images: [{                      // 图片（最多 9 张）
+    fileID: String,               // 云存储文件 ID
+    cloudPath: String             // 云存储路径
+  }],
+  like_count: Number,             // 点赞数
+  comment_count: Number,          // 评论数
+  view_count: Number,             // 浏览数
+  is_pinned: Boolean,             // 是否置顶（管理员操作）
+  status: String,                 // 'active' | 'hidden' | 'deleted'
+  created_at: Date,
+  updated_at: Date
+}
+// 索引: user_id, topic_id, status, created_at(desc), is_pinned+created_at(desc)
+// 云存储路径: community-images/
+```
+
+### community_comments
+```javascript
+{
+  _id: String,
+  post_id: String,                // 所属帖子 ID（索引）
+  user_id: String,                // 评论用户 ID（索引）
+  nick_name: String,              // 昵称（冗余）
+  avatar_url: String,             // 头像（冗余）
+  content: String,                // 评论内容（最多 500 字）
+  reply_to_id: String,            // 回复的评论 ID（可选，楼中楼）
+  reply_to_name: String,          // 回复的用户昵称
+  like_count: Number,             // 点赞数
+  status: String,                 // 'active' | 'hidden' | 'deleted'
+  created_at: Date
+}
+// 索引: post_id, user_id, created_at(desc)
+```
+
+### community_topics
+```javascript
+{
+  _id: String,
+  title: String,                  // 话题标题
+  description: String,            // 话题描述
+  icon: String,                   // 话题图标（emoji 或图片 URL）
+  post_count: Number,             // 帖子数
+  is_hot: Boolean,                // 是否热门
+  sort_order: Number,             // 排序权重（越大越靠前）
+  status: String,                 // 'active' | 'archived'
+  created_by: String,             // 创建者 user_id（管理员）
+  created_at: Date,
+  updated_at: Date
+}
+// 索引: status, sort_order(desc), created_at(desc)
+```
+
+> **点赞记录**：复用已有的 `favorites` 集合，`item_type` 设为 `'post_like'` 或 `'comment_like'`，利用 `user_id + item_id + item_type` 唯一索引防重复。
+
 ## 数据权限模型
 
 - **数据隔离**：所有记录通过 `user_id` 字段实现用户级数据隔离

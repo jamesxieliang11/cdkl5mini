@@ -316,6 +316,13 @@ Page({
     })
   },
 
+  // 导航到希舞宝宝社区
+  goToCommunity() {
+    wx.navigateTo({
+      url: '/pages/community/index'
+    })
+  },
+
   // 导航到管理面板
   goToAdmin() {
     wx.switchTab({
