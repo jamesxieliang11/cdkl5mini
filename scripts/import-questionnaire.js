@@ -25,6 +25,7 @@ const path = require('path')
 const HEADER_MAP = {
   '提交时间（自动）': 'submit_time',
   '提交时间': 'submit_time',
+  '孩子姓名 （必填）': 'child_name',
   '孩子姓名（必填）': 'child_name',
   '孩子姓名': 'child_name',
   '微信群昵称（必须与微信群备注名一致）（必填）': 'wechat_group_nickname',
@@ -137,10 +138,13 @@ const HEADER_MAP = {
 // ==================== 工具函数 ====================
 
 /**
- * 标准化表头：去除前后空格、替换换行符
+ * 标准化表头：去除前后空格、替换换行符、不间断空格转普通空格
  */
 function normalizeHeader(header) {
-  return (header || '').replace(/[\r\n]+/g, '').trim()
+  return (header || '')
+    .replace(/[\r\n]+/g, '')
+    .replace(/\u00A0/g, ' ')
+    .trim()
 }
 
 /**

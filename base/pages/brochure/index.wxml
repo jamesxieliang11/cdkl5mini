@@ -1,0 +1,50 @@
+<!-- 自定义导航栏 -->
+<view class="status-bar"></view>
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" size="20" color="#333" />
+  </view>
+  <view class="nav-title">📖 CDKL5 宣教手册</view>
+  <view class="nav-placeholder"></view>
+</view>
+
+<view class="page-container">
+  <!-- 手册封面信息 -->
+  <view class="brochure-card">
+    <view class="brochure-icon">📖</view>
+    <view class="brochure-title">CDKL5 宣教手册</view>
+    <view class="brochure-desc">全面了解 CDKL5 缺陷症的科普知识、康复指导和日常护理要点</view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-section" wx:if="{{loading}}">
+    <van-loading size="24px" type="spinner" color="#34BFA3">正在加载手册...</van-loading>
+  </view>
+
+  <!-- 打开手册按钮 -->
+  <view class="action-section" wx:if="{{!loading}}">
+    <van-button 
+      type="primary" 
+      size="large" 
+      round 
+      icon="description"
+      bind:click="openBrochure"
+      custom-class="open-button"
+      color="#34BFA3"
+    >
+      打开宣教手册
+    </van-button>
+
+    <view class="tip-text">
+      <van-icon name="info-o" size="14" color="#999" />
+      <text>点击按钮将下载并打开 PDF 手册</text>
+    </view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view wx:if="{{errorMsg}}" class="error-section">
+    <van-empty description="{{errorMsg}}">
+      <van-button slot="button" type="primary" size="small" bind:click="openBrochure" color="#34BFA3">重试</van-button>
+    </van-empty>
+  </view>
+</view>

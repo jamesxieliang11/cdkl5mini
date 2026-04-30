@@ -13,6 +13,127 @@
     <text class="subtitle">请填写宝宝和家长的基本信息</text>
   </view>
 
+  <!-- ==================== 我的宝宝管理 ==================== -->
+  <view class="section baby-section">
+    <view class="section-title">
+      <van-icon name="like-o" color="#34BFA3" />
+      <text>我的宝宝</text>
+      <text class="section-subtitle">（问卷认领绑定）</text>
+    </view>
+
+    <!-- 已绑定的宝宝列表 -->
+    <view class="baby-list" wx:if="{{boundList.length > 0}}">
+      <view class="baby-card" wx:for="{{boundList}}" wx:key="_id">
+        <view class="baby-card-main" data-id="{{item._id}}" bindtap="onViewQuestionnaire">
+          <view class="baby-card-name">
+            👶 {{item.child_name}}
+            <van-tag type="success" size="mini" wx:if="{{item.child_gender}}">{{item.child_gender}}</van-tag>
+          </view>
+          <view class="baby-card-info">出生日期：{{item.birth_date || '未记录'}}</view>
+          <view class="baby-card-info">地区：{{item.region || '未记录'}}</view>
+          <view class="baby-card-tip">点击查看/编辑问卷 →</view>
+        </view>
+        <view class="baby-card-unbind" data-id="{{item._id}}" data-name="{{item.child_name}}" catchtap="onUnbindChild">
+          <van-icon name="close" size="16" color="#ee0a24" />
+          <text class="unbind-text">解绑</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="baby-empty" wx:if="{{!boundLoading && boundList.length === 0}}">
+      <van-icon name="search" size="48" color="#ddd" />
+      <text class="baby-empty-text">暂未绑定宝宝问卷</text>
+      <text class="baby-empty-hint">如果您之前已填写过问卷，可以通过手机号认领</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="baby-loading" wx:if="{{boundLoading}}">
+      <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="baby-actions">
+      <van-button
+        type="primary"
+        color="#34BFA3"
+        size="small"
+        plain
+        icon="plus"
+        bindtap="onShowClaimPanel"
+      >认领宝宝问卷</van-button>
+      <van-button
+        type="default"
+        size="small"
+        icon="edit"
+        bindtap="goToQuestionnaire"
+      >填写新问卷</van-button>
+    </view>
+  </view>
+
+  <!-- ==================== 认领弹窗 ==================== -->
+  <van-popup show="{{showClaimPanel}}" position="bottom" round closeable bind:close="onCloseClaimPanel" custom-style="max-height: 75vh; padding-bottom: env(safe-area-inset-bottom);">
+    <view class="claim-popup">
+      <view class="claim-popup-title">🔗 认领宝宝问卷</view>
+      <view class="claim-popup-hint">输入登记时的手机号查找并认领</view>
+
+      <view class="claim-search-row">
+        <van-field
+          value="{{claimPhone}}"
+          placeholder="请输入手机号"
+          type="tel"
+          bind:input="onClaimPhoneInput"
+          custom-style="flex: 1;"
+        />
+        <van-button
+          type="primary"
+          size="small"
+          color="#34BFA3"
+          loading="{{claimSearching}}"
+          disabled="{{!claimPhone || claimPhone.length < 6}}"
+          bindtap="onSearchByPhone"
+          custom-style="margin-left: 16rpx;"
+        >搜索</van-button>
+      </view>
+
+      <!-- 搜索结果 -->
+      <view class="claim-result-list" wx:if="{{claimResults.length > 0}}">
+        <view class="claim-result-tip">找到 {{claimResults.length}} 条记录，请确认您的宝宝：</view>
+        <view
+          class="claim-result-card {{claimSelectedId === item._id ? 'claim-result-card-selected' : ''}}"
+          wx:for="{{claimResults}}"
+          wx:key="_id"
+          data-id="{{item._id}}"
+          data-name="{{item.child_name}}"
+          data-birth="{{item.birth_date}}"
+          bindtap="onSelectClaimCard"
+        >
+          <view class="claim-result-name">👶 {{item.child_name}}</view>
+          <view class="claim-result-info">出生：{{item.birth_date || '未记录'}} · {{item.child_gender || '未记录'}} · {{item.region || '未记录'}}</view>
+          <view class="claim-result-info">微信群昵称：{{item.wechat_group_nickname || '未记录'}}</view>
+          <van-icon wx:if="{{claimSelectedId === item._id}}" name="checked" color="#34BFA3" size="24" class="claim-check-icon" />
+        </view>
+
+        <van-button
+          type="primary"
+          color="#34BFA3"
+          block
+          loading="{{claimBinding}}"
+          disabled="{{!claimSelectedId}}"
+          custom-style="margin-top: 24rpx;"
+          bindtap="onConfirmClaim"
+        >确认认领</van-button>
+      </view>
+
+      <!-- 无结果 -->
+      <view class="claim-empty-result" wx:if="{{claimSearched && claimResults.length === 0}}">
+        <van-icon name="search" size="48" color="#ccc" />
+        <text class="claim-empty-text">未找到匹配的记录</text>
+        <text class="claim-empty-hint">可能手机号有误，或信息尚未录入</text>
+      </view>
+    </view>
+  </van-popup>
+
   <form bindsubmit="submitForm">
     <!-- 宝宝信息 -->
     <view class="section">

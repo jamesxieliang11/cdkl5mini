@@ -1,3 +1,6 @@
+<!-- 工具函数模块 -->
+<wxs src="./utils.wxs" module="utils" />
+
 <!-- 问卷详情列表页 -->
 <view class="page-header">
   <view class="header-row">
@@ -57,14 +60,14 @@
         <view class="bar-track">
           <view class="bar-fill" style="width: {{stats.submittedCount > 0 ? stats.genderDistribution.male / stats.submittedCount * 100 : 0}}%; background: linear-gradient(90deg, #1989fa, #1565c0);"></view>
         </view>
-        <view class="bar-count">{{stats.genderDistribution.male || 0}}人 ({{stats.submittedCount > 0 ? (stats.genderDistribution.male / stats.submittedCount * 100).toFixed(1) : 0}}%)</view>
+        <view class="bar-count">{{stats.genderDistribution.male || 0}}人 ({{utils.percent(stats.genderDistribution.male, stats.submittedCount)}}%)</view>
       </view>
       <view class="bar-item" wx:if="{{stats.genderDistribution.female !== undefined}}">
         <view class="bar-label">女</view>
         <view class="bar-track">
           <view class="bar-fill" style="width: {{stats.submittedCount > 0 ? stats.genderDistribution.female / stats.submittedCount * 100 : 0}}%; background: linear-gradient(90deg, #ee0a24, #c41d7f);"></view>
         </view>
-        <view class="bar-count">{{stats.genderDistribution.female || 0}}人 ({{stats.submittedCount > 0 ? (stats.genderDistribution.female / stats.submittedCount * 100).toFixed(1) : 0}}%)</view>
+        <view class="bar-count">{{stats.genderDistribution.female || 0}}人 ({{utils.percent(stats.genderDistribution.female, stats.submittedCount)}}%)</view>
       </view>
       <view class="bar-item" wx:if="{{stats.genderDistribution.unknown !== undefined}}">
         <view class="bar-label">未知</view>
@@ -124,7 +127,7 @@
         <view class="bar-track">
           <view class="bar-fill seizure-control-bar" style="width: {{stats.submittedCount > 0 ? val / stats.submittedCount * 100 : 0}}%;"></view>
         </view>
-        <view class="bar-count">{{val}}人 ({{stats.submittedCount > 0 ? (val / stats.submittedCount * 100).toFixed(1) : 0}}%)</view>
+        <view class="bar-count">{{val}}人 ({{utils.percent(val, stats.submittedCount)}}%)</view>
       </view>
     </view>
   </view>
@@ -143,16 +146,22 @@
       <view class="detail-item" wx:for="{{questionnaires}}" wx:key="index">
         <view class="detail-header">
           <text class="detail-name">{{item.child_name || item.childName || '未填写'}}</text>
-          <van-tag type="success" size="small">已提交</van-tag>
+          <view class="detail-header-tags">
+            <van-tag wx:if="{{item.openid}}" type="success" size="small">已绑定</van-tag>
+            <van-tag wx:else type="warning" size="small" bindtap="onOpenBind" data-id="{{item._id}}" data-name="{{item.child_name}}">未绑定 · 点击绑定</van-tag>
+          </view>
         </view>
         <view class="detail-body">
           <view class="detail-info">
-            <text class="detail-info-item" wx:if="{{item.province || item.city}}">📍 {{item.province || ''}}{{item.city || ''}}</text>
+            <text class="detail-info-item" wx:if="{{item.region}}">📍 {{item.region}}</text>
             <text class="detail-info-item" wx:if="{{item.diagnosis_age || item.diagnosisAge}}">🎂 诊断年龄: {{item.diagnosis_age || item.diagnosisAge || '未知'}}</text>
           </view>
-          <view class="detail-info" wx:if="{{item.seizure_control || item.seizureControl || item.gender}}">
-            <text class="detail-info-item" wx:if="{{item.gender}}">👤 {{item.gender}}</text>
+          <view class="detail-info" wx:if="{{item.seizure_control || item.seizureControl || item.child_gender}}">
+            <text class="detail-info-item" wx:if="{{item.child_gender}}">👤 {{item.child_gender}}</text>
             <text class="detail-info-item" wx:if="{{item.seizure_control || item.seizureControl}}">⚡ {{item.seizure_control || item.seizureControl}}</text>
+          </view>
+          <view class="detail-info" wx:if="{{item.parent_contact}}">
+            <text class="detail-info-item">📱 {{item.parent_contact}}</text>
           </view>
         </view>
       </view>
@@ -160,3 +169,34 @@
   </view>
 
 </view>
+
+<!-- ==================== 管理员绑定弹窗 ==================== -->
+<van-dialog
+  use-slot
+  show="{{showBindDialog}}"
+  title="绑定用户 - {{bindTargetName}}"
+  show-cancel-button
+  confirm-button-text="确认绑定"
+  cancel-button-text="取消"
+  confirm-button-color="#34BFA3"
+  bind:confirm="onConfirmBind"
+  bind:cancel="onCloseBind"
+  bind:close="onCloseBind"
+>
+  <view class="bind-dialog-content">
+    <view class="bind-dialog-hint">请输入要绑定的用户 openid（可在用户管理中查看）</view>
+    <van-field
+      value="{{bindOpenid}}"
+      label="openid"
+      placeholder="必填"
+      required
+      bind:input="onBindOpenidInput"
+    />
+    <van-field
+      value="{{bindUserId}}"
+      label="userId"
+      placeholder="选填"
+      bind:input="onBindUserIdInput"
+    />
+  </view>
+</van-dialog>

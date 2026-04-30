@@ -51,6 +51,297 @@ const OPTIONS = {
   referralSource: ['微信群', '病友推荐', '医生推荐', '网络搜索', '公众号', '其他']
 }
 
+// 需要做模糊匹配修正的字段 → 对应 OPTIONS 的 key
+const RADIO_FIELD_OPTION_MAP = {
+  child_gender: 'gender',
+  birth_order: 'birthOrder',
+  pregnancy_method: 'pregnancyMethod',
+  pregnancy_protection: 'pregnancyProtection',
+  delivery_method: 'deliveryMethod',
+  misdiagnosed_as_cp: 'misdiagnosedAsCp',
+  mother_education: 'education',
+  father_education: 'education',
+  family_member_resigned: 'familyResigned',
+  monthly_income: 'monthlyIncome',
+  treatment_cost: 'treatmentCost',
+  rehab_cost: 'rehabCost',
+  mobility_method: 'mobilityMethod',
+  swallowing_difficulty: 'swallowingDifficulty',
+  sleep_disorder: 'sleepDisorder',
+  sleep_restlessness: 'sleepRestlessness',
+  development_status: 'developmentStatus',
+  gene_test_done: 'geneTestDone',
+  mutation_source: 'mutationSource',
+  mutation_type: 'mutationType',
+  seizure_control: 'seizureControl',
+  recent_seizure_duration: 'recentSeizureDuration',
+  recent_seizure_intensity: 'recentSeizureIntensity',
+  hot_bath: 'hotBath',
+  bath_frequency: 'bathFrequency',
+  bath_duration: 'bathDuration',
+  volunteer_willingness: 'volunteerWillingness',
+  referral_source: 'referralSource'
+}
+
+// 多选字段 → OPTIONS key
+const CHECKBOX_FIELD_OPTION_MAP = {
+  other_symptoms: 'otherSymptoms',
+  treatment_methods: 'treatmentMethods'
+}
+
+/**
+ * Excel 原始值 → 前端 OPTIONS 值 的显式映射表
+ * 用于修正导入数据与前端选项不匹配的问题
+ */
+const VALUE_CORRECTION_MAP = {
+  // 性别
+  child_gender: {
+    '女孩': '女', '男孩': '男'
+  },
+  // 第几胎（数字 → 文字）
+  birth_order: {
+    '1': '第一胎', '2': '第二胎', '3': '第三胎', '4': '第四胎及以上',
+    '5': '第四胎及以上', '第1胎': '第一胎', '第2胎': '第二胎', '第3胎': '第三胎'
+  },
+  // 怀孕方式
+  pregnancy_method: {
+    '自然受孕': '自然怀孕'
+  },
+  // 分娩方式
+  delivery_method: {
+    '顺转剖': '剖腹产'
+  },
+  // 家庭成员辞职
+  family_member_resigned: {
+    '无': '否', '母亲辞职': '是，母亲辞职', '父亲辞职': '是，父亲辞职',
+    '其他家庭成员辞职': '是，其他家庭成员辞职'
+  },
+  // 学历
+  mother_education: {
+    '专科及以下': '大专', '研究生及以上': '硕士', '大学本科': '本科'
+  },
+  father_education: {
+    '专科及以下': '大专', '研究生及以上': '硕士', '大学本科': '本科'
+  },
+  // 基因变异来源
+  mutation_source: {
+    '自发': '新发突变', '嵌合': '不确定',
+    '基因报告看不懂': '不确定', '看不懂': '不确定'
+  },
+  // 突变类型
+  mutation_type: {
+    '无义': '无义突变', '错义': '错义突变', '移码': '移码突变',
+    '报告看不懂': '不确定', '新发无义': '无义突变'
+  },
+  // 癫痫控制
+  seizure_control: {
+    '近一个月仍有癫痫发作': '未控制（频繁发作）',
+    '近一个月无癫痫发作': '部分控制（发作减少）',
+    '近一年无癫痫发作': '已控制（无发作超过6个月）',
+    '每天都有发作': '未控制（频繁发作）'
+  },
+  // 发作强度
+  recent_seizure_intensity: {
+    '较轻': '轻度', '中等': '中度', '强烈': '重度', '无': '轻度'
+  },
+  // 发作持续时间
+  recent_seizure_duration: {
+    '1分钟内': '1分钟以内', '3-5分钟': '1-5分钟',
+    '>5分钟': '10分钟以上', '无': '数秒'
+  },
+  // 收入/费用（万元制 → 元制映射）
+  monthly_income: {
+    '5000元以下': '3000-5000元',
+    '5000元-1万元': '5000-10000元',
+    '1万元-3万元': '10000-20000元',
+    '3万元以上': '50000元以上'
+  },
+  treatment_cost: {
+    '5000元以下': '3000-5000元',
+    '5000元-1万元': '5000-10000元',
+    '1万元-3万元': '10000元以上',
+    '3万元以上': '10000元以上'
+  },
+  rehab_cost: {
+    '5000元以下': '3000-5000元',
+    '5000元-1万元': '5000-10000元',
+    '1万元-3万元': '10000元以上',
+    '3万元以上': '10000元以上'
+  },
+  // 发育状态（简单值直接映射，组合值在 normalizeQuestionnaireValues 中特殊处理）
+  development_status: {
+    '都不知道': '严重落后'
+  },
+  // 移动方式
+  mobility_method: {
+    '卧床': '完全不能自主移动', '躺着': '完全不能自主移动',
+    '轮椅/宝宝推车': '完全不能自主移动',
+    '辅助下行走（如拄拐/扶走）': '扶走',
+    '六个月怎么走？': '完全不能自主移动'
+  },
+  // 睡眠不安
+  sleep_restlessness: {
+    '少无=每周有0-1次': '偶尔',
+    '有时=每周有2-4次': '经常',
+    '经常=每周有5-7次': '总是'
+  },
+  // 吞咽困难（数字量表）
+  swallowing_difficulty: {
+    '0': '无困难', '1': '轻度困难', '2': '中度困难', '3': '重度困难', '4': '需要鼻饲/胃管'
+  },
+  // 睡眠障碍（数字量表）
+  sleep_disorder: {
+    '0': '无障碍', '1': '轻度', '2': '中度', '3': '重度', '4': '重度'
+  },
+  // 药浴频率
+  bath_frequency: {
+    '每天一次': '每天', '不定期': '偶尔', '无须作答': '从不'
+  },
+  // 热浴时长
+  bath_duration: {
+    '10分钟以下': '10分钟以内', '无须作答': '10分钟以内'
+  },
+  // 志愿者意愿
+  volunteer_willingness: {
+    '如有需要时': '视情况而定', '已在团队': '是',
+    '身体欠佳，暂时没有精力。': '否'
+  },
+  // 渠道来源
+  referral_source: {
+    '公众号/视频号': '公众号', '抖音': '网络搜索', '小红书': '网络搜索',
+    '基因群成立初期，松松爸推荐入群': '病友推荐'
+  }
+}
+
+// 多选字段的选项值映射
+// 注意：key 必须与 CHECKBOX_FIELD_OPTION_MAP 的 value（OPTIONS key）一致，即 camelCase
+const MULTI_VALUE_CORRECTION_MAP = {
+  treatmentMethods: {
+    '药物治疗': '抗癫痫药物', '手术治疗': '手术'
+  },
+  otherSymptoms: {
+    '运动发育迟缓': '发育迟缓', '智力障碍': '发育迟缓',
+    '语言障碍': '发育迟缓', '肌张力高/低': '运动障碍',
+    '吞咽困难': '发育迟缓', '胃肠道问题': '便秘',
+    '视觉障碍': '视觉障碍', '听力障碍': '其他',
+    '睡眠障碍': '其他'
+  },
+  mobilityMethod: {
+    '卧床': '完全不能自主移动', '轮椅/宝宝推车': '完全不能自主移动',
+    '辅助下行走（如拄拐/扶走）': '扶走'
+  }
+}
+
+/**
+ * 修正单个值：先查显式映射表，再做模糊匹配
+ */
+function correctValue(dbValue, field, optionsList) {
+  if (!dbValue || !optionsList || !optionsList.length) return dbValue
+
+  // 精确匹配前端选项（已经是正确值）
+  if (optionsList.includes(dbValue)) return dbValue
+
+  // 查显式映射表
+  const fieldMap = VALUE_CORRECTION_MAP[field]
+  if (fieldMap && fieldMap[dbValue] !== undefined) {
+    return fieldMap[dbValue]
+  }
+
+  // 去空格/标点后精确匹配
+  const normalized = dbValue.replace(/[\s,，、;；\u00A0]/g, '').toLowerCase()
+  const normalizedMatch = optionsList.find(opt =>
+    opt.replace(/[\s,，、;；\u00A0]/g, '').toLowerCase() === normalized
+  )
+  if (normalizedMatch) return normalizedMatch
+
+  // 包含匹配
+  const containsMatch = optionsList.find(opt => {
+    const optNorm = opt.replace(/[\s,，、;；\u00A0]/g, '').toLowerCase()
+    return normalized.includes(optNorm) || optNorm.includes(normalized)
+  })
+  if (containsMatch) return containsMatch
+
+  console.warn(`[问卷修正] 字段 ${field} 值 "${dbValue}" 未匹配到选项，保留原值`)
+  return dbValue
+}
+
+/**
+ * 修正问卷数据：将数据库值映射到前端 OPTIONS 中匹配的选项
+ */
+function normalizeQuestionnaireValues(formData) {
+  const corrected = { ...formData }
+
+  // development_status 特殊处理：Excel 存的是技能列表，根据掌握技能数量判断发育等级
+  if (corrected.development_status && OPTIONS.developmentStatus &&
+      !OPTIONS.developmentStatus.includes(corrected.development_status)) {
+    const rawDevStatus = String(corrected.development_status).toLowerCase()
+    if (rawDevStatus.includes('正常走') && rawDevStatus.includes('说话')) {
+      corrected.development_status = '基本正常'
+    } else if (rawDevStatus.includes('独站') || rawDevStatus.includes('走不稳') || rawDevStatus.includes('正常走')) {
+      corrected.development_status = '轻度落后'
+    } else if (rawDevStatus.includes('独坐') || rawDevStatus.includes('翻身')) {
+      corrected.development_status = '明显落后'
+    } else {
+      corrected.development_status = '严重落后'
+    }
+  }
+
+  for (const [field, optionKey] of Object.entries(RADIO_FIELD_OPTION_MAP)) {
+    if (corrected[field] && OPTIONS[optionKey]) {
+      // 跳过已处理的 development_status
+      if (field === 'development_status' && OPTIONS[optionKey].includes(corrected[field])) continue
+
+      // 处理可能的多值字段（如 mobility_method 可能是 "卧床, 轮椅/宝宝推车"）
+      const rawValue = String(corrected[field])
+      if (rawValue.includes(',') || rawValue.includes('、')) {
+        // 取第一个值来匹配（单选字段不应有多个值）
+        const firstPart = rawValue.split(/[,，、]/).map(s => s.trim()).filter(Boolean)[0]
+        corrected[field] = correctValue(firstPart, field, OPTIONS[optionKey])
+      } else {
+        corrected[field] = correctValue(rawValue, field, OPTIONS[optionKey])
+      }
+    }
+  }
+
+  return corrected
+}
+
+/**
+ * 修正多选字段：将每个选项分别映射
+ */
+function normalizeCheckboxValues(rawValue, optionKey) {
+  if (!rawValue) return []
+  const optionsList = OPTIONS[optionKey]
+  if (!optionsList) return rawValue.split('、')
+
+  const parts = String(rawValue).split(/[、,，;；]/).map(s => s.trim()).filter(Boolean)
+  const fieldMap = MULTI_VALUE_CORRECTION_MAP[optionKey] || {}
+
+  const corrected = new Set()
+  for (const part of parts) {
+    if (optionsList.includes(part)) {
+      corrected.add(part)
+    } else if (fieldMap[part]) {
+      corrected.add(fieldMap[part])
+    } else {
+      // 模糊匹配
+      const normalized = part.replace(/[\s\u00A0]/g, '').toLowerCase()
+      const match = optionsList.find(opt =>
+        opt.replace(/[\s\u00A0]/g, '').toLowerCase() === normalized ||
+        normalized.includes(opt.replace(/[\s\u00A0]/g, '').toLowerCase()) ||
+        opt.replace(/[\s\u00A0]/g, '').toLowerCase().includes(normalized)
+      )
+      if (match) {
+        corrected.add(match)
+      } else {
+        console.warn(`[问卷修正] 多选字段 ${optionKey} 值 "${part}" 未匹配到选项，跳过`)
+      }
+    }
+  }
+
+  return Array.from(corrected)
+}
+
 Page({
   data: {
     currentStep: 1,
@@ -60,6 +351,11 @@ Page({
     isEdit: false,
     loading: false,
     submitting: false,
+
+    // 当前绑定的宝宝信息（只读展示）
+    currentQuestionnaireId: '',
+    currentChildName: '',
+    hasQuestionnaire: false,
 
     // 表单数据
     formData: {
@@ -143,6 +439,13 @@ Page({
     this.loadExistingQuestionnaire()
   },
 
+  onShow() {
+    // 从用户中心认领宝宝后返回，自动刷新问卷数据
+    if (!this.data.loading) {
+      this.loadExistingQuestionnaire()
+    }
+  },
+
   // ==================== 数据加载 ====================
 
   // 加载本地草稿
@@ -159,29 +462,51 @@ Page({
     }
   },
 
-  // 加载已提交的问卷（编辑模式）
+  // 加载已提交的问卷（编辑模式），若无则显示认领面板
   async loadExistingQuestionnaire() {
     try {
       this.setData({ loading: true })
       const result = await getQuestionnaire()
       if (result.data) {
         const q = result.data
+        // 修正数据库值与前端 OPTIONS 的差异（模糊匹配）
+        const correctedData = normalizeQuestionnaireValues(q)
+        const correctedSymptoms = normalizeCheckboxValues(q.other_symptoms, 'otherSymptoms')
+        const correctedTreatments = normalizeCheckboxValues(q.treatment_methods, 'treatmentMethods')
+
         this.setData({
           isEdit: true,
-          formData: { ...this.data.formData, ...q },
-          selectedSymptoms: q.other_symptoms ? q.other_symptoms.split('、') : [],
-          selectedTreatments: q.treatment_methods ? q.treatment_methods.split('、') : [],
+          hasQuestionnaire: true,
+          currentQuestionnaireId: q._id || '',
+          currentChildName: q.child_name || '',
+          formData: { ...this.data.formData, ...correctedData, other_symptoms: correctedSymptoms.join('、'), treatment_methods: correctedTreatments.join('、') },
+          selectedSymptoms: correctedSymptoms,
+          selectedTreatments: correctedTreatments,
           geneReportFiles: (q.gene_report_images || []).map((fileID, i) => ({
             url: fileID,
             name: `报告${i + 1}`
           }))
         })
+      } else {
+        // 没有已绑定的问卷，提示去用户中心认领
+        this.setData({ hasQuestionnaire: false })
       }
     } catch (error) {
-      console.log('未找到已有问卷，进入新建模式')
+      console.log('未找到已有问卷')
+      this.setData({ hasQuestionnaire: false })
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  // 跳转到用户中心管理宝宝
+  goToUserProfile() {
+    wx.navigateTo({ url: '/pages/user-profile/index' })
+  },
+
+  // 跳过认领，直接填写新问卷
+  onSkipToNew() {
+    this.setData({ hasQuestionnaire: true, isEdit: false })
   },
 
   // 保存草稿到本地
@@ -417,5 +742,11 @@ Page({
         fail: () => wx.switchTab({ url: '/pages/home/index' })
       })
     }
+  },
+
+  // 回到主页
+  goHome() {
+    this.saveDraft()
+    wx.switchTab({ url: '/pages/home/index' })
   }
 })

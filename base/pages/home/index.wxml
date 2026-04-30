@@ -80,6 +80,12 @@
         custom-class="function-item"
       />
       <van-grid-item 
+        icon="description" 
+        text="宣教手册"
+        bind:click="goToBrochure"
+        custom-class="function-item"
+      />
+      <van-grid-item 
         wx:if="{{isProd}}"
         icon="smile-comment-o" 
         text="AI 助手"

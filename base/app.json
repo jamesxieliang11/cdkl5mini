@@ -15,7 +15,8 @@
     "pages/ai-assistant/index",
     "pages/family-questionnaire/index",
     "pages/admin-questionnaire-detail/index",
-    "pages/admin-overview-detail/index"
+    "pages/admin-overview-detail/index",
+    "pages/brochure/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

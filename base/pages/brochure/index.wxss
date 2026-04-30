@@ -1,0 +1,111 @@
+/* 状态栏区域 */
+.status-bar {
+  height: var(--status-bar-height);
+  background: #ffffff;
+}
+
+/* 自定义导航栏 - 与 feedback 等页面一致 */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  padding: 0 20rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.nav-back {
+  width: 80rpx;
+  display: flex;
+  align-items: center;
+  padding: 10rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.nav-placeholder {
+  width: 80rpx;
+}
+
+/* 页面容器 */
+.page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 100%);
+  padding: 40rpx 30rpx 140rpx;
+}
+
+/* 手册卡片 */
+.brochure-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 50rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.brochure-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #34BFA3, #5dd5b8);
+}
+
+.brochure-icon {
+  font-size: 100rpx;
+  margin-bottom: 30rpx;
+}
+
+.brochure-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 20rpx;
+}
+
+.brochure-desc {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  padding: 0 20rpx;
+}
+
+/* 加载区域 */
+.loading-section {
+  display: flex;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+/* 操作区域 */
+.action-section {
+  padding: 20rpx 0;
+}
+
+.open-button {
+  margin-bottom: 30rpx;
+}
+
+.tip-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 错误提示 */
+.error-section {
+  padding: 40rpx 0;
+}

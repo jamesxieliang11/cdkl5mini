@@ -317,3 +317,21 @@
   font-size: 26rpx;
   color: #999;
 }
+
+/* ========== 绑定相关 ========== */
+.detail-header-tags {
+  display: flex;
+  gap: 8rpx;
+}
+
+.bind-dialog-content {
+  padding: 24rpx 16rpx;
+}
+
+.bind-dialog-hint {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+  line-height: 1.6;
+  padding: 0 16rpx;
+}

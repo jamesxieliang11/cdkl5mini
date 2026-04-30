@@ -24,11 +24,12 @@ Page({
     this.initTodayDate()
     this.loadRecentData()
 
-    // 检测环境版本，非生产环境隐藏 AI 助手入口
+    // 检测环境版本：仅本地开发和线上正式版展示 AI 助手，其他版本（体验版等）隐藏以过审
     let isProd = false
     try {
       const accountInfo = wx.getAccountInfoSync()
-      isProd = accountInfo?.miniProgram?.envVersion === 'release'
+      const envVersion = accountInfo?.miniProgram?.envVersion
+      isProd = envVersion === 'develop' || envVersion === 'release'
     } catch (error) {
       isProd = false
     }
@@ -271,6 +272,13 @@ Page({
     } catch (error) {
       console.warn('检查问卷状态失败:', error)
     }
+  },
+
+  // 导航到宣教手册
+  goToBrochure() {
+    wx.navigateTo({
+      url: '/pages/brochure/index'
+    })
   },
 
   // 导航到家庭问卷

@@ -1,5 +1,6 @@
 // 用户信息完善页面
 const app = getApp()
+const { getMyBoundQuestionnaires, unbindQuestionnaire, searchQuestionnaireByPhone, claimQuestionnaire } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -20,15 +21,29 @@ Page({
     loading: false,
     isEdit: false, // 是否为编辑模式
     currentDate: '', // 当前日期，用于限制生日选择
-    isProd: false // 是否为生产环境
+    isProd: false, // 是否为生产环境
+
+    // 我的宝宝管理
+    boundList: [],
+    boundLoading: false,
+    showClaimPanel: false,
+    claimPhone: '',
+    claimSearching: false,
+    claimSearched: false,
+    claimResults: [],
+    claimSelectedId: '',
+    claimSelectedName: '',
+    claimSelectedBirth: '',
+    claimBinding: false
   },
 
   onLoad: function (options) {
-    // 检测环境版本
+    // 检测环境版本：仅本地开发和线上正式版展示，其他版本隐藏以过审
     let isProd = false
     try {
       const accountInfo = wx.getAccountInfoSync()
-      isProd = accountInfo?.miniProgram?.envVersion === "release"
+      const envVersion = accountInfo?.miniProgram?.envVersion
+      isProd = envVersion === 'develop' || envVersion === 'release'
     } catch (error) {
       isProd = false
     }
@@ -42,6 +57,12 @@ Page({
     })
     
     this.loadUserProfile()
+    this.loadBoundBabies()
+  },
+
+  onShow() {
+    // 每次进入页面刷新绑定列表
+    this.loadBoundBabies()
   },
 
   // 返回按钮点击处理
@@ -493,6 +514,182 @@ Page({
           icon: 'error'
         })
       }
+    })
+  },
+
+  // ==================== 我的宝宝管理 ====================
+
+  // 加载已绑定的宝宝列表
+  async loadBoundBabies() {
+    this.setData({ boundLoading: true })
+    try {
+      const result = await getMyBoundQuestionnaires()
+      this.setData({ boundList: result.data || [] })
+    } catch (error) {
+      console.error('获取绑定宝宝列表失败:', error)
+    } finally {
+      this.setData({ boundLoading: false })
+    }
+  },
+
+  // 打开认领面板
+  onShowClaimPanel() {
+    this.setData({
+      showClaimPanel: true,
+      claimPhone: '',
+      claimSearched: false,
+      claimResults: [],
+      claimSelectedId: ''
+    })
+  },
+
+  // 关闭认领面板
+  onCloseClaimPanel() {
+    this.setData({ showClaimPanel: false })
+  },
+
+  // 认领：输入手机号
+  onClaimPhoneInput(event) {
+    this.setData({ claimPhone: event.detail })
+  },
+
+  // 认领：搜索
+  async onSearchByPhone() {
+    const phone = this.data.claimPhone
+    if (!phone || phone.length < 6) {
+      wx.showToast({ title: '请输入有效的手机号', icon: 'none' })
+      return
+    }
+    this.setData({ claimSearching: true, claimSearched: false, claimResults: [], claimSelectedId: '' })
+    try {
+      const result = await searchQuestionnaireByPhone(phone)
+      this.setData({
+        claimResults: result.data.records || [],
+        claimSearched: true
+      })
+    } catch (error) {
+      console.error('搜索问卷失败:', error)
+      wx.showToast({ title: '搜索失败，请重试', icon: 'none' })
+    } finally {
+      this.setData({ claimSearching: false })
+    }
+  },
+
+  // 认领：选中一个宝宝卡片
+  onSelectClaimCard(event) {
+    const { id, name, birth } = event.currentTarget.dataset
+    this.setData({
+      claimSelectedId: id,
+      claimSelectedName: name,
+      claimSelectedBirth: birth || ''
+    })
+  },
+
+  // 认领：确认绑定
+  async onConfirmClaim() {
+    if (!this.data.claimSelectedId) {
+      wx.showToast({ title: '请先选择一条记录', icon: 'none' })
+      return
+    }
+    this.setData({ claimBinding: true })
+    try {
+      const result = await claimQuestionnaire(
+        this.data.claimSelectedId,
+        this.data.claimSelectedName,
+        this.data.claimSelectedBirth
+      )
+      wx.showToast({ title: '绑定成功！', icon: 'success' })
+      this.setData({
+        showClaimPanel: false,
+        claimResults: [],
+        claimSelectedId: ''
+      })
+      // 刷新绑定列表
+      await this.loadBoundBabies()
+
+      // 如果返回了宝宝信息，询问是否同步到当前表单
+      const childInfo = result.data && result.data.childInfo
+      if (childInfo && childInfo.childName) {
+        this.promptSyncChildInfo(childInfo)
+      }
+    } catch (error) {
+      console.error('绑定失败:', error)
+      wx.showToast({ title: error.message || '绑定失败，请重试', icon: 'none' })
+    } finally {
+      this.setData({ claimBinding: false })
+    }
+  },
+
+  // 弹窗询问是否将宝宝信息同步到当前用户资料
+  promptSyncChildInfo(childInfo) {
+    const infoLines = [
+      `宝宝姓名：${childInfo.childName}`,
+      childInfo.birthDate ? `出生日期：${childInfo.birthDate}` : '',
+      childInfo.childGender ? `性别：${childInfo.childGender}` : '',
+      childInfo.region ? `地区：${childInfo.region}` : ''
+    ].filter(Boolean).join('\n')
+
+    wx.showModal({
+      title: '同步宝宝信息',
+      content: `是否将以下信息同步到您的个人资料？\n\n${infoLines}`,
+      confirmText: '同步',
+      cancelText: '暂不',
+      success: (res) => {
+        if (res.confirm) {
+          this.setData({
+            'patientInfo.babyName': childInfo.childName,
+            'patientInfo.babyBirthday': childInfo.birthDate || '',
+            'patientInfo.parentName': childInfo.parentName || '',
+            'patientInfo.parentPhone': childInfo.parentContact || ''
+          })
+          wx.showToast({ title: '已同步到表单', icon: 'success' })
+        }
+      }
+    })
+  },
+
+  // 解绑宝宝
+  onUnbindChild(event) {
+    const targetId = event.currentTarget.dataset.id
+    const targetName = event.currentTarget.dataset.name
+    wx.showModal({
+      title: '确认解绑',
+      content: `确定要解绑「${targetName}」的问卷吗？解绑后可以重新认领。`,
+      confirmColor: '#ee0a24',
+      success: (res) => {
+        if (res.confirm) {
+          this.doUnbind(targetId)
+        }
+      }
+    })
+  },
+
+  async doUnbind(questionnaireId) {
+    try {
+      wx.showLoading({ title: '解绑中...' })
+      await unbindQuestionnaire(questionnaireId)
+      wx.showToast({ title: '已解绑', icon: 'success' })
+      await this.loadBoundBabies()
+    } catch (error) {
+      console.error('解绑失败:', error)
+      wx.showToast({ title: error.message || '解绑失败', icon: 'none' })
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
+  // 跳转到问卷页查看/编辑
+  onViewQuestionnaire(event) {
+    const questionnaireId = event.currentTarget.dataset.id
+    wx.navigateTo({
+      url: `/pages/family-questionnaire/index?questionnaireId=${questionnaireId}`
+    })
+  },
+
+  // 跳转到问卷页填写新问卷
+  goToQuestionnaire() {
+    wx.navigateTo({
+      url: '/pages/family-questionnaire/index'
     })
   },
 

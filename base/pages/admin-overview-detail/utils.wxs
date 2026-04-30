@@ -1,0 +1,15 @@
+// 工具函数模块 - 提供 wxml 模板中不支持的方法
+module.exports = {
+  // 百分比格式化：保留一位小数
+  percent: function(value, total) {
+    if (!total || total <= 0) return '0'
+    var result = value / total * 100
+    // WXS 中手动实现 toFixed(1)
+    var rounded = Math.round(result * 10) / 10
+    var str = '' + rounded
+    if (str.indexOf('.') === -1) {
+      str = str + '.0'
+    }
+    return str
+  }
+}

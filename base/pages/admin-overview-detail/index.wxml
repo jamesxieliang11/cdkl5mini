@@ -1,3 +1,6 @@
+<!-- 工具函数模块 -->
+<wxs src="./utils.wxs" module="utils" />
+
 <!-- 数据趋势概览页 -->
 <view class="page-header">
   <view class="header-row">
@@ -49,21 +52,21 @@
         <view class="bar-track">
           <view class="bar-fill" style="width: {{overview.recordCounts.total > 0 ? overview.recordCounts.seizure / overview.recordCounts.total * 100 : 0}}%; background: linear-gradient(90deg, #ee0a24, #c41d7f);"></view>
         </view>
-        <view class="bar-count">{{overview.recordCounts.seizure || 0}}条 ({{overview.recordCounts.total > 0 ? (overview.recordCounts.seizure / overview.recordCounts.total * 100).toFixed(1) : 0}}%)</view>
+        <view class="bar-count">{{overview.recordCounts.seizure || 0}}条 ({{utils.percent(overview.recordCounts.seizure, overview.recordCounts.total)}}%)</view>
       </view>
       <view class="bar-item">
         <view class="bar-label">💊 用药</view>
         <view class="bar-track">
           <view class="bar-fill" style="width: {{overview.recordCounts.total > 0 ? overview.recordCounts.medication / overview.recordCounts.total * 100 : 0}}%; background: linear-gradient(90deg, #1989fa, #1565c0);"></view>
         </view>
-        <view class="bar-count">{{overview.recordCounts.medication || 0}}条 ({{overview.recordCounts.total > 0 ? (overview.recordCounts.medication / overview.recordCounts.total * 100).toFixed(1) : 0}}%)</view>
+        <view class="bar-count">{{overview.recordCounts.medication || 0}}条 ({{utils.percent(overview.recordCounts.medication, overview.recordCounts.total)}}%)</view>
       </view>
       <view class="bar-item">
         <view class="bar-label">📝 其他</view>
         <view class="bar-track">
           <view class="bar-fill" style="width: {{overview.recordCounts.total > 0 ? overview.recordCounts.other / overview.recordCounts.total * 100 : 0}}%; background: linear-gradient(90deg, #ff976a, #ee6723);"></view>
         </view>
-        <view class="bar-count">{{overview.recordCounts.other || 0}}条 ({{overview.recordCounts.total > 0 ? (overview.recordCounts.other / overview.recordCounts.total * 100).toFixed(1) : 0}}%)</view>
+        <view class="bar-count">{{overview.recordCounts.other || 0}}条 ({{utils.percent(overview.recordCounts.other, overview.recordCounts.total)}}%)</view>
       </view>
     </view>
   </view>
@@ -152,7 +155,7 @@
           <view class="progress-bar">
             <view class="progress-fill" style="width: {{overview.totalUsers > 0 ? overview.activeUsers / overview.totalUsers * 100 : 0}}%"></view>
           </view>
-          <text class="active-rate-text">{{overview.totalUsers > 0 ? (overview.activeUsers / overview.totalUsers * 100).toFixed(1) : 0}}%</text>
+          <text class="active-rate-text">{{utils.percent(overview.activeUsers, overview.totalUsers)}}%</text>
         </view>
       </view>
     </view>

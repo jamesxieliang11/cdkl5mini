@@ -852,6 +852,63 @@ function getQuestionnaireAdminList(pageSize = 100, pageIndex = 0) {
 }
 
 /**
+ * 按手机号搜索未绑定的问卷
+ * @param {string} phone 手机号或微信号
+ * @returns {Promise} 返回匹配的问卷列表
+ */
+function searchQuestionnaireByPhone(phone) {
+  return callQuestionnaireFunction('searchByPhone', { phone })
+}
+
+/**
+ * 家长认领绑定问卷
+ * @param {string} questionnaireId 问卷记录ID
+ * @param {string} childName 孩子姓名（用于二次验证）
+ * @param {string} birthDate 出生日期（用于二次验证）
+ * @returns {Promise} 返回绑定结果
+ */
+function claimQuestionnaire(questionnaireId, childName, birthDate) {
+  return callQuestionnaireFunction('claim', {
+    questionnaireId,
+    childName,
+    birthDate,
+    userId: wx.getStorageSync('userId') || ''
+  })
+}
+
+/**
+ * 管理员手动绑定问卷到指定用户
+ * @param {string} questionnaireId 问卷记录ID
+ * @param {string} targetOpenid 目标用户openid
+ * @param {string} targetUserId 目标用户ID
+ * @returns {Promise} 返回绑定结果
+ */
+function adminBindQuestionnaire(questionnaireId, targetOpenid, targetUserId) {
+  return callQuestionnaireFunction('adminBind', {
+    questionnaireId,
+    targetOpenid,
+    targetUserId
+  })
+}
+
+/**
+ * 获取当前用户绑定的所有问卷列表
+ * @returns {Promise} 返回问卷数组
+ */
+function getMyBoundQuestionnaires() {
+  return callQuestionnaireFunction('getMyBoundList', {})
+}
+
+/**
+ * 解绑问卷（将当前用户从问卷的 bound_users 中移除）
+ * @param {string} questionnaireId 问卷记录ID
+ * @returns {Promise} 返回解绑结果
+ */
+function unbindQuestionnaire(questionnaireId) {
+  return callQuestionnaireFunction('unbind', { questionnaireId })
+}
+
+/**
  * 获取管理员概览统计数据
  * @returns {Promise} 返回概览统计
  */
@@ -911,9 +968,14 @@ module.exports = {
   submitQuestionnaire,
   getQuestionnaire,
   checkQuestionnaireSubmitted,
+  searchQuestionnaireByPhone,
+  claimQuestionnaire,
+  getMyBoundQuestionnaires,
+  unbindQuestionnaire,
   // 问卷管理统计函数
   getQuestionnaireAdminStats,
   getQuestionnaireAdminList,
+  adminBindQuestionnaire,
   // 管理员概览函数
   getAdminOverview
 }

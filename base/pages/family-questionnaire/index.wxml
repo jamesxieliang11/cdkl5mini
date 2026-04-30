@@ -2,11 +2,16 @@
 <view class="status-bar"></view>
 <view class="nav-bar">
   <view class="nav-back" bindtap="onBack">
-    <van-icon name="arrow-left" size="20" color="#333" />
+    <van-icon name="arrow-left" size="20" color="#fff" />
   </view>
   <view class="nav-title">{{isEdit ? '编辑' : '填写'}}家庭基础信息</view>
-  <view class="nav-action" bindtap="saveDraftToCloud">
-    <text class="save-draft-text">保存草稿</text>
+  <view class="nav-right-actions">
+    <view class="nav-action" bindtap="saveDraftToCloud">
+      <text class="save-draft-text">保存草稿</text>
+    </view>
+    <view class="nav-action" bindtap="goHome">
+      <van-icon name="wap-home-o" size="20" color="rgba(255,255,255,0.9)" />
+    </view>
   </view>
 </view>
 
@@ -25,8 +30,24 @@
   <text class="loading-text">加载中...</text>
 </view>
 
+
+<!-- ==================== 未绑定提示 ==================== -->
+<view class="no-questionnaire" wx:if="{{!loading && !hasQuestionnaire}}">
+  <view class="section-card">
+    <view class="no-questionnaire-content">
+      <van-icon name="info-o" size="48" color="#34BFA3" />
+      <text class="no-questionnaire-title">尚未绑定宝宝问卷</text>
+      <text class="no-questionnaire-hint">请先前往个人中心认领已有问卷，或直接填写新问卷</text>
+      <view class="no-questionnaire-actions">
+        <van-button type="primary" color="#34BFA3" size="small" bindtap="goToUserProfile">去认领</van-button>
+        <van-button type="default" size="small" bindtap="onSkipToNew">直接填写新问卷</van-button>
+      </view>
+    </view>
+  </view>
+</view>
+
 <!-- ==================== Step 1: 基本信息 ==================== -->
-<view class="step-container" wx:if="{{currentStep === 1}}">
+<view class="step-container" wx:if="{{(hasQuestionnaire || isEdit) && currentStep === 1}}">
   <view class="section-card">
     <view class="card-title">👶 孩子与家长基本信息</view>
 
@@ -425,7 +446,7 @@
 </view>
 
 <!-- ==================== 底部导航按钮 ==================== -->
-<view class="bottom-actions">
+<view class="bottom-actions" wx:if="{{hasQuestionnaire || isEdit}}">
   <van-button
     wx:if="{{currentStep > 1}}"
     type="default"

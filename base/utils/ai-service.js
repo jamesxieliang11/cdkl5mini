@@ -4,7 +4,7 @@
  * 提供基因报告解读、病历生成、调药建议、知识问答等场景的 AI 对话能力
  */
 
-const { listMedicationRecords, listSeizureRecords, listOtherRecords, listMonthlyReports } = require('./database.js')
+const { listMedicationRecords, listSeizureRecords, listOtherRecords, listMonthlyReports, getMyBoundQuestionnaires } = require('./database.js')
 
 // ==================== 场景配置 ====================
 
@@ -75,13 +75,15 @@ const SYSTEM_PROMPTS = {
 
 ⚠️ 重要声明：你的解读仅供参考，不构成医学诊断。建议家长将报告带给专业的遗传学医生进行确认和解读。`,
 
-  medical_record: `你是一名资深儿童神经科医生的助手。请根据以下患者数据生成一份简洁的门诊病历摘要。
+  medical_record: `你是一名资深儿童神经科医生的助手。请根据以下患者数据生成一份精简的门诊病历摘要，直接呈现数据事实，不做评估和建议。
 
 ## 输出要求
-- 总字数控制在600-800字
-- 严格按照以下格式分段输出
-- 关键数据前置（发作频率、当前用药）
+- 总字数控制在400-600字
+- 严格按照以下格式分段输出，不要增加额外章节
+- 医生最关注的信息前置：发作频率、发作类型、当前用药
 - 使用专业医学术语，数据用具体数字
+- 不要输出"评估与建议"、"注意事项"等主观判断内容
+- 只呈现客观数据和事实
 
 ## 输出格式
 
@@ -92,17 +94,14 @@ const SYSTEM_PROMPTS = {
 1-2句概括（如：CDKL5基因突变相关癫痫，近X月发作Y次/月，现服Z种抗癫痫药物）
 
 ### 现病史
+- 首次发作年龄：XX
 - 癫痫发作：近N月月均发作X次，主要类型为XX，典型持续X分钟，趋势为（增加/减少/稳定）
 - 当前用药（表格）：
-| 药物 | 剂量 | 频次 | 依从性 |
+| 药物 | 剂量 | 频次 |
 - 近期调药：XX
-- 发育状况：已达里程碑XX，近期新进展XX
 
 ### 既往史
-基因检测 / 首次发作年龄 / 伴随症状（简要）
-
-### 评估与建议
-基于数据趋势的2-3条简要建议`,
+基因检测结果 / 基因突变类型 / 伴随症状（简要）`,
 
   drug_adjustment: `你是一位药学参考助手，专注于 CDKL5 综合征（CDKL5 缺乏症）的抗癫痫药物治疗参考。
 
@@ -568,31 +567,58 @@ async function fetchOtherRecordsSummary(days = 30) {
 }
 
 /**
- * 获取宝宝基本信息
+ * 获取宝宝基本信息（合并用户 profile + 绑定问卷数据）
  */
 async function fetchBabyInfo() {
   try {
-    const result = await wx.cloud.callFunction({
-      name: 'getUserProfile',
-      data: {}
-    })
+    // 并行获取用户 profile 和绑定问卷
+    const [profileResult, questionnaireResult] = await Promise.all([
+      wx.cloud.callFunction({ name: 'getUserProfile', data: {} }).catch(() => null),
+      getMyBoundQuestionnaires().catch(() => ({ success: false }))
+    ])
 
-    const patientInfo = result.result?.data?.patientInfo || {}
+    const patientInfo = profileResult?.result?.data?.patientInfo || {}
+    // 取第一个绑定问卷作为数据补充来源
+    const boundList = (questionnaireResult?.success && questionnaireResult?.data) || []
+    const questionnaire = boundList.length > 0 ? boundList[0] : {}
+
     const parts = []
 
-    if (patientInfo.babyName) parts.push(`姓名：${patientInfo.babyName}`)
-    if (patientInfo.babyBirthday) {
-      const birthDate = new Date(patientInfo.babyBirthday)
+    // 基本信息：优先用 profile，问卷兜底
+    const babyName = patientInfo.babyName || questionnaire.child_name
+    if (babyName) parts.push(`姓名：${babyName}`)
+
+    const gender = patientInfo.gender || questionnaire.child_gender
+    if (gender) parts.push(`性别：${gender}`)
+
+    const birthday = patientInfo.babyBirthday || questionnaire.birth_date
+    if (birthday) {
+      const birthDate = new Date(birthday)
       const now = new Date()
       const ageInMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth())
       const ageText = ageInMonths < 12
         ? `${ageInMonths}个月`
         : `${Math.floor(ageInMonths / 12)}岁${ageInMonths % 12 > 0 ? ageInMonths % 12 + '个月' : ''}`
       parts.push(`年龄：${ageText}`)
-      parts.push(`出生日期：${birthDate.toLocaleDateString('zh-CN')}`)
     }
+
     if (patientInfo.weight) parts.push(`体重：${patientInfo.weight}kg`)
-    if (patientInfo.medicalHistory) parts.push(`病史：${patientInfo.medicalHistory}`)
+
+    // 从问卷获取医学关键信息
+    if (questionnaire.first_seizure_age) parts.push(`首次发作年龄：${questionnaire.first_seizure_age}`)
+    if (questionnaire.diagnosis_age) parts.push(`确诊年龄：${questionnaire.diagnosis_age}`)
+    if (questionnaire.mutation_type) parts.push(`基因突变类型：${questionnaire.mutation_type}`)
+    if (questionnaire.mutation_source) parts.push(`突变来源：${questionnaire.mutation_source}`)
+    if (questionnaire.seizure_control) parts.push(`癫痫控制状态：${questionnaire.seizure_control}`)
+    if (questionnaire.recent_seizure_type) parts.push(`近期发作类型：${questionnaire.recent_seizure_type}`)
+    if (questionnaire.recent_seizure_intensity) parts.push(`发作强度：${questionnaire.recent_seizure_intensity}`)
+    if (questionnaire.current_medications) parts.push(`当前用药：${questionnaire.current_medications}`)
+    if (questionnaire.treatment_methods) parts.push(`治疗方式：${questionnaire.treatment_methods}`)
+    if (questionnaire.other_symptoms) parts.push(`伴随症状：${questionnaire.other_symptoms}`)
+    if (questionnaire.development_status) parts.push(`发育状态：${questionnaire.development_status}`)
+    if (questionnaire.mobility_method) parts.push(`移动方式：${questionnaire.mobility_method}`)
+
+    if (patientInfo.medicalHistory) parts.push(`补充病史：${patientInfo.medicalHistory}`)
 
     return parts.length > 0 ? parts.join('，') : '暂无宝宝基本信息'
   } catch (error) {
