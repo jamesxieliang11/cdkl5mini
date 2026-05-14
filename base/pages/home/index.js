@@ -16,7 +16,8 @@ Page({
       { name: '📋 AI 生成病历', subname: '汇总记录数据，生成标准化病历', scene: 'medical_record' },
       { name: '💊 AI 调药参考', subname: '基于用药和发作数据提供参考（仅供参考）', scene: 'drug_adjustment' },
       { name: '💡 CDKL5 知识问答', subname: '疾病知识、康复训练、日常护理', scene: 'knowledge_qa' }
-    ]
+    ],
+    featuresEnabled: false // 功能总开关（从云端配置读取，默认关闭）
   },
 
   onLoad(options) {
@@ -24,16 +25,9 @@ Page({
     this.initTodayDate()
     this.loadRecentData()
 
-    // 检测环境版本：仅本地开发和线上正式版展示 AI 助手，其他版本（体验版等）隐藏以过审
-    let isProd = false
-    try {
-      const accountInfo = wx.getAccountInfoSync()
-      const envVersion = accountInfo?.miniProgram?.envVersion
-      isProd = envVersion === 'develop' || envVersion === 'release'
-    } catch (error) {
-      isProd = false
-    }
-    this.setData({ isProd })
+    // 从全局配置读取功能总开关（由管理员在后台控制）
+    const appConfig = app.globalData.appConfig || {}
+    this.setData({ featuresEnabled: !!appConfig.features_enabled })
   },
 
   onShow() {
@@ -42,6 +36,23 @@ Page({
     this.checkQuestionnaireStatus()
     this.updateTabBarState()
     this.checkAdminRole()
+    // 每次显示时同步最新的功能开关状态（app.js 异步拉取后可能已更新）
+    this.syncAppConfig()
+  },
+
+  // 同步全局功能开关到页面 data
+  syncAppConfig() {
+    const appConfig = app.globalData.appConfig || {}
+    this.setData({ featuresEnabled: !!appConfig.features_enabled })
+  },
+
+  // 问卷已认领时覆盖功能开关（与 app.js 的逻辑保持一致）
+  overrideFeaturesIfQuestionnaireClaimed(submitted) {
+    if (submitted && !this.data.featuresEnabled) {
+      console.log('[Home] 用户已认领问卷，功能开关覆盖为开启')
+      this.setData({ featuresEnabled: true })
+      app.globalData.appConfig = { features_enabled: true }
+    }
   },
 
   // 检查管理员角色
@@ -268,6 +279,8 @@ Page({
       const result = await checkQuestionnaireSubmitted()
       if (result && result.data) {
         this.setData({ showQuestionnaireReminder: !result.data.submitted })
+        // 已认领问卷时，即使总开关关闭也视为开启
+        this.overrideFeaturesIfQuestionnaireClaimed(result.data.submitted)
       }
     } catch (error) {
       console.warn('检查问卷状态失败:', error)

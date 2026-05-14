@@ -52,6 +52,35 @@ exports.main = async (event, context) => {
   }
 }
 
+// ==================== 公共方法 ====================
+
+// 查询用户资料，拼接「宝宝名字+关系」作为社区昵称
+async function resolveUserDisplayInfo(userId, fallbackNickName, fallbackAvatarUrl) {
+  let displayName = fallbackNickName || '希舞宝宝'
+  let avatarUrl = fallbackAvatarUrl || ''
+  try {
+    const userResult = await db.collection('users').where({ _id: userId }).limit(1).get()
+    if (userResult.data && userResult.data.length > 0) {
+      const user = userResult.data[0]
+      const patientInfo = user.patientInfo || {}
+      // 优先级：宝宝名字+关系 → 微信昵称 → 前端传入的昵称 → "希舞宝宝"
+      if (patientInfo.babyName) {
+        const relationMap = { '父亲': '爸爸', '母亲': '妈妈', '爷爷': '爷爷', '奶奶': '奶奶', '外公': '外公', '外婆': '外婆', '其他': '家人' }
+        const roleName = relationMap[patientInfo.relationship] || '家人'
+        displayName = patientInfo.babyName + roleName
+      } else if (user.nickName) {
+        displayName = user.nickName
+      }
+      if (!avatarUrl && user.avatarUrl) {
+        avatarUrl = user.avatarUrl
+      }
+    }
+  } catch (e) {
+    console.log('查询用户资料失败，使用前端传入的昵称:', e.message)
+  }
+  return { displayName, avatarUrl }
+}
+
 // ==================== 帖子相关 ====================
 
 // 发布帖子
@@ -66,10 +95,13 @@ async function createPost(event) {
     return { success: false, message: '帖子内容不能超过 2000 字' }
   }
 
+  // 查询用户资料拼接社区昵称
+  const { displayName, avatarUrl } = await resolveUserDisplayInfo(userId, data.nickName, data.avatarUrl)
+
   const post = {
     user_id: userId,
-    nick_name: data.nickName || '希舞宝宝',
-    avatar_url: data.avatarUrl || '',
+    nick_name: data.isAnonymous ? '匿名用户' : displayName,
+    avatar_url: data.isAnonymous ? '' : avatarUrl,
     is_anonymous: data.isAnonymous || false,
     topic_id: data.topicId || '',
     content: data.content.trim(),
@@ -299,11 +331,14 @@ async function createComment(event) {
     return { success: false, message: '评论内容不能超过 500 字' }
   }
 
+  // 查询用户资料拼接社区昵称
+  const { displayName, avatarUrl } = await resolveUserDisplayInfo(userId, data.nickName, data.avatarUrl)
+
   const comment = {
     post_id: postId,
     user_id: userId,
-    nick_name: data.nickName || '希舞宝宝',
-    avatar_url: data.avatarUrl || '',
+    nick_name: displayName,
+    avatar_url: avatarUrl,
     content: data.content.trim(),
     reply_to_id: data.replyToId || '',
     reply_to_name: data.replyToName || '',

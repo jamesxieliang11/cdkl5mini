@@ -145,7 +145,7 @@ Page({
         wx.hideLoading()
       }
 
-      // 获取用户信息
+      // 获取用户信息（昵称由云函数根据 patientInfo 自动拼接）
       const userInfo = wx.getStorageSync('userInfo') || {}
 
       const postData = {

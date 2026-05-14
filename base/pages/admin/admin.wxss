@@ -363,6 +363,36 @@
   text-align: center;
 }
 
+/* 功能开关管理 */
+.config-switch-list {
+  margin-top: 8rpx;
+}
+
+.config-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.config-switch-info {
+  flex: 1;
+  margin-right: 24rpx;
+}
+
+.config-switch-label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.config-switch-desc {
+  font-size: 22rpx;
+  color: #999;
+}
+
 /* 社区话题管理 */
 .topic-form {
   margin-bottom: 16rpx;

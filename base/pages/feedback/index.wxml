@@ -58,8 +58,8 @@
           </view>
         </view>
 
-        <!-- 联系方式（仅生产环境显示，避免审核问题） -->
-        <view wx:if="{{isProd}}">
+        <!-- 联系方式（功能总开关开启时显示） -->
+        <view wx:if="{{featuresEnabled}}">
           <view class="section-label">联系方式（可选）</view>
           <van-field
             value="{{contact}}"

@@ -180,70 +180,36 @@
     </view>
   </view>
 
-  <!-- ========== 社区话题管理 ========== -->
+  <!-- ========== 功能开关管理 ========== -->
   <view class="section-card" wx:if="{{isAdmin}}">
-    <view class="section-card-title">💬 社区话题管理</view>
-
-    <!-- 新建话题表单 -->
-    <view class="topic-form">
-      <view class="topic-form-row">
-        <van-field
-          value="{{newTopicTitle}}"
-          placeholder="话题标题"
-          bind:change="onTopicTitleInput"
-          border="{{false}}"
-          custom-class="topic-input"
-        />
-      </view>
-      <view class="topic-form-row">
-        <van-field
-          value="{{newTopicDesc}}"
-          placeholder="话题描述（选填）"
-          bind:change="onTopicDescInput"
-          border="{{false}}"
-          custom-class="topic-input"
-        />
-      </view>
-      <view class="topic-form-row" style="display: flex; align-items: center; gap: 16rpx;">
-        <van-field
-          value="{{newTopicIcon}}"
-          placeholder="图标 emoji"
-          bind:change="onTopicIconInput"
-          border="{{false}}"
-          custom-class="topic-input"
-          style="flex: 1;"
-        />
-        <van-button
-          type="primary"
-          size="small"
-          round
-          color="#34BFA3"
-          disabled="{{!newTopicTitle}}"
-          loading="{{topicSubmitting}}"
-          bind:click="submitNewTopic"
-        >
-          发布话题
-        </van-button>
-      </view>
+    <view class="section-card-title">⚙️ 功能开关</view>
+    <view wx:if="{{appConfigLoading}}" class="loading-placeholder">
+      <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
     </view>
-
-    <!-- 已有话题列表 -->
-    <view class="topic-manage-list" wx:if="{{communityTopics.length > 0}}">
-      <view class="stat-row" style="margin-top: 24rpx;">
-        <view class="stat-row-label">已有话题 ({{communityTopics.length}})</view>
-      </view>
-      <view class="topic-manage-item" wx:for="{{communityTopics}}" wx:key="_id">
-        <view class="topic-manage-left">
-          <text class="topic-manage-icon">{{item.icon || '💬'}}</text>
-          <view class="topic-manage-info">
-            <text class="topic-manage-name">{{item.title}}</text>
-            <text class="topic-manage-count">{{item.post_count || 0}} 帖子</text>
-          </view>
+    <view wx:else class="config-switch-list">
+      <view class="config-switch-row" style="border-bottom: none;">
+        <view class="config-switch-info">
+          <view class="config-switch-label">🔓 功能总开关</view>
+          <view class="config-switch-desc">社区、问卷、手册、AI 助手等所有扩展功能</view>
         </view>
-        <van-tag wx:if="{{item.is_hot}}" type="danger" size="small">热门</van-tag>
+        <van-switch
+          checked="{{appConfig.features_enabled}}"
+          loading="{{appConfigSaving}}"
+          active-color="#34BFA3"
+          bind:change="onToggleAppConfig"
+        />
       </view>
     </view>
-    <view wx:elif="{{!topicListLoading}}" class="empty-text" style="padding: 24rpx;">暂无话题</view>
+  </view>
+
+  <!-- ========== 社区管理入口 ========== -->
+  <view class="section-card" wx:if="{{isAdmin}}">
+    <view class="section-card-title">💬 社区管理</view>
+    <view class="detail-btn-wrapper" style="border-top: none; margin-top: 0; padding-top: 0;">
+      <van-button plain type="primary" size="small" bind:tap="goToCommunityAdmin" custom-style="border-color: #34BFA3; color: #34BFA3;">
+        💬 管理话题、帖子与评论
+      </van-button>
+    </view>
   </view>
 
   <!-- 用户管理（仅超管可见） -->

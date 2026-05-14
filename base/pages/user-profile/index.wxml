@@ -13,8 +13,8 @@
     <text class="subtitle">请填写宝宝和家长的基本信息</text>
   </view>
 
-  <!-- ==================== 我的宝宝管理 ==================== -->
-  <view class="section baby-section">
+  <!-- ==================== 我的宝宝管理（仅本地和正式环境显示） ==================== -->
+  <view class="section baby-section" wx:if="{{isProd}}">
     <view class="section-title">
       <van-icon name="like-o" color="#34BFA3" />
       <text>我的宝宝</text>

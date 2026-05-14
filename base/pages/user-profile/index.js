@@ -38,16 +38,11 @@ Page({
   },
 
   onLoad: function (options) {
-    // 检测环境版本：仅本地开发和线上正式版展示，其他版本隐藏以过审
-    let isProd = false
-    try {
-      const accountInfo = wx.getAccountInfoSync()
-      const envVersion = accountInfo?.miniProgram?.envVersion
-      isProd = envVersion === 'develop' || envVersion === 'release'
-    } catch (error) {
-      isProd = false
-    }
-    
+    // 从全局配置读取功能总开关
+    const app = getApp()
+    const appConfig = app.globalData.appConfig || {}
+    const isProd = !!appConfig.features_enabled
+
     // 设置当前日期
     const today = new Date()
     const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`

@@ -1,4 +1,4 @@
-按x<!-- 状态栏区域 -->
+<!-- 状态栏区域 -->
 <view class="status-bar"></view>
 <view class="nav-bar">
   <view class="nav-back" bindtap="goBack">

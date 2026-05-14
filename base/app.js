@@ -1,4 +1,5 @@
 const { wxLogin, getUserInfo, isLoggedIn } = require('./utils/user.js')
+const { getAppConfig, checkQuestionnaireSubmitted } = require('./utils/database.js')
 
 App({
   globalData: {
@@ -7,7 +8,11 @@ App({
     openid: '', // 用户openid
     queueNumber: '', // 排队号
     favoriteSchedules: [], // 收藏的议程
-    hasNewMessage: false // 是否有新消息
+    hasNewMessage: false, // 是否有新消息
+    // 应用功能配置（从云端拉取，本地缓存兜底，默认全关闭）
+    appConfig: {
+      features_enabled: false
+    }
   },
 
   onLaunch() {
@@ -34,6 +39,9 @@ App({
     // 获取收藏的议程
     const favoriteSchedules = wx.getStorageSync('favoriteSchedules') || []
     this.globalData.favoriteSchedules = favoriteSchedules
+
+    // 初始化应用配置：先从本地缓存恢复，再静默拉取远端并更新
+    this.initAppConfig()
   },
 
   onShow: function () {
@@ -41,6 +49,50 @@ App({
     this.checkNewMessages()
     // 检查月度汇报提醒
     this.checkMonthlyReportReminder()
+  },
+
+  // 初始化应用配置：先从本地缓存恢复，再静默拉取远端并更新
+  initAppConfig() {
+    const APP_CONFIG_CACHE_KEY = 'appConfig'
+    const DEFAULT_CONFIG = { features_enabled: false }
+
+    // 先从本地缓存恢复，默认关闭所有功能
+    const cachedConfig = wx.getStorageSync(APP_CONFIG_CACHE_KEY) || DEFAULT_CONFIG
+    this.globalData.appConfig = { features_enabled: !!cachedConfig.features_enabled }
+
+    // 静默拉取远端配置，有变化才更新
+    getAppConfig().then(result => {
+      if (!result || !result.data) return
+      const remoteFeaturesEnabled = !!result.data.features_enabled
+      if (remoteFeaturesEnabled !== this.globalData.appConfig.features_enabled) {
+        const newConfig = { features_enabled: remoteFeaturesEnabled }
+        this.globalData.appConfig = newConfig
+        wx.setStorageSync(APP_CONFIG_CACHE_KEY, newConfig)
+        console.log('[AppConfig] 配置已更新:', newConfig)
+      }
+      // 如果总开关关闭，检查用户是否已认领问卷，已认领则视为开启
+      if (!this.globalData.appConfig.features_enabled) {
+        this.checkQuestionnaireOverride()
+      }
+    }).catch(err => {
+      console.log('[AppConfig] 拉取远端配置失败，使用本地缓存:', err.message)
+      // 本地缓存也是关闭的，同样检查问卷状态
+      if (!this.globalData.appConfig.features_enabled) {
+        this.checkQuestionnaireOverride()
+      }
+    })
+  },
+
+  // 已认领问卷时覆盖功能开关为开启状态
+  checkQuestionnaireOverride() {
+    checkQuestionnaireSubmitted().then(result => {
+      if (result && result.data && result.data.submitted) {
+        console.log('[AppConfig] 用户已认领问卷，功能开关覆盖为开启')
+        this.globalData.appConfig = { features_enabled: true }
+      }
+    }).catch(err => {
+      console.log('[AppConfig] 检查问卷状态失败:', err.message)
+    })
   },
 
   // 初始化用户登录状态

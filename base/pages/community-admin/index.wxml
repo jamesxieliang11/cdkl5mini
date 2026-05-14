@@ -1,0 +1,191 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+
+<!-- 自定义导航栏 -->
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" color="#fff" size="20px" />
+  </view>
+  <text class="nav-title">社区管理</text>
+  <view class="nav-placeholder"></view>
+</view>
+
+<van-tabs active="{{activeTab}}" bind:change="onTabChange" color="#34BFA3" line-width="60" sticky>
+  <!-- ========== 话题管理 ========== -->
+  <van-tab title="话题">
+    <view class="tab-content">
+      <!-- 新建话题表单 -->
+      <view class="form-card">
+        <view class="form-card-title">新建话题</view>
+        <view class="form-row">
+          <van-field
+            value="{{newTopicTitle}}"
+            placeholder="话题标题（必填）"
+            bind:change="onTopicTitleInput"
+            border="{{false}}"
+            custom-class="form-input"
+          />
+        </view>
+        <view class="form-row">
+          <van-field
+            value="{{newTopicDesc}}"
+            placeholder="话题描述（选填）"
+            bind:change="onTopicDescInput"
+            border="{{false}}"
+            custom-class="form-input"
+          />
+        </view>
+        <view class="form-row-inline">
+          <van-field
+            value="{{newTopicIcon}}"
+            placeholder="图标 emoji"
+            bind:change="onTopicIconInput"
+            border="{{false}}"
+            custom-class="form-input"
+            style="flex: 1;"
+          />
+          <van-button
+            type="primary"
+            size="small"
+            round
+            color="#34BFA3"
+            disabled="{{!newTopicTitle}}"
+            loading="{{topicSubmitting}}"
+            bind:click="submitNewTopic"
+          >
+            发布话题
+          </van-button>
+        </view>
+      </view>
+
+      <!-- 话题列表 -->
+      <view class="list-card">
+        <view class="list-card-title">已有话题 ({{communityTopics.length}})</view>
+        <view wx:if="{{topicListLoading}}" class="loading-box">
+          <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+        </view>
+        <view wx:elif="{{communityTopics.length === 0}}" class="empty-text">暂无话题</view>
+        <view wx:else>
+          <view class="topic-item" wx:for="{{communityTopics}}" wx:key="_id">
+            <view class="topic-left">
+              <text class="topic-icon">{{item.icon || '💬'}}</text>
+              <view class="topic-info">
+                <text class="topic-name">{{item.title}}</text>
+                <text class="topic-desc">{{item.description || '无描述'}} · {{item.post_count || 0}} 帖子</text>
+              </view>
+            </view>
+            <view class="topic-actions">
+              <van-tag wx:if="{{item.is_hot}}" type="danger" size="small">热门</van-tag>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </van-tab>
+
+  <!-- ========== 帖子管理 ========== -->
+  <van-tab title="帖子">
+    <view class="tab-content">
+      <!-- 帖子筛选 -->
+      <view class="filter-bar">
+        <view class="filter-item {{postFilter === '' ? 'active' : ''}}" bindtap="onPostFilter" data-status="">全部</view>
+        <view class="filter-item {{postFilter === 'active' ? 'active' : ''}}" bindtap="onPostFilter" data-status="active">正常</view>
+        <view class="filter-item {{postFilter === 'hidden' ? 'active' : ''}}" bindtap="onPostFilter" data-status="hidden">已隐藏</view>
+      </view>
+
+      <!-- 帖子列表 -->
+      <view wx:if="{{postListLoading && posts.length === 0}}" class="loading-box">
+        <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+      </view>
+      <view wx:elif="{{posts.length === 0}}" class="empty-box">
+        <van-empty description="暂无帖子" />
+      </view>
+      <view wx:else>
+        <view class="post-item" wx:for="{{posts}}" wx:key="_id">
+          <view class="post-header">
+            <view class="post-author">
+              <text class="post-nick">{{item.nick_name}}</text>
+              <van-tag wx:if="{{item.is_pinned}}" type="primary" size="small" style="margin-left: 8rpx;">置顶</van-tag>
+              <van-tag wx:if="{{item.status === 'hidden'}}" type="warning" size="small" style="margin-left: 8rpx;">已隐藏</van-tag>
+            </view>
+            <text class="post-time">{{item.displayTime}}</text>
+          </view>
+          <view class="post-content">{{item.content}}</view>
+          <view class="post-stats">
+            <text class="stat-text">👁 {{item.view_count || 0}}</text>
+            <text class="stat-text">👍 {{item.like_count || 0}}</text>
+            <text class="stat-text">💬 {{item.comment_count || 0}}</text>
+          </view>
+          <view class="post-actions-bar">
+            <view class="action-btn {{item.is_pinned ? 'active' : ''}}" bindtap="onTogglePin" data-id="{{item._id}}" data-index="{{index}}">
+              {{item.is_pinned ? '取消置顶' : '置顶'}}
+            </view>
+            <view class="action-btn" bindtap="onHidePost" data-id="{{item._id}}" data-index="{{index}}" wx:if="{{item.status === 'active'}}">
+              隐藏
+            </view>
+            <view class="action-btn" bindtap="onViewComments" data-id="{{item._id}}" data-nick="{{item.nick_name}}" data-index="{{index}}">
+              查看评论
+            </view>
+            <view class="action-btn danger" bindtap="onDeletePost" data-id="{{item._id}}" data-index="{{index}}">
+              删除
+            </view>
+          </view>
+        </view>
+
+        <!-- 加载更多 -->
+        <view wx:if="{{hasMorePosts}}" class="load-more" bindtap="loadMorePosts">
+          <van-loading wx:if="{{postListLoading}}" size="20px" color="#34BFA3" />
+          <text wx:else class="load-more-text">点击加载更多</text>
+        </view>
+      </view>
+    </view>
+  </van-tab>
+
+  <!-- ========== 评论管理 ========== -->
+  <van-tab title="评论">
+    <view class="tab-content">
+      <view wx:if="{{!selectedPostForComments}}" class="empty-box" style="padding-top: 80rpx;">
+        <van-empty description="请在「帖子」页签中点击「查看评论」" image="search" />
+      </view>
+      <view wx:else>
+        <!-- 当前帖子信息 -->
+        <view class="comment-post-info">
+          <text class="comment-post-label">帖子：</text>
+          <text class="comment-post-nick">{{selectedPostForComments.nickName}}</text>
+          <text class="comment-post-id">（ID: {{selectedPostForComments.postId}}）</text>
+        </view>
+
+        <!-- 评论列表 -->
+        <view wx:if="{{commentListLoading && comments.length === 0}}" class="loading-box">
+          <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+        </view>
+        <view wx:elif="{{comments.length === 0}}" class="empty-box">
+          <van-empty description="该帖子暂无评论" />
+        </view>
+        <view wx:else>
+          <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
+            <view class="comment-header">
+              <text class="comment-nick">{{item.nick_name}}</text>
+              <text class="comment-time">{{item.displayTime}}</text>
+            </view>
+            <view class="comment-body">{{item.content}}</view>
+            <view wx:if="{{item.reply_to_name}}" class="comment-reply-info">
+              回复 @{{item.reply_to_name}}
+            </view>
+            <view class="comment-actions-bar">
+              <view class="action-btn danger" bindtap="onDeleteComment" data-comment-id="{{item._id}}" data-index="{{index}}">
+                删除评论
+              </view>
+            </view>
+          </view>
+
+          <!-- 加载更多评论 -->
+          <view wx:if="{{hasMoreComments}}" class="load-more" bindtap="loadMoreComments">
+            <van-loading wx:if="{{commentListLoading}}" size="20px" color="#34BFA3" />
+            <text wx:else class="load-more-text">点击加载更多</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </van-tab>
+</van-tabs>

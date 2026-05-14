@@ -23,6 +23,10 @@ exports.main = async (event, context) => {
         return await adminListFeedbacks(pageSize, pageIndex)
       case 'reply':
         return await replyFeedback(feedbackId, data)
+      case 'getAppConfig':
+        return await getAppConfig()
+      case 'updateAppConfig':
+        return await updateAppConfig(data, context)
       default:
         return {
           success: false,
@@ -156,6 +160,55 @@ async function adminListFeedbacks(pageSize, pageIndex) {
       hasMore: (pageIndex + 1) * pageSize < countResult.total
     }
   }
+}
+
+// 获取应用全局配置
+async function getAppConfig() {
+  try {
+    const result = await db.collection('app_config').doc('global').get()
+    return {
+      success: true,
+      data: result.data
+    }
+  } catch (error) {
+    // 集合或文档不存在时返回默认配置
+    return {
+      success: true,
+      data: {
+        _id: 'global',
+        community_enabled: false,
+        questionnaire_enabled: false
+      }
+    }
+  }
+}
+
+// 管理员更新应用全局配置（需管理员权限，由前端传入 adminRole 校验）
+async function updateAppConfig(data, context) {
+  const validKeys = ['features_enabled']
+  const updateData = {}
+
+  for (const key of validKeys) {
+    if (key in data) {
+      updateData[key] = data[key]
+    }
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return { success: false, message: '没有有效的配置字段' }
+  }
+
+  updateData.updated_at = new Date()
+
+  // 先尝试 set（文档存在时更新），若集合不存在则用 add 创建
+  try {
+    await db.collection('app_config').doc('global').set({ data: updateData })
+  } catch (setError) {
+    // 集合不存在时降级：直接 add 插入（会自动创建集合）
+    await db.collection('app_config').add({ data: { _id: 'global', ...updateData } })
+  }
+
+  return { success: true, message: '配置更新成功', data: updateData }
 }
 
 // 管理员回复反馈

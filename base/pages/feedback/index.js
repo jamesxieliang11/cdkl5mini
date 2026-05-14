@@ -25,20 +25,14 @@ Page({
     submitting: false,
     feedbackList: [],
     loading: false,
-    isProd: false
+    featuresEnabled: false
   },
 
   onLoad() {
-    // 检测环境版本：仅本地开发和线上正式版展示，其他版本隐藏以过审
-    let isProd = false
-    try {
-      const accountInfo = wx.getAccountInfoSync()
-      const envVersion = accountInfo?.miniProgram?.envVersion
-      isProd = envVersion === 'develop' || envVersion === 'release'
-    } catch (error) {
-      isProd = false
-    }
-    this.setData({ isProd })
+    // 从全局配置读取功能总开关
+    const app = getApp()
+    const appConfig = app.globalData.appConfig || {}
+    this.setData({ featuresEnabled: !!appConfig.features_enabled })
     this.loadFeedbackList()
   },
 

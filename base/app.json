@@ -19,7 +19,8 @@
     "pages/brochure/index",
     "pages/community/index",
     "pages/community-post/index",
-    "pages/community-detail/index"
+    "pages/community-detail/index",
+    "pages/community-admin/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

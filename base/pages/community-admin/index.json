@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "社区管理",
+  "usingComponents": {
+    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
+    "van-loading": "/miniprogram_npm/@vant/weapp/loading/index",
+    "van-switch": "/miniprogram_npm/@vant/weapp/switch/index",
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
+    "van-tab": "/miniprogram_npm/@vant/weapp/tab/index",
+    "van-tabs": "/miniprogram_npm/@vant/weapp/tabs/index",
+    "van-dialog": "/miniprogram_npm/@vant/weapp/dialog/index",
+    "van-swipe-cell": "/miniprogram_npm/@vant/weapp/swipe-cell/index"
+  }
+}

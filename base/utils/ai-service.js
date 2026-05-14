@@ -595,11 +595,14 @@ async function fetchBabyInfo() {
     if (birthday) {
       const birthDate = new Date(birthday)
       const now = new Date()
+      console.log('[AI] 生日原始值:', birthday, '解析结果:', birthDate.toISOString(), '当前时间:', now.toISOString())
       const ageInMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth())
       const ageText = ageInMonths < 12
         ? `${ageInMonths}个月`
         : `${Math.floor(ageInMonths / 12)}岁${ageInMonths % 12 > 0 ? ageInMonths % 12 + '个月' : ''}`
-      parts.push(`年龄：${ageText}`)
+      parts.push(`出生日期：${birthDate.getFullYear()}年${birthDate.getMonth() + 1}月${birthDate.getDate()}日`)
+      parts.push(`年龄：${ageText}（截至${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日计算，此为准确年龄，请直接使用）`)
+      console.log('[AI] 计算年龄:', ageText)
     }
 
     if (patientInfo.weight) parts.push(`体重：${patientInfo.weight}kg`)

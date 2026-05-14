@@ -24,8 +24,8 @@
     <view class="today-date">{{currentDate}}</view>
   </view>
 
-  <!-- 问卷填写提醒 -->
-  <view class="questionnaire-reminder" wx:if="{{showQuestionnaireReminder}}" bindtap="goToQuestionnaire">
+  <!-- 问卷填写提醒（功能总开关开启时显示） -->
+  <view class="questionnaire-reminder" wx:if="{{featuresEnabled && showQuestionnaireReminder}}" bindtap="goToQuestionnaire">
     <view class="reminder-content">
       <van-icon name="edit" size="20" color="#34BFA3" />
       <text class="reminder-text">📝 家庭基础信息问卷尚未填写，点击填写</text>
@@ -74,27 +74,28 @@
         custom-class="function-item"
       />
       <van-grid-item 
+        wx:if="{{featuresEnabled}}"
         icon="edit" 
         text="家庭问卷"
         bind:click="goToQuestionnaire"
         custom-class="function-item"
       />
       <van-grid-item 
-        wx:if="{{isProd}}"
+        wx:if="{{featuresEnabled}}"
         icon="friends-o" 
         text="希舞社区"
         bind:click="goToCommunity"
         custom-class="function-item"
       />
       <van-grid-item 
-        wx:if="{{isProd}}"
+        wx:if="{{featuresEnabled}}"
         icon="description" 
         text="希舞手册"
         bind:click="goToBrochure"
         custom-class="function-item"
       />
       <van-grid-item 
-        wx:if="{{isProd}}"
+        wx:if="{{featuresEnabled}}"
         icon="smile-comment-o" 
         text="AI 助手"
         bind:click="showAIMenu"

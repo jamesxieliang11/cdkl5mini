@@ -3,7 +3,10 @@
     "custom-tabbar": "/components/custom-tabbar/index",
     "van-icon": "@vant/weapp/icon/index",
     "van-button": "@vant/weapp/button/index",
-    "van-tag": "@vant/weapp/tag/index"
+    "van-tag": "@vant/weapp/tag/index",
+    "van-switch": "@vant/weapp/switch/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-field": "@vant/weapp/field/index"
   },
   "navigationBarTitleText": "管理员面板"
 }

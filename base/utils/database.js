@@ -1211,5 +1211,34 @@ module.exports = {
   listCommunityTopics,
   updateCommunityTopic,
   adminListCommunityPosts,
-  getCommunityShareData
+  getCommunityShareData,
+  // 应用配置相关函数
+  getAppConfig,
+  updateAppConfig
+}
+
+// ==================== 应用配置 ====================
+
+const APP_CONFIG_CACHE_KEY = 'appConfig'
+
+// 默认配置（未拉到时的兜底值，功能默认关闭）
+const DEFAULT_APP_CONFIG = {
+  community_enabled: false,
+  questionnaire_enabled: false
+}
+
+/**
+ * 获取应用配置（先取本地缓存，后台静默拉取远程并更新）
+ * @returns {Object} 当前生效的配置
+ */
+function getAppConfig() {
+  return callFeedbackFunction('getAppConfig', {})
+}
+
+/**
+ * 管理员更新应用配置
+ * @param {Object} config 配置对象，如 { community_enabled: true }
+ */
+function updateAppConfig(config) {
+  return callFeedbackFunction('updateAppConfig', { data: config })
 }

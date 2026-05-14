@@ -2,7 +2,7 @@
 const app = getApp()
 const { 
   getAdminOverview, getQuestionnaireAdminStats, getAdminMonthlyStats,
-  createCommunityTopic, listCommunityTopics
+  getAppConfig, updateAppConfig
 } = require('../../utils/database.js')
 
 Page({
@@ -37,12 +37,13 @@ Page({
     currentMonthStats: null,
     monthlyStatsLoading: false,
 
-    // 用户管理
-    showUserManagement: false,
-    userList: [],
-    loadingUsers: false
+    // 应用功能开关
+    appConfig: {
+      features_enabled: false
+    },
+    appConfigLoading: false,
+    appConfigSaving: false
   },
-
   onLoad() {
     this.checkAdminPermission()
     // 管理员加载看板数据
@@ -50,7 +51,7 @@ Page({
       this.loadOverviewData()
       this.loadQuestionnaireStats()
       this.loadCurrentMonthStats()
-      this.loadCommunityTopics()
+      this.loadAppConfig()
     }
   },
 
@@ -63,7 +64,7 @@ Page({
       this.loadOverviewData()
       this.loadQuestionnaireStats()
       this.loadCurrentMonthStats()
-      this.loadCommunityTopics()
+      this.loadAppConfig()
     }
   },
 
@@ -234,68 +235,54 @@ Page({
     }
   },
 
-  // ==================== 社区话题管理 ====================
+  // ==================== 应用功能开关 ====================
 
-  // 加载话题列表
-  async loadCommunityTopics() {
-    this.setData({ topicListLoading: true })
+  // 加载应用配置
+  async loadAppConfig() {
+    this.setData({ appConfigLoading: true })
     try {
-      const result = await listCommunityTopics()
-      if (result.data && result.data.records) {
-        this.setData({ communityTopics: result.data.records })
+      const result = await getAppConfig()
+      if (result && result.data) {
+        this.setData({
+          appConfig: { features_enabled: !!result.data.features_enabled }
+        })
       }
     } catch (error) {
-      console.error('加载话题列表失败:', error)
+      console.error('加载应用配置失败:', error)
     } finally {
-      this.setData({ topicListLoading: false })
+      this.setData({ appConfigLoading: false })
     }
   },
 
-  // 话题标题输入
-  onTopicTitleInput(event) {
-    this.setData({ newTopicTitle: event.detail })
-  },
+  // 切换功能总开关
+  async onToggleAppConfig(event) {
+    const newValue = event.detail
 
-  // 话题描述输入
-  onTopicDescInput(event) {
-    this.setData({ newTopicDesc: event.detail })
-  },
+    // 乐观更新 UI
+    this.setData({ 'appConfig.features_enabled': newValue, appConfigSaving: true })
 
-  // 话题图标输入
-  onTopicIconInput(event) {
-    this.setData({ newTopicIcon: event.detail })
-  },
-
-  // 发布新话题
-  async submitNewTopic() {
-    if (!this.data.newTopicTitle) {
-      wx.showToast({ title: '请输入话题标题', icon: 'none' })
-      return
-    }
-
-    this.setData({ topicSubmitting: true })
     try {
-      await createCommunityTopic({
-        title: this.data.newTopicTitle,
-        description: this.data.newTopicDesc,
-        icon: this.data.newTopicIcon || '💬'
-      })
+      await updateAppConfig({ features_enabled: newValue })
 
-      wx.showToast({ title: '话题发布成功', icon: 'success' })
+      // 同步更新全局状态和本地缓存
+      const newConfig = { features_enabled: newValue }
+      app.globalData.appConfig = newConfig
+      wx.setStorageSync('appConfig', newConfig)
 
-      // 重置表单并刷新列表
-      this.setData({
-        newTopicTitle: '',
-        newTopicDesc: '',
-        newTopicIcon: '💬'
-      })
-      this.loadCommunityTopics()
+      wx.showToast({ title: '设置已保存', icon: 'success' })
     } catch (error) {
-      console.error('发布话题失败:', error)
-      wx.showToast({ title: '发布失败', icon: 'none' })
+      // 回滚 UI
+      this.setData({ 'appConfig.features_enabled': !newValue })
+      console.error('保存应用配置失败:', error)
+      wx.showToast({ title: '保存失败', icon: 'none' })
     } finally {
-      this.setData({ topicSubmitting: false })
+      this.setData({ appConfigSaving: false })
     }
+  },
+
+  // 跳转到社区管理页面
+  goToCommunityAdmin() {
+    wx.navigateTo({ url: '/pages/community-admin/index' })
   },
 
 })
