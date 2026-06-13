@@ -2,7 +2,7 @@
 
 .page-header {
   padding: 20rpx 30rpx 24rpx;
-  background: linear-gradient(135deg, #1989fa, #1976d2);
+  background: var(--gradient-primary);
 }
 
 .header-row {

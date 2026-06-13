@@ -71,10 +71,8 @@ Page({
   /**
    * 返回主页
    */
-  goToHome() {
-    wx.switchTab({
-      url: '/pages/home/index'
-    })
+  goBack() {
+    wx.navigateBack()
   },
 
   /**

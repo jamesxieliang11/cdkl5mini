@@ -1,18 +1,136 @@
 <view class="custom-tabbar">
-  <view class="tabbar-item" bindtap="switchTab" data-path="/pages/home/index" data-index="0">
-    <image class="tabbar-icon" src="../../icons/home{{active === 'home' ? '-selected' : ''}}.png"></image>
-    <view class="tabbar-text {{active === 'home' ? 'active' : ''}}">服务</view>
-  </view>
-  
-  <view class="tabbar-item center-item" bindtap="showAddRecordModal" data-index="1">
-    <view class="center-button">
-      <text class="center-icon-text">➕</text>
+  <!-- 首页 -->
+  <view class="tabbar-item {{active === 'home' ? 'is-active' : ''}}" bindtap="switchTab" data-path="/pages/home/index" data-key="home">
+    <view class="tab-pill">
+      <van-icon name="home-o" size="22px" color="{{active === 'home' ? '#34BFA3' : '#b0b0b0'}}" />
     </view>
-    <view class="tabbar-text center-text {{active === 'add-record' ? 'active' : ''}}">添加记录</view>
+    <view class="tabbar-text">首页</view>
   </view>
-  
-  <view class="tabbar-item" bindtap="switchTab" data-path="/pages/user-profile/index" data-index="2">
-    <image class="tabbar-icon" src="../../icons/usercenter{{active === 'admin' ? '-selected' : ''}}.png"></image>
-    <view class="tabbar-text {{active === 'admin' ? 'active' : ''}}">我的</view>
+
+  <!-- 记录 -->
+  <view class="tabbar-item {{active === 'records' ? 'is-active' : ''}}" bindtap="switchTab" data-path="/pages/my-records/index" data-key="records">
+    <view class="tab-pill">
+      <van-icon name="orders-o" size="22px" color="{{active === 'records' ? '#34BFA3' : '#b0b0b0'}}" />
+    </view>
+    <view class="tabbar-text">记录</view>
+  </view>
+
+  <!-- 中间 + 按钮 -->
+  <view class="tabbar-item center-item" bindtap="openQuickPanel">
+    <view class="center-button">
+      <van-icon name="plus" size="28px" color="#fff" />
+    </view>
+    <view class="tabbar-text center-text">记一笔</view>
+  </view>
+
+  <!-- 社区（功能开启或已认领问卷时显示） -->
+  <view wx:if="{{showCommunity}}" class="tabbar-item {{active === 'community' ? 'is-active' : ''}}" bindtap="switchTab" data-path="/pages/community/index" data-key="community">
+    <view class="tab-pill">
+      <van-icon name="chat-o" size="22px" color="{{active === 'community' ? '#34BFA3' : '#b0b0b0'}}" />
+    </view>
+    <view class="tabbar-text">社区</view>
+  </view>
+
+  <!-- 我的 -->
+  <view class="tabbar-item {{active === 'profile' ? 'is-active' : ''}}" bindtap="switchTab" data-path="/pages/user-profile/index" data-key="profile">
+    <view class="tab-pill">
+      <van-icon name="user-o" size="22px" color="{{active === 'profile' ? '#34BFA3' : '#b0b0b0'}}" />
+    </view>
+    <view class="tabbar-text">我的</view>
   </view>
 </view>
+
+<!-- 快速记录面板 -->
+<van-popup
+  show="{{showQuickPanel}}"
+  position="bottom"
+  round
+  custom-style="max-height: 80vh;"
+  bind:close="closeQuickPanel"
+>
+  <view class="quick-panel">
+    <view class="quick-panel-header">
+      <text class="quick-panel-title">快速记录</text>
+      <van-icon name="cross" size="18px" color="#999" bind:click="closeQuickPanel" />
+    </view>
+
+    <!-- 一键快记区域 -->
+    <view class="quick-section">
+      <view class="quick-section-label">一键快记</view>
+      <view class="quick-actions">
+        <!-- 吃药了 -->
+        <view class="quick-action-card {{lastMedRecord ? '' : 'disabled'}}" bindtap="{{lastMedRecord ? 'quickMedication' : ''}}">
+          <view class="quick-action-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <van-icon name="label-o" size="24px" color="#fff" />
+          </view>
+          <view class="quick-action-info">
+            <text class="quick-action-name">吃药了</text>
+            <text class="quick-action-desc" wx:if="{{lastMedRecord}}">复制上次用药记录</text>
+            <text class="quick-action-desc" wx:else>请先详细记录一次</text>
+          </view>
+        </view>
+
+        <!-- 发作了 -->
+        <view class="quick-action-card {{lastSeizureRecord ? '' : 'disabled'}}" bindtap="{{lastSeizureRecord ? 'quickSeizure' : ''}}">
+          <view class="quick-action-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+            <van-icon name="warning-o" size="24px" color="#fff" />
+          </view>
+          <view class="quick-action-info">
+            <text class="quick-action-name">发作了</text>
+            <text class="quick-action-desc" wx:if="{{lastSeizureRecord}}">复制上次发作记录</text>
+            <text class="quick-action-desc" wx:else>请先详细记录一次</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 随手记 -->
+    <view class="quick-section">
+      <view class="quick-section-label">随手记</view>
+      <view class="quick-note-categories">
+        <view
+          wx:for="{{quickCategories}}"
+          wx:key="*this"
+          class="quick-cat-tag {{quickNoteCategory === item ? 'active' : ''}}"
+          bindtap="onQuickCategorySelect"
+          data-cat="{{item}}"
+        >{{item}}</view>
+      </view>
+      <view class="quick-note-input">
+        <van-field
+          value="{{quickNoteContent}}"
+          placeholder="简单记几个字..."
+          border="{{false}}"
+          bind:change="onQuickNoteInput"
+          custom-class="quick-input"
+        />
+        <view class="quick-note-submit {{quickNoteContent ? 'active' : ''}}" bindtap="submitQuickNote">
+          <van-icon name="guide-o" size="20px" color="{{quickNoteContent ? '#fff' : '#ccc'}}" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 详细记录 -->
+    <view class="quick-section">
+      <view class="quick-section-label">详细记录</view>
+      <view class="detail-record-grid">
+        <view class="detail-record-item" bindtap="goToDetailRecord" data-type="medication">
+          <van-icon name="label-o" size="20px" color="#4facfe" />
+          <text>调药记录</text>
+        </view>
+        <view class="detail-record-item" bindtap="goToDetailRecord" data-type="seizure">
+          <van-icon name="warning-o" size="20px" color="#fa709a" />
+          <text>发作记录</text>
+        </view>
+        <view class="detail-record-item" bindtap="goToDetailRecord" data-type="other">
+          <van-icon name="edit" size="20px" color="#34BFA3" />
+          <text>其他记录</text>
+        </view>
+        <view class="detail-record-item" bindtap="goToDetailRecord" data-type="monthly">
+          <van-icon name="chart-trending-o" size="20px" color="#FF9800" />
+          <text>月度汇报</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</van-popup>

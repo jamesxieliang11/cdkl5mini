@@ -7,7 +7,7 @@
     "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
     "van-tab": "/miniprogram_npm/@vant/weapp/tab/index",
     "van-tabs": "/miniprogram_npm/@vant/weapp/tabs/index",
-    "van-dialog": "/miniprogram_npm/@vant/weapp/dialog/index",
-    "van-swipe-cell": "/miniprogram_npm/@vant/weapp/swipe-cell/index"
+    "van-field": "/miniprogram_npm/@vant/weapp/field/index",
+    "van-button": "/miniprogram_npm/@vant/weapp/button/index"
   }
 }

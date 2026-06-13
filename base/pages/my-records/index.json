@@ -3,5 +3,8 @@
   "enablePullDownRefresh": true,
   "onReachBottomDistance": 50,
   "backgroundTextStyle": "dark",
-  "usingComponents": {}
+  "usingComponents": {
+    "custom-tabbar": "/components/custom-tabbar/index",
+    "van-popup": "/miniprogram_npm/@vant/weapp/popup/index"
+  }
 }

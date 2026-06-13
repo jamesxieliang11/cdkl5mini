@@ -35,8 +35,17 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    // 页面显示时刷新数据
+    this.updateTabBarState()
     this.refreshRecords()
+  },
+
+  updateTabBarState() {
+    if (typeof this.getTabBar === 'function') {
+      const tabBar = this.getTabBar()
+      if (tabBar && typeof tabBar.updateState === 'function') {
+        tabBar.updateState()
+      }
+    }
   },
 
   /**

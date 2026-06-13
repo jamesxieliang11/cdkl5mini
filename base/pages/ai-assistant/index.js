@@ -5,9 +5,6 @@ const {
   getDisclaimer,
   buildMedicalRecordContext,
   buildDrugAdjustmentContext,
-  fetchBabyInfo,
-  fetchSeizureSummary,
-  fetchMedicationSummary,
   parseTimeRangeToDays
 } = require('../../utils/ai-service.js')
 

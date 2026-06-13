@@ -3,11 +3,15 @@ Component({
     postData: {
       type: Object,
       value: null
+    },
+    type: {
+      type: String,
+      value: 'post'
     }
   },
 
   data: {
-    posterImage: ''  // 生成的海报临时路径
+    posterImage: ''
   },
 
   lifetimes: {
@@ -27,7 +31,6 @@ Component({
   },
 
   methods: {
-    // 绘制海报
     async drawPoster() {
       const query = this.createSelectorQuery()
       query.select('#posterCanvas')
@@ -53,24 +56,33 @@ Component({
           this._canvasWidth = canvasWidth
           this._canvasHeight = canvasHeight
 
-          this.renderPoster(canvas, ctx, canvasWidth, canvasHeight)
+          switch (this.data.type) {
+            case 'checkin':
+              this.renderCheckinPoster(canvas, ctx, canvasWidth, canvasHeight)
+              break
+            case 'stats':
+              this.renderStatsPoster(canvas, ctx, canvasWidth, canvasHeight)
+              break
+            case 'activity':
+              this.renderActivityPoster(canvas, ctx, canvasWidth, canvasHeight)
+              break
+            default:
+              this.renderPostPoster(canvas, ctx, canvasWidth, canvasHeight)
+          }
         })
     },
 
-    // 渲染海报内容
-    async renderPoster(canvas, ctx, width, height) {
+    // ===================== 社区帖子海报（原有逻辑） =====================
+    async renderPostPoster(canvas, ctx, width, height) {
       const postData = this.properties.postData
       if (!postData) return
 
-      // 背景
       ctx.fillStyle = '#ffffff'
       ctx.fillRect(0, 0, width, height)
 
-      // 顶部品牌区域
       ctx.fillStyle = '#34BFA3'
       ctx.fillRect(0, 0, width, 120)
 
-      // 品牌文字
       ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 28px sans-serif'
       ctx.textAlign = 'center'
@@ -78,24 +90,18 @@ Component({
       ctx.font = '18px sans-serif'
       ctx.fillText('希舞宝宝社区', width / 2, 85)
 
-      // 分割线
       ctx.fillStyle = '#f0f0f0'
       ctx.fillRect(30, 140, width - 60, 1)
 
-      // 用户信息
       ctx.textAlign = 'left'
       ctx.fillStyle = '#333333'
       ctx.font = 'bold 20px sans-serif'
-      const displayName = postData.nickName || '希舞宝宝'
-      ctx.fillText(displayName, 30, 180)
+      ctx.fillText(postData.nickName || '希舞宝宝', 30, 180)
 
-      // 发布时间
       ctx.fillStyle = '#999999'
       ctx.font = '14px sans-serif'
-      const timeStr = this.formatPosterTime(postData.createdAt)
-      ctx.fillText(timeStr, 30, 205)
+      ctx.fillText(this.formatPosterTime(postData.createdAt), 30, 205)
 
-      // 话题标签
       let contentStartY = 240
       if (postData.topicTitle) {
         ctx.fillStyle = '#34BFA3'
@@ -104,7 +110,6 @@ Component({
         contentStartY += 35
       }
 
-      // 帖子内容（自动换行）
       ctx.fillStyle = '#333333'
       ctx.font = '18px sans-serif'
       const contentLines = this.wrapText(ctx, postData.content || '', width - 60, 18)
@@ -122,7 +127,6 @@ Component({
 
       const contentEndY = contentStartY + Math.min(contentLines.length, maxContentLines) * 28 + 20
 
-      // 帖子图片（如果有，绘制第一张缩略图）
       let imageEndY = contentEndY
       if (postData.images && postData.images.length > 0) {
         try {
@@ -135,31 +139,247 @@ Component({
             imageEndY = contentEndY + imgHeight + 20
           }
         } catch (error) {
-          console.error('加载帖子图片失败:', error)
           imageEndY = contentEndY
         }
       }
 
-      // 统计信息
       ctx.fillStyle = '#999999'
       ctx.font = '14px sans-serif'
       const statsY = Math.min(imageEndY + 10, height - 220)
       ctx.fillText(`❤️ ${postData.likeCount || 0} 赞   💬 ${postData.commentCount || 0} 评论`, 30, statsY)
 
-      // 底部区域 - 分隔线
+      await this.drawFooter(canvas, ctx, width, height)
+      this.exportPoster(canvas)
+    },
+
+    // ===================== 打卡海报 =====================
+    async renderCheckinPoster(canvas, ctx, width, height) {
+      const data = this.properties.postData
+      if (!data) return
+
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, width, height)
+
+      // 顶部渐变区
+      const gradient = ctx.createLinearGradient(0, 0, width, 160)
+      gradient.addColorStop(0, '#34BFA3')
+      gradient.addColorStop(1, '#2dd4a8')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, width, 160)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 32px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('🌿 希舞之家', width / 2, 60)
+      ctx.font = '18px sans-serif'
+      ctx.fillText('每一天都是进步', width / 2, 100)
+      ctx.font = '14px sans-serif'
+      ctx.globalAlpha = 0.8
+      ctx.fillText(data.nickName || '希舞宝宝', width / 2, 135)
+      ctx.globalAlpha = 1
+
+      // 主体卡片区
+      const cardY = 200
+      ctx.fillStyle = '#f8faf9'
+      this.drawRoundRect(ctx, 40, cardY, width - 80, 400, 20)
+      ctx.fill()
+
+      // 打卡成功
+      ctx.fillStyle = '#34BFA3'
+      ctx.font = 'bold 28px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('✅ 今日打卡成功', width / 2, cardY + 60)
+
+      // 连续天数（大字）
+      if (data.streak > 0) {
+        ctx.fillStyle = '#FF6B6B'
+        ctx.font = 'bold 72px sans-serif'
+        ctx.fillText(String(data.streak), width / 2, cardY + 170)
+
+        ctx.fillStyle = '#666'
+        ctx.font = '20px sans-serif'
+        ctx.fillText('🔥 连续记录天数', width / 2, cardY + 210)
+      }
+
+      // 今日记录
+      const RECORD_LABELS = { medication: '用药', seizure: '发作', other: '其他' }
+      const typeLabel = RECORD_LABELS[data.recordType] || '其他'
+      ctx.fillStyle = '#999'
+      ctx.font = '18px sans-serif'
+      ctx.fillText(`💊 今日${typeLabel}记录 ${data.todayCount || 0} 条`, width / 2, cardY + 280)
+
+      // 累计天数
+      if (data.totalDays > 0) {
+        ctx.fillText(`📊 累计记录 ${data.totalDays} 天`, width / 2, cardY + 320)
+      }
+
+      // 日期
+      ctx.fillStyle = '#bbb'
+      ctx.font = '16px sans-serif'
+      ctx.fillText(data.date || this.formatPosterTime(new Date()), width / 2, cardY + 370)
+
+      await this.drawFooter(canvas, ctx, width, height)
+      this.exportPoster(canvas)
+    },
+
+    // ===================== 统计海报 =====================
+    async renderStatsPoster(canvas, ctx, width, height) {
+      const data = this.properties.postData
+      if (!data) return
+
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, width, height)
+
+      // 顶部
+      const gradient = ctx.createLinearGradient(0, 0, width, 140)
+      gradient.addColorStop(0, '#34BFA3')
+      gradient.addColorStop(1, '#2da88e')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, width, 140)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 28px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('🌿 希舞之家 · 我的记录', width / 2, 55)
+      ctx.font = '16px sans-serif'
+      ctx.globalAlpha = 0.9
+      ctx.fillText(data.nickName || '希舞宝宝', width / 2, 90)
+      if (data.firstRecordDate) {
+        ctx.font = '14px sans-serif'
+        ctx.fillText(`从 ${data.firstRecordDate} 加入`, width / 2, 120)
+      }
+      ctx.globalAlpha = 1
+
+      // 三大数字
+      const numY = 220
+      const cols = [
+        { value: String(data.totalDays || 0), label: '记录天数' },
+        { value: String(data.streak || 0), label: '连续天数' },
+        { value: String(data.totalRecords || 0), label: '总记录数' }
+      ]
+      const colWidth = (width - 60) / 3
+      cols.forEach((col, i) => {
+        const cx = 30 + colWidth * i + colWidth / 2
+        ctx.fillStyle = '#333'
+        ctx.font = 'bold 48px sans-serif'
+        ctx.fillText(col.value, cx, numY)
+        ctx.fillStyle = '#999'
+        ctx.font = '16px sans-serif'
+        ctx.fillText(col.label, cx, numY + 35)
+      })
+
+      // 分隔线
+      ctx.fillStyle = '#f0f0f0'
+      ctx.fillRect(40, numY + 60, width - 80, 1)
+
+      // 详细记录
+      const detailY = numY + 100
+      const details = [
+        { icon: '💊', value: String(data.medicationCount || 0), label: '用药' },
+        { icon: '⚡', value: String(data.seizureCount || 0), label: '发作' },
+        { icon: '📄', value: String(data.otherCount || 0), label: '其他' }
+      ]
+      details.forEach((d, i) => {
+        const cx = 30 + colWidth * i + colWidth / 2
+        ctx.fillStyle = '#333'
+        ctx.font = '20px sans-serif'
+        ctx.fillText(`${d.icon} ${d.value}`, cx, detailY)
+        ctx.fillStyle = '#999'
+        ctx.font = '14px sans-serif'
+        ctx.fillText(d.label, cx, detailY + 30)
+      })
+
+      // 成就
+      if (data.achievements && data.achievements.length > 0) {
+        ctx.fillStyle = '#f0f0f0'
+        ctx.fillRect(40, detailY + 60, width - 80, 1)
+
+        const achY = detailY + 100
+        ctx.fillStyle = '#666'
+        ctx.font = '16px sans-serif'
+        ctx.fillText('已解锁成就', width / 2, achY)
+
+        const icons = data.achievements.map(a => a.icon || a).join('  ')
+        ctx.font = '32px sans-serif'
+        ctx.fillText(icons, width / 2, achY + 50)
+      }
+
+      // 社区数据
+      if (data.postCount > 0 || data.commentCount > 0) {
+        const socialY = data.achievements && data.achievements.length > 0 ? detailY + 190 : detailY + 100
+        ctx.fillStyle = '#bbb'
+        ctx.font = '14px sans-serif'
+        ctx.fillText(`社区：${data.postCount || 0}帖 · ${data.commentCount || 0}评 · ${data.likesReceived || 0}赞`, width / 2, socialY)
+      }
+
+      await this.drawFooter(canvas, ctx, width, height)
+      this.exportPoster(canvas)
+    },
+
+    // ===================== 活动海报 =====================
+    async renderActivityPoster(canvas, ctx, width, height) {
+      const data = this.properties.postData
+      if (!data) return
+
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, width, height)
+
+      // 顶部
+      const gradient = ctx.createLinearGradient(0, 0, width, 160)
+      gradient.addColorStop(0, '#FF6B6B')
+      gradient.addColorStop(1, '#ee5a5a')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, width, 160)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 28px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('🎯 活动参与证书', width / 2, 55)
+      ctx.font = '18px sans-serif'
+      ctx.fillText('希舞之家', width / 2, 90)
+
+      // 活动名
+      ctx.fillStyle = '#333'
+      ctx.font = 'bold 32px sans-serif'
+      ctx.fillText(data.activityTitle || '社区活动', width / 2, 260)
+
+      // 参与者名
+      ctx.fillStyle = '#666'
+      ctx.font = '20px sans-serif'
+      ctx.fillText(data.nickName || '希舞宝宝', width / 2, 340)
+      ctx.fillText('已参与本次活动', width / 2, 380)
+
+      // 参与统计
+      if (data.participationCount > 0) {
+        ctx.fillStyle = '#FF6B6B'
+        ctx.font = 'bold 56px sans-serif'
+        ctx.fillText(String(data.participationCount), width / 2, 480)
+        ctx.fillStyle = '#999'
+        ctx.font = '18px sans-serif'
+        ctx.fillText('次打卡', width / 2, 520)
+      }
+
+      // 日期
+      ctx.fillStyle = '#bbb'
+      ctx.font = '16px sans-serif'
+      ctx.fillText(data.date || this.formatPosterTime(new Date()), width / 2, 580)
+
+      await this.drawFooter(canvas, ctx, width, height)
+      this.exportPoster(canvas)
+    },
+
+    // ===================== 共用方法 =====================
+    async drawFooter(canvas, ctx, width, height) {
       const bottomAreaY = height - 180
       ctx.fillStyle = '#f0f0f0'
       ctx.fillRect(30, bottomAreaY, width - 60, 1)
 
-      // 底部 - 小程序码区域
-      // 使用文字提示代替（用户可后续上传小程序码到云存储）
       ctx.fillStyle = '#666666'
       ctx.font = '16px sans-serif'
       ctx.textAlign = 'center'
       ctx.fillText('打开微信扫一扫', width / 2, bottomAreaY + 50)
-      ctx.fillText('进入「希舞之家」小程序查看详情', width / 2, bottomAreaY + 80)
+      ctx.fillText('进入「希舞之家」小程序', width / 2, bottomAreaY + 80)
 
-      // 绘制小程序码占位圆
       ctx.beginPath()
       ctx.arc(width / 2, bottomAreaY + 130, 40, 0, Math.PI * 2)
       ctx.fillStyle = '#f0f0f0'
@@ -168,26 +388,32 @@ Component({
       ctx.font = 'bold 14px sans-serif'
       ctx.fillText('小程序码', width / 2, bottomAreaY + 135)
 
-      // 尝试加载小程序码图片（如果云存储中有）
       try {
-        const qrcodeUrl = 'cloud://cloud1-4g0dlvsdc0db6c89.636c-cloud1-4g0dlvsdc0db6c89-1330686498/community-assets/qrcode.png'
-        const qrcodeImg = await this.loadImage(canvas, qrcodeUrl)
+        const qrcodeImg = await this.loadImage(canvas, '/icons/qrcode.png')
         if (qrcodeImg) {
-          // 清除占位圆，绘制真实小程序码
           ctx.fillStyle = '#ffffff'
           ctx.fillRect(width / 2 - 50, bottomAreaY + 85, 100, 100)
           ctx.drawImage(qrcodeImg, width / 2 - 45, bottomAreaY + 90, 90, 90)
         }
       } catch (error) {
-        // 小程序码加载失败使用占位文字，不影响整体海报
         console.log('小程序码加载失败，使用占位:', error)
       }
-
-      // 导出图片
-      this.exportPoster(canvas)
     },
 
-    // 导出海报为图片
+    drawRoundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath()
+      ctx.moveTo(x + r, y)
+      ctx.lineTo(x + w - r, y)
+      ctx.arcTo(x + w, y, x + w, y + r, r)
+      ctx.lineTo(x + w, y + h - r)
+      ctx.arcTo(x + w, y + h, x + w - r, y + h, r)
+      ctx.lineTo(x + r, y + h)
+      ctx.arcTo(x, y + h, x, y + h - r, r)
+      ctx.lineTo(x, y + r)
+      ctx.arcTo(x, y, x + r, y, r)
+      ctx.closePath()
+    },
+
     exportPoster(canvas) {
       setTimeout(() => {
         wx.canvasToTempFilePath({
@@ -205,10 +431,8 @@ Component({
       }, 200)
     },
 
-    // 加载图片
     loadImage(canvas, url) {
       return new Promise((resolve, reject) => {
-        // 如果是云存储文件，先获取临时链接
         if (url.startsWith('cloud://')) {
           wx.cloud.getTempFileURL({
             fileList: [url],
@@ -233,7 +457,6 @@ Component({
       })
     },
 
-    // 文字自动换行
     wrapText(ctx, text, maxWidth, fontSize) {
       const lines = []
       const paragraphs = text.split('\n')
@@ -259,7 +482,6 @@ Component({
       return lines
     },
 
-    // 格式化海报时间
     formatPosterTime(dateValue) {
       if (!dateValue) return ''
       const date = new Date(dateValue)
@@ -269,7 +491,6 @@ Component({
       return `${year}年${month}月${day}日`
     },
 
-    // 保存到相册
     savePoster() {
       if (!this.data.posterImage) {
         wx.showToast({ title: '海报未生成', icon: 'none' })
@@ -300,7 +521,6 @@ Component({
       })
     },
 
-    // 关闭海报
     onClose() {
       this.triggerEvent('close')
     }

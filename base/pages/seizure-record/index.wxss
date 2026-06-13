@@ -8,7 +8,7 @@
 
 /* 页面头部 */
 .page-header {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: var(--gradient-primary);
   padding: 60rpx 40rpx 60rpx;
   color: white;
   text-align: center;
@@ -23,7 +23,7 @@
 }
 
 .header-title {
-  font-size: 44rpx;
+  font-size: var(--font-h1);
   font-weight: 700;
   margin: 0;
 }
@@ -138,9 +138,9 @@
 
 /* 适老化 - 提交按钮放大 */
 .submit-container .van-button {
-  border-radius: 50rpx;
+  border-radius: var(--radius-pill);
   height: 96rpx;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: var(--gradient-primary);
   border: none;
   font-size: 36rpx;
   font-weight: 600;

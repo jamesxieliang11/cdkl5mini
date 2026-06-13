@@ -1,0 +1,49 @@
+<view class="checkin-mask" wx:if="{{show}}" catchtouchmove="noop">
+  <view class="checkin-card" catchtap="noop">
+    <!-- 成功图标 -->
+    <view class="checkin-icon">
+      <van-icon name="checked" size="60" color="#34BFA3" />
+    </view>
+
+    <text class="checkin-title">打卡成功！</text>
+
+    <!-- 连续打卡 -->
+    <view class="checkin-streak" wx:if="{{streak > 0}}">
+      <text class="streak-fire">🔥</text>
+      <text class="streak-text">连续记录第 </text>
+      <text class="streak-number">{{streak}}</text>
+      <text class="streak-text"> 天</text>
+    </view>
+
+    <!-- 今日统计 -->
+    <view class="checkin-today">
+      <text class="today-text">今日已记录 {{todayCount}} 条{{recordTypeLabel}}</text>
+    </view>
+
+    <!-- 累计天数 -->
+    <view class="checkin-total" wx:if="{{totalDays > 0}}">
+      <text class="total-text">累计记录 {{totalDays}} 天</text>
+    </view>
+
+    <!-- 按钮区域 -->
+    <view class="checkin-actions">
+      <van-button
+        type="primary"
+        round
+        color="#34BFA3"
+        custom-class="action-btn"
+        bind:click="onShare"
+      >
+        分享打卡
+      </van-button>
+      <van-button
+        plain
+        round
+        custom-class="action-btn"
+        bind:click="onClose"
+      >
+        完成
+      </van-button>
+    </view>
+  </view>
+</view>

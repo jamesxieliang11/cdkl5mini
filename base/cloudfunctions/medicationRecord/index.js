@@ -8,10 +8,22 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function resolveCurrentUser() {
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+  if (!openid) throw new Error('AUTH_FAIL')
+  const res = await db.collection('users').where({ openid }).field({ _id: true, adminRole: true }).limit(1).get()
+  if (!res.data || !res.data.length) throw new Error('USER_NOT_FOUND')
+  return { userId: res.data[0]._id, openid, adminRole: res.data[0].adminRole || '' }
+}
+
 exports.main = async (event, context) => {
-  const { action, data, recordId, userId, pageSize = 10, pageIndex = 0 } = event
-  
+  const { action, data, recordId, pageSize = 10, pageIndex = 0 } = event
+
   try {
+    const currentUser = await resolveCurrentUser()
+    const userId = currentUser.userId
+
     switch (action) {
       case 'create':
         return await createRecord(data, userId)

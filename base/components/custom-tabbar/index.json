@@ -3,6 +3,8 @@
   "usingComponents": {
     "van-tabbar": "/miniprogram_npm/@vant/weapp/tabbar/index",
     "van-tabbar-item": "/miniprogram_npm/@vant/weapp/tabbar-item/index",
-    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index"
+    "van-icon": "/miniprogram_npm/@vant/weapp/icon/index",
+    "van-popup": "/miniprogram_npm/@vant/weapp/popup/index",
+    "van-field": "/miniprogram_npm/@vant/weapp/field/index"
   }
 }

@@ -2,11 +2,8 @@
 <view class="container">
   <!-- 页面标题 -->
   <view class="page-header">
+    <van-icon name="arrow-left" size="20" color="#fff" bind:click="goBack" />
     <text class="page-title">我的报告</text>
-    <button class="home-btn" bindtap="goToHome">
-      <text class="home-icon">🏠</text>
-      <text class="home-text">主页</text>
-    </button>
   </view>
 
   <!-- AI 生成病历入口 — 适老化增强辨识度 -->

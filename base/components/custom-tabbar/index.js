@@ -1,117 +1,203 @@
+const {
+  listMedicationRecords,
+  listSeizureRecords,
+  createMedicationRecord,
+  createSeizureRecord,
+  createOtherRecord
+} = require('../../utils/database.js')
+
 Component({
   data: {
-    active: 'home'
+    active: 'home',
+    showCommunity: false,
+    showQuickPanel: false,
+    lastMedRecord: null,
+    lastSeizureRecord: null,
+    quickNoteCategory: '日常观察',
+    quickNoteContent: '',
+    quickCategories: ['日常观察', '饮食记录', '睡眠情况', '情绪状态', '康复训练', '其他'],
+    submitting: false
   },
 
   lifetimes: {
     attached() {
-      // 组件初始化时根据当前页面设置active状态
       this.updateActiveByCurrentPage()
-    },
-
-    ready() {
-      // 组件准备完毕后开始监听页面变化
-      this.startPageListener()
-    },
-
-    detached() {
-      // 组件销毁时清理定时器
-      if (this.pageCheckTimer) {
-        clearInterval(this.pageCheckTimer)
-      }
+      this.syncCommunityVisible()
     }
   },
 
   methods: {
     switchTab(event) {
-      const { path } = event.currentTarget.dataset;
-      
-      console.log('跳转到:', path);
-      
+      const { path } = event.currentTarget.dataset
       if (path) {
-        wx.switchTab({ 
+        wx.switchTab({
           url: path,
           success: () => {
-            // 跳转成功后，延迟更新状态确保页面已切换
             setTimeout(() => {
               this.updateActiveByCurrentPage()
             }, 100)
           }
-        });
+        })
       }
     },
-    
-    // 显示添加记录选择弹窗
-    showAddRecordModal() {
-      wx.showActionSheet({
-        itemList: ['调药记录', '发作记录', '其他记录', '📋 月度汇报'],
-        success: (res) => {
-          const recordTypes = [
-            '/pages/medication-record/index',
-            '/pages/seizure-record/index', 
-            '/pages/other-record/index',
-            '/pages/monthly-report/index'
-          ]
-          
-          if (res.tapIndex >= 0) {
-            wx.navigateTo({
-              url: recordTypes[res.tapIndex]
-            })
-          }
-        }
-      })
+
+    async openQuickPanel() {
+      this.setData({ showQuickPanel: true })
+      try {
+        const [medResult, seizureResult] = await Promise.all([
+          listMedicationRecords(1, 0).catch(() => ({ success: false })),
+          listSeizureRecords(1, 0).catch(() => ({ success: false }))
+        ])
+        const lastMed = (medResult.success && medResult.data?.records?.[0]) || null
+        const lastSeizure = (seizureResult.success && seizureResult.data?.records?.[0]) || null
+        this.setData({ lastMedRecord: lastMed, lastSeizureRecord: lastSeizure })
+      } catch (e) {
+        console.log('加载历史记录失败:', e)
+      }
     },
-    
-    // 根据当前页面路径更新active状态
+
+    closeQuickPanel() {
+      this.setData({ showQuickPanel: false, quickNoteContent: '' })
+    },
+
+    async quickMedication() {
+      const record = this.data.lastMedRecord
+      if (!record || this.data.submitting) return
+
+      this.setData({ submitting: true })
+      try {
+        const now = new Date()
+        const datetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+        const medications = (record.medications || []).map(med => ({
+          name: med.medication_name || med.name || '',
+          dosage: med.dosage || '',
+          unit: med.unit || 'mg',
+          takeTime: datetime.split(' ')[1]
+        }))
+
+        await createMedicationRecord({
+          datetime,
+          weight: record.weight || '',
+          medications,
+          sideEffects: ''
+        })
+
+        wx.showToast({ title: '用药已记录', icon: 'success' })
+        this.setData({ showQuickPanel: false })
+      } catch (error) {
+        console.error('快速记录用药失败:', error)
+        wx.showToast({ title: '记录失败', icon: 'none' })
+      } finally {
+        this.setData({ submitting: false })
+      }
+    },
+
+    async quickSeizure() {
+      const record = this.data.lastSeizureRecord
+      if (!record || this.data.submitting) return
+
+      this.setData({ submitting: true })
+      try {
+        const now = new Date()
+        const datetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+        await createSeizureRecord({
+          datetime,
+          seizureType: record.seizure_type || '未知',
+          duration: record.duration || '1',
+          symptoms: record.symptoms || '',
+          triggers: record.triggers || ''
+        })
+
+        wx.showToast({ title: '发作已记录', icon: 'success' })
+        this.setData({ showQuickPanel: false })
+      } catch (error) {
+        console.error('快速记录发作失败:', error)
+        wx.showToast({ title: '记录失败', icon: 'none' })
+      } finally {
+        this.setData({ submitting: false })
+      }
+    },
+
+    onQuickCategorySelect(e) {
+      this.setData({ quickNoteCategory: e.currentTarget.dataset.cat })
+    },
+
+    onQuickNoteInput(e) {
+      this.setData({ quickNoteContent: e.detail })
+    },
+
+    async submitQuickNote() {
+      if (!this.data.quickNoteContent.trim() || this.data.submitting) return
+
+      this.setData({ submitting: true })
+      try {
+        const now = new Date()
+        const datetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+        await createOtherRecord({
+          datetime,
+          category: this.data.quickNoteCategory,
+          content: this.data.quickNoteContent.trim(),
+          remark: ''
+        })
+
+        wx.showToast({ title: '已记录', icon: 'success' })
+        this.setData({ showQuickPanel: false, quickNoteContent: '' })
+      } catch (error) {
+        console.error('快速记录失败:', error)
+        wx.showToast({ title: '记录失败', icon: 'none' })
+      } finally {
+        this.setData({ submitting: false })
+      }
+    },
+
+    goToDetailRecord(e) {
+      const type = e.currentTarget.dataset.type
+      const urls = {
+        medication: '/pages/medication-record/index',
+        seizure: '/pages/seizure-record/index',
+        other: '/pages/other-record/index',
+        monthly: '/pages/monthly-report/index'
+      }
+      this.setData({ showQuickPanel: false })
+      if (urls[type]) {
+        wx.navigateTo({ url: urls[type] })
+      }
+    },
+
+    syncCommunityVisible() {
+      const app = getApp()
+      const appConfig = (app && app.globalData && app.globalData.appConfig) || {}
+      this.setData({ showCommunity: !!appConfig.features_enabled })
+    },
+
     updateActiveByCurrentPage() {
       const pages = getCurrentPages()
       if (pages.length === 0) return
-      
-      const currentPage = pages[pages.length - 1]
-      const route = currentPage.route
-      
-      let active = 'home' // 默认值
-      
-      // 根据页面路径判断应该激活哪个tab
+
+      const route = pages[pages.length - 1].route
+      let active = 'home'
+
       if (route.includes('home')) {
         active = 'home'
-      } else if (route.includes('add-record') || route.includes('medication-record') || route.includes('seizure-record') || route.includes('other-record')) {
-        active = 'add-record'
-      } else if (route.includes('admin')) {
-        active = 'admin'
+      } else if (route.includes('my-records')) {
+        active = 'records'
+      } else if (route.includes('community')) {
+        active = 'community'
+      } else if (route.includes('user-profile')) {
+        active = 'profile'
       }
-      
-      // 只有当状态发生变化时才更新
-      if (this.data.active !== active) {
-        console.log('页面路径变化，更新tabbar状态:', route, '->', active)
-        this.setData({ active })
-      }
-    },
 
-    // 开始监听页面变化
-    startPageListener() {
-      // 使用定时器定期检查页面变化
-      this.pageCheckTimer = setInterval(() => {
-        this.updateActiveByCurrentPage()
-      }, 500) // 每500ms检查一次
-    },
-
-    // 设置当前激活的tab（供外部调用）
-    setActive(active) {
-      console.log('外部设置tabbar状态:', active)
       if (this.data.active !== active) {
         this.setData({ active })
       }
     },
 
-    // 获取当前激活的tab
-    getActive() {
-      return this.data.active
-    },
-
-    // 手动触发状态更新（供页面调用）
     updateState() {
       this.updateActiveByCurrentPage()
+      this.syncCommunityVisible()
     }
   }
-});
+})

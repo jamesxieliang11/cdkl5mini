@@ -5,9 +5,14 @@
     "van-cell-group": "@vant/weapp/cell-group/index",
     "van-field": "@vant/weapp/field/index",
     "van-icon": "@vant/weapp/icon/index",
-    "van-nav-bar": "@vant/weapp/nav-bar/index"
+    "van-nav-bar": "@vant/weapp/nav-bar/index",
+    "van-tag": "@vant/weapp/tag/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "custom-tabbar": "/components/custom-tabbar/index",
+    "share-poster": "/components/share-poster/index"
   },
-  "navigationBarTitleText": "完善用户信息",
-  "navigationBarBackgroundColor": "#667eea",
+  "navigationBarTitleText": "我的",
+  "navigationBarBackgroundColor": "#34BFA3",
   "navigationBarTextStyle": "white"
 }

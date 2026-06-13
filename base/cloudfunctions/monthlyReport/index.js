@@ -8,10 +8,28 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function resolveCurrentUser() {
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+  if (!openid) throw new Error('AUTH_FAIL')
+  const res = await db.collection('users').where({ openid }).field({ _id: true, adminRole: true }).limit(1).get()
+  if (!res.data || !res.data.length) throw new Error('USER_NOT_FOUND')
+  return { userId: res.data[0]._id, openid, adminRole: res.data[0].adminRole || '' }
+}
+
+function requireAdmin(currentUser) {
+  if (!['admin', 'superadmin'].includes(currentUser.adminRole)) {
+    throw new Error('权限不足')
+  }
+}
+
 exports.main = async (event, context) => {
-  const { action, data, reportId, month, userId, pageSize = 10, pageIndex = 0 } = event
+  const { action, data, reportId, month, pageSize = 10, pageIndex = 0 } = event
 
   try {
+    const currentUser = await resolveCurrentUser()
+    const userId = currentUser.userId
+
     switch (action) {
       case 'create':
         return await createReport(data, userId)
@@ -30,14 +48,18 @@ exports.main = async (event, context) => {
       case 'checkMonthSubmitted':
         return await checkMonthSubmitted(month, userId)
       case 'adminStats':
+        requireAdmin(currentUser)
         return await getAdminStats(month)
       case 'adminDetail':
+        requireAdmin(currentUser)
         return await getAdminDetail(month, pageSize, pageIndex)
       case 'listUsers':
+        requireAdmin(currentUser)
         return await listUsers(pageSize, pageIndex)
       case 'setAdminRole':
-        return await setAdminRole(data, userId)
+        return await setAdminRole(data, currentUser)
       case 'adminOverview':
+        requireAdmin(currentUser)
         return await getAdminOverview()
       default:
         return { success: false, message: '不支持的操作类型' }
@@ -560,23 +582,16 @@ async function listUsers(pageSize, pageIndex) {
 }
 
 // 设置用户管理员角色（仅超管可操作）
-async function setAdminRole(data, operatorUserId) {
+async function setAdminRole(data, currentUser) {
   if (!data || !data.targetUserId || data.adminRole === undefined) {
     return { success: false, message: '参数不完整' }
   }
 
-  // 校验操作者是否为超管
-  const operator = await db.collection('users')
-    .where({ _id: operatorUserId })
-    .field({ adminRole: true })
-    .get()
-
-  if (operator.data.length === 0 || operator.data[0].adminRole !== 'superadmin') {
+  if (currentUser.adminRole !== 'superadmin') {
     return { success: false, message: '权限不足，仅超级管理员可执行此操作' }
   }
 
-  // 不允许修改自己的角色
-  if (data.targetUserId === operatorUserId) {
+  if (data.targetUserId === currentUser.userId) {
     return { success: false, message: '不能修改自己的管理员角色' }
   }
 

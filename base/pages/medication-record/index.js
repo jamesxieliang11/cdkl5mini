@@ -1,5 +1,5 @@
 const app = getApp()
-const { createMedicationRecord, getMedicationRecord, updateMedicationRecord } = require('../../utils/database.js')
+const { createMedicationRecord, getMedicationRecord, updateMedicationRecord, getTodayStats } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -78,17 +78,23 @@ Page({
     historyOptions: [],
     
     submitting: false,
-    
+
     // 编辑模式相关
     isEditMode: false,
-    editRecordId: null
+    editRecordId: null,
+
+    // 打卡成功相关
+    showCheckin: false,
+    checkinStreak: 0,
+    checkinTodayCount: 0,
+    checkinTotalDays: 0,
+    showCheckinPoster: false,
+    checkinPosterData: null
   },
 
   // 返回按钮点击处理
-  onBack: function() {
-    wx.switchTab({
-      url: '/pages/home/index'
-    })
+  onBack() {
+    wx.navigateBack()
   },
 
   onLoad(options) {
@@ -648,12 +654,7 @@ Page({
       
       console.log('调药记录保存成功:', result)
       
-      wx.showToast({
-        title: this.data.isEditMode ? '更新成功' : '保存成功',
-        icon: 'success'
-      })
-
-      // 同时保存到本地存储作为备份（用于历史记录快捷选择）
+      // 保存到本地存储作为备份
       try {
         const records = wx.getStorageSync('medicationRecords') || []
         const newRecord = {
@@ -661,21 +662,30 @@ Page({
           ...this.data.formData,
           createTime: new Date().toISOString()
         }
-        
         records.unshift(newRecord)
-        // 只保留最近10条记录作为历史记录
-        if (records.length > 10) {
-          records.splice(10)
-        }
+        if (records.length > 10) records.splice(10)
         wx.setStorageSync('medicationRecords', records)
       } catch (localError) {
         console.warn('本地存储备份失败:', localError)
       }
 
-      // 延迟返回上一页
-      setTimeout(() => {
-        wx.navigateBack()
-      }, 1500)
+      if (this.data.isEditMode) {
+        wx.showToast({ title: '更新成功', icon: 'success' })
+        setTimeout(() => wx.navigateBack(), 1500)
+      } else {
+        // 新建模式：显示打卡成功
+        try {
+          const statsResult = await getTodayStats()
+          this.setData({
+            showCheckin: true,
+            checkinStreak: statsResult.data.streak || 0,
+            checkinTodayCount: statsResult.data.todayCount || 0,
+            checkinTotalDays: statsResult.data.totalDays || 0
+          })
+        } catch (e) {
+          this.setData({ showCheckin: true, checkinStreak: 0, checkinTodayCount: 1, checkinTotalDays: 0 })
+        }
+      }
 
     } catch (error) {
       console.error('保存记录失败:', error)
@@ -686,5 +696,37 @@ Page({
     } finally {
       this.setData({ submitting: false })
     }
+  },
+
+  onCheckinClose() {
+    this.setData({ showCheckin: false })
+    wx.navigateBack()
+  },
+
+  onCheckinShare() {
+    const userInfo = wx.getStorageSync('userInfo') || {}
+    this.setData({
+      showCheckin: false,
+      showCheckinPoster: true,
+      checkinPosterData: {
+        nickName: userInfo.nickName || '希舞宝宝',
+        streak: this.data.checkinStreak,
+        todayCount: this.data.checkinTodayCount,
+        totalDays: this.data.checkinTotalDays,
+        recordType: 'medication',
+        date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+      }
+    })
+  },
+
+  onCheckinPosterClose() {
+    this.setData({ showCheckinPoster: false })
+    wx.navigateBack()
+  },
+
+  onCheckinPosterSaved() {
+    wx.showToast({ title: '已保存到相册', icon: 'success' })
+    this.setData({ showCheckinPoster: false })
+    setTimeout(() => wx.navigateBack(), 1500)
   }
 })

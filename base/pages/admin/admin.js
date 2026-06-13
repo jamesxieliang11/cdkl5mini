@@ -285,4 +285,8 @@ Page({
     wx.navigateTo({ url: '/pages/community-admin/index' })
   },
 
+  goToFeedbackAdmin() {
+    wx.navigateTo({ url: '/pages/admin-feedback/index' })
+  },
+
 })

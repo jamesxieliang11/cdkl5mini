@@ -1,0 +1,114 @@
+<!-- 状态栏区域 -->
+<view class="status-bar"></view>
+
+<!-- 自定义导航栏 -->
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" color="#fff" size="20px" />
+  </view>
+  <text class="nav-title">反馈管理</text>
+  <view class="nav-placeholder"></view>
+</view>
+
+<!-- 筛选栏 -->
+<view class="filter-bar">
+  <view class="filter-item {{statusFilter === '' ? 'active' : ''}}" bindtap="onFilterChange" data-status="">全部</view>
+  <view class="filter-item {{statusFilter === 'pending' ? 'active' : ''}}" bindtap="onFilterChange" data-status="pending">待处理</view>
+  <view class="filter-item {{statusFilter === 'replied' ? 'active' : ''}}" bindtap="onFilterChange" data-status="replied">已回复</view>
+</view>
+
+<!-- 加载中 -->
+<view wx:if="{{loading && feedbacks.length === 0}}" class="loading-box">
+  <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+</view>
+
+<!-- 空状态 -->
+<view wx:elif="{{feedbacks.length === 0}}" class="empty-box">
+  <van-empty description="暂无反馈" />
+</view>
+
+<!-- 反馈列表 -->
+<view wx:else class="feedback-list">
+  <view class="feedback-item" wx:for="{{filteredFeedbacks}}" wx:key="_id">
+    <!-- 头部：类型 + 状态 + 时间 -->
+    <view class="feedback-header">
+      <view class="feedback-tags">
+        <van-tag type="primary" size="small">{{item.typeLabel}}</van-tag>
+        <van-tag wx:if="{{item.status === 'replied'}}" type="success" size="small">已回复</van-tag>
+        <van-tag wx:else type="warning" size="small">待处理</van-tag>
+      </view>
+      <text class="feedback-time">{{item.displayTime}}</text>
+    </view>
+
+    <!-- 内容 -->
+    <view class="feedback-content">{{item.content}}</view>
+
+    <!-- 联系方式 -->
+    <view wx:if="{{item.contact}}" class="feedback-contact">
+      <van-icon name="phone-o" size="14px" color="#999" />
+      <text>{{item.contact}}</text>
+    </view>
+
+    <!-- 图片 -->
+    <view wx:if="{{item.images && item.images.length > 0}}" class="feedback-images">
+      <image
+        wx:for="{{item.images}}"
+        wx:for-item="img"
+        wx:key="*this"
+        src="{{img}}"
+        mode="aspectFill"
+        class="feedback-img"
+        bindtap="previewImage"
+        data-url="{{img}}"
+        data-urls="{{item.images}}"
+      />
+    </view>
+
+    <!-- 已有回复 -->
+    <view wx:if="{{item.reply}}" class="feedback-reply-box">
+      <view class="reply-label">管理员回复：</view>
+      <view class="reply-content">{{item.reply}}</view>
+      <view class="reply-time">{{item.displayReplyTime}}</view>
+    </view>
+
+    <!-- 回复操作 -->
+    <view class="feedback-actions">
+      <view wx:if="{{expandedId === item._id}}" class="reply-form">
+        <van-field
+          value="{{replyContent}}"
+          type="textarea"
+          placeholder="输入回复内容..."
+          bind:change="onReplyInput"
+          border="{{false}}"
+          custom-class="reply-input"
+          autosize
+        />
+        <view class="reply-form-btns">
+          <van-button size="small" round bind:click="cancelReply">取消</van-button>
+          <van-button
+            type="primary"
+            size="small"
+            round
+            color="#34BFA3"
+            disabled="{{!replyContent}}"
+            loading="{{replying}}"
+            bind:click="submitReply"
+            data-id="{{item._id}}"
+            data-index="{{index}}"
+          >
+            提交回复
+          </van-button>
+        </view>
+      </view>
+      <view wx:else class="action-btn" bindtap="expandReply" data-id="{{item._id}}">
+        {{item.reply ? '修改回复' : '回复'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view wx:if="{{hasMore}}" class="load-more" bindtap="loadMore">
+    <van-loading wx:if="{{loading}}" size="20px" color="#34BFA3" />
+    <text wx:else class="load-more-text">点击加载更多</text>
+  </view>
+</view>

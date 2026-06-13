@@ -5,6 +5,7 @@
  */
 
 const { listMedicationRecords, listSeizureRecords, listOtherRecords, listMonthlyReports, getMyBoundQuestionnaires } = require('./database.js')
+const { MILESTONE_LABELS } = require('./milestone-config.js')
 
 // ==================== 场景配置 ====================
 
@@ -153,12 +154,7 @@ const DRUG_DISCLAIMER = '⚠️ 以上调药参考信息仅供学习交流，不
 
 // ==================== 核心 AI 服务函数 ====================
 
-/**
- * 创建 AI 模型实例
- */
-function createAIModel() {
-  return wx.cloud.extend.AI.createModel('hunyuan-exp')
-}
+const AI_MODEL = 'hunyuan-exp'
 
 /**
  * 流式对话调用
@@ -170,7 +166,7 @@ function createAIModel() {
  */
 async function streamChat(systemPrompt, messages, onChunk, onComplete, onError) {
   try {
-    const model = createAIModel()
+    const model = wx.cloud.extend.AI.createModel(AI_MODEL)
 
     const allMessages = [
       { role: 'system', content: systemPrompt },
@@ -179,7 +175,7 @@ async function streamChat(systemPrompt, messages, onChunk, onComplete, onError) 
 
     const response = await model.streamText({
       data: {
-        model: 'hunyuan-turbos-latest',
+        model: AI_MODEL,
         messages: allMessages
       }
     })
@@ -204,33 +200,6 @@ async function streamChat(systemPrompt, messages, onChunk, onComplete, onError) 
     }
     throw error
   }
-}
-
-// ==================== 里程碑 ID 到中文标签映射 ====================
-
-const MILESTONE_LABELS = {
-  gross_head_control: '能抬头',
-  gross_roll_over: '能翻身',
-  gross_sit: '能独坐',
-  gross_crawl: '能爬行',
-  gross_stand_support: '能扶站',
-  gross_stand_alone: '能独站',
-  gross_walk_support: '能扶走',
-  gross_walk_alone: '能独走',
-  fine_grasp: '能抓握',
-  fine_transfer: '能传递',
-  fine_pincer: '能拇食指捏',
-  fine_spoon: '能用勺子',
-  lang_eye_contact: '有眼神交流',
-  lang_vocalize: '能发出声音',
-  lang_single_word: '能说单字',
-  lang_phrases: '能说词组',
-  lang_understand: '能理解简单指令',
-  lang_recognize_family: '能认识家人',
-  social_smile: '有社交微笑',
-  social_stranger_anxiety: '能认生',
-  social_separation_anxiety: '有分离焦虑',
-  social_imitate: '能模仿动作'
 }
 
 // ==================== 数据预处理辅助函数 ====================
@@ -440,107 +409,6 @@ function summarizeMilestones(monthlyReports) {
 // ==================== 上下文数据构建 ====================
 
 /**
- * 获取用户的发作记录摘要
- * @param {number} days - 获取最近多少天的记录
- */
-async function fetchSeizureSummary(days = 30) {
-  try {
-    const result = await listSeizureRecords(200, 0)
-    if (!result.success || !result.data.records) return '暂无发作记录'
-
-    const cutoffTime = Date.now() - days * 24 * 60 * 60 * 1000
-    const recentRecords = result.data.records.filter(
-      record => new Date(record.record_time).getTime() >= cutoffTime
-    )
-
-    if (recentRecords.length === 0) return `最近${days}天内暂无发作记录`
-
-    const typeCount = {}
-    let totalDuration = 0
-    recentRecords.forEach(record => {
-      const seizureType = record.seizure_type || '未知类型'
-      typeCount[seizureType] = (typeCount[seizureType] || 0) + 1
-      totalDuration += parseFloat(record.duration) || 0
-    })
-
-    const typeDistribution = Object.entries(typeCount)
-      .map(([type, count]) => `${type}: ${count}次`)
-      .join('、')
-
-    return `最近${days}天发作记录：共${recentRecords.length}次发作。` +
-      `类型分布：${typeDistribution}。` +
-      `平均每次持续${(totalDuration / recentRecords.length).toFixed(1)}分钟。` +
-      `详细记录：\n${recentRecords.map(record =>
-        `- ${new Date(record.record_time).toLocaleDateString('zh-CN')} ${record.seizure_type || '未知类型'}发作，持续${record.duration || '未知'}分钟` +
-        (record.triggers ? `，诱因：${record.triggers}` : '') +
-        (record.symptoms ? `，症状：${record.symptoms}` : '')
-      ).join('\n')}`
-  } catch (error) {
-    console.error('获取发作记录摘要失败:', error)
-    return '获取发作记录失败'
-  }
-}
-
-/**
- * 获取用户的用药记录摘要
- * @param {number} days - 获取最近多少天的记录
- */
-async function fetchMedicationSummary(days = 30) {
-  try {
-    const result = await listMedicationRecords(200, 0)
-    if (!result.success || !result.data.records) return '暂无用药记录'
-
-    const cutoffTime = Date.now() - days * 24 * 60 * 60 * 1000
-    const recentRecords = result.data.records.filter(
-      record => new Date(record.record_time).getTime() >= cutoffTime
-    )
-
-    if (recentRecords.length === 0) return `最近${days}天内暂无用药记录`
-
-    const medicationMap = {}
-    const sideEffectsSet = new Set()
-
-    recentRecords.forEach(record => {
-      if (record.medications) {
-        record.medications.forEach(med => {
-          const medName = med.medication_name || '未知药物'
-          if (!medicationMap[medName]) {
-            medicationMap[medName] = { dosages: [], unit: med.unit || '' }
-          }
-          medicationMap[medName].dosages.push(parseFloat(med.dosage) || 0)
-        })
-      }
-      if (record.side_effects) {
-        record.side_effects.split(/[,、，]/).forEach(effect => {
-          const trimmed = effect.trim()
-          if (trimmed && trimmed !== '无副作用') sideEffectsSet.add(trimmed)
-        })
-      }
-    })
-
-    const medicationSummary = Object.entries(medicationMap).map(([name, info]) => {
-      const latestDosage = info.dosages[info.dosages.length - 1]
-      return `${name} ${latestDosage}${info.unit}`
-    }).join('、')
-
-    const sideEffects = sideEffectsSet.size > 0
-      ? `副作用：${Array.from(sideEffectsSet).join('、')}`
-      : '暂无明显副作用'
-
-    return `最近${days}天用药记录：共${recentRecords.length}条记录。` +
-      `当前用药方案：${medicationSummary}。${sideEffects}。` +
-      `详细记录：\n${recentRecords.slice(0, 10).map(record =>
-        `- ${new Date(record.record_time).toLocaleDateString('zh-CN')} ` +
-        (record.medications || []).map(m => `${m.medication_name} ${m.dosage}${m.unit}`).join(' + ') +
-        (record.side_effects ? ` | 副作用：${record.side_effects}` : '')
-      ).join('\n')}`
-  } catch (error) {
-    console.error('获取用药记录摘要失败:', error)
-    return '获取用药记录失败'
-  }
-}
-
-/**
  * 获取用户的其他记录摘要
  * @param {number} days - 获取最近多少天的记录
  */
@@ -686,22 +554,43 @@ ${otherSummary}`
  * 构建调药建议的完整上下文
  */
 async function buildDrugAdjustmentContext() {
-  const [babyInfo, seizureSummary, medicationSummary] = await Promise.all([
+  const days = 90
+
+  const [babyInfoResult, seizureResult, medicationResult, monthlyReportResult] = await Promise.all([
     fetchBabyInfo(),
-    fetchSeizureSummary(90),
-    fetchMedicationSummary(90)
+    listSeizureRecords(200, 0).catch(() => ({ success: false })),
+    listMedicationRecords(200, 0).catch(() => ({ success: false })),
+    listMonthlyReports(10, 0).catch(() => ({ success: false }))
   ])
+
+  const cutoffTime = Date.now() - days * 24 * 60 * 60 * 1000
+
+  const allSeizureRecords = (seizureResult.success && seizureResult.data?.records) || []
+  const recentSeizureRecords = allSeizureRecords.filter(
+    record => new Date(record.record_time).getTime() >= cutoffTime
+  )
+
+  const allMedRecords = (medicationResult.success && medicationResult.data?.records) || []
+  const recentMedRecords = allMedRecords.filter(
+    record => new Date(record.record_time).getTime() >= cutoffTime
+  )
+
+  const monthlyReports = (monthlyReportResult.success && monthlyReportResult.data?.records) || []
+  const recentMonthlyReports = monthlyReports.slice(0, 3)
+
+  const seizureStats = summarizeSeizureStats(recentSeizureRecords, days)
+  const medSummary = summarizeCurrentMedications(recentMedRecords, recentMonthlyReports)
 
   return `以下是患儿的当前情况，请基于这些信息提供调药思路参考：
 
 【患儿基本信息】
-${babyInfo}
+${babyInfoResult}
 
 【近3个月发作情况】
-${seizureSummary}
+${seizureStats.summary}
 
 【近3个月用药情况】
-${medicationSummary}
+${medSummary.summary}
 
 请分析当前用药方案的合理性，并提供调药思路参考。`
 }
@@ -753,18 +642,10 @@ function parseTimeRangeToDays(rangeText) {
 // ==================== 导出 ====================
 
 module.exports = {
-  SCENE_CONFIG,
-  DISCLAIMER,
-  DRUG_DISCLAIMER,
-  createAIModel,
   streamChat,
   getSceneConfig,
   getSystemPrompt,
   getDisclaimer,
-  fetchSeizureSummary,
-  fetchMedicationSummary,
-  fetchOtherRecordsSummary,
-  fetchBabyInfo,
   buildMedicalRecordContext,
   buildDrugAdjustmentContext,
   parseTimeRangeToDays

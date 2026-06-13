@@ -1,4 +1,4 @@
-// 希舞宝宝社区云函数 - 帖子、评论、话题、点赞管理
+// 希舞宝宝社区云函数 - 帖子、评论、话题、点赞、活动管理
 const cloud = require('wx-server-sdk')
 
 cloud.init({
@@ -8,10 +8,58 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function resolveCurrentUser() {
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+  if (!openid) throw new Error('AUTH_FAIL')
+  const res = await db.collection('users').where({ openid }).field({ _id: true, adminRole: true }).limit(1).get()
+  if (!res.data || !res.data.length) throw new Error('USER_NOT_FOUND')
+  return { userId: res.data[0]._id, openid, adminRole: res.data[0].adminRole || '' }
+}
+
+function requireAdmin(currentUser) {
+  if (!['admin', 'superadmin'].includes(currentUser.adminRole)) {
+    throw new Error('权限不足')
+  }
+}
+
+// 尝试解析用户（读操作允许未登录）
+async function tryResolveUser() {
+  try {
+    return await resolveCurrentUser()
+  } catch (e) {
+    return null
+  }
+}
+
 exports.main = async (event, context) => {
   const { action } = event
 
   try {
+    // 读操作：允许未登录访问，尝试解析用户以获取点赞状态
+    const readActions = ['getPost', 'listPosts', 'listComments', 'listTopics', 'listActivities', 'getActivity', 'getShareData']
+    if (readActions.includes(action)) {
+      const user = await tryResolveUser()
+      if (user) {
+        event.userId = user.userId
+        event.isAdmin = ['admin', 'superadmin'].includes(user.adminRole)
+      } else {
+        event.userId = ''
+        event.isAdmin = false
+      }
+    } else {
+      // 写操作：必须登录
+      const currentUser = await resolveCurrentUser()
+      event.userId = currentUser.userId
+      event.isAdmin = ['admin', 'superadmin'].includes(currentUser.adminRole)
+
+      // 管理员专属操作
+      const adminActions = ['togglePinPost', 'hidePost', 'createTopic', 'updateTopic', 'adminListPosts', 'createActivity', 'updateActivity']
+      if (adminActions.includes(action)) {
+        requireAdmin(currentUser)
+      }
+    }
+
     switch (action) {
       case 'createPost':
         return await createPost(event)
@@ -43,6 +91,16 @@ exports.main = async (event, context) => {
         return await adminListPosts(event)
       case 'getShareData':
         return await getShareData(event)
+      case 'createActivity':
+        return await createActivity(event)
+      case 'listActivities':
+        return await listActivities(event)
+      case 'getActivity':
+        return await getActivity(event)
+      case 'updateActivity':
+        return await updateActivity(event)
+      case 'joinActivity':
+        return await joinActivity(event)
       default:
         return { success: false, message: '不支持的操作类型' }
     }
@@ -607,6 +665,220 @@ async function adminListPosts(event) {
       pageIndex,
       hasMore: (pageIndex + 1) * pageSize < countResult.total
     }
+  }
+}
+
+// ==================== 活动相关 ====================
+
+async function createActivity(event) {
+  const { data, userId } = event
+
+  if (!data || !data.title || !data.title.trim()) {
+    return { success: false, message: '活动标题不能为空' }
+  }
+
+  const activity = {
+    title: data.title.trim(),
+    description: data.description || '',
+    cover_image: data.coverImage || '',
+    start_time: data.startTime ? new Date(data.startTime) : new Date(),
+    end_time: data.endTime ? new Date(data.endTime) : null,
+    type: data.type || 'general',
+    topic_id: data.topicId || '',
+    participant_count: 0,
+    max_participants: data.maxParticipants || 0,
+    status: data.status || 'active',
+    created_by: userId || '',
+    created_at: new Date(),
+    updated_at: new Date()
+  }
+
+  const result = await db.collection('community_activities').add({ data: activity })
+
+  return {
+    success: true,
+    message: '活动创建成功',
+    data: { activityId: result._id, ...activity }
+  }
+}
+
+async function listActivities(event) {
+  const { status, pageSize = 10, pageIndex = 0, includeAll } = event
+  const skip = pageIndex * pageSize
+
+  let query = {}
+  if (includeAll) {
+    query.status = _.in(['active', 'ended', 'draft'])
+  } else if (status) {
+    query.status = status
+  } else {
+    query.status = 'active'
+  }
+
+  const countResult = await db.collection('community_activities').where(query).count()
+
+  const result = await db.collection('community_activities')
+    .where(query)
+    .orderBy('created_at', 'desc')
+    .skip(skip)
+    .limit(pageSize)
+    .get()
+
+  // 自动结束已过期的活动
+  const now = new Date()
+  const activities = result.data.map(a => {
+    if (a.status === 'active' && a.end_time && new Date(a.end_time) < now) {
+      db.collection('community_activities').doc(a._id).update({
+        data: { status: 'ended', updated_at: now }
+      }).catch(() => {})
+      return { ...a, status: 'ended' }
+    }
+    return a
+  })
+
+  // 查询当前用户的参与状态
+  const userId = event.userId
+  let joinedIds = []
+  if (userId && activities.length > 0) {
+    try {
+      const activityIds = activities.map(a => a._id)
+      const joinResult = await db.collection('community_activity_participants').where({
+        activity_id: _.in(activityIds),
+        user_id: userId
+      }).get()
+      joinedIds = joinResult.data.map(j => j.activity_id)
+    } catch (e) {
+      console.log('查询参与状态失败:', e.message)
+    }
+  }
+
+  return {
+    success: true,
+    data: {
+      records: activities.map(a => ({ ...a, isJoined: joinedIds.includes(a._id) })),
+      total: countResult.total,
+      hasMore: (pageIndex + 1) * pageSize < countResult.total
+    }
+  }
+}
+
+async function getActivity(event) {
+  const { activityId, userId } = event
+
+  if (!activityId) {
+    return { success: false, message: '活动 ID 不能为空' }
+  }
+
+  const result = await db.collection('community_activities').doc(activityId).get()
+  const activity = result.data
+
+  if (!activity) {
+    return { success: false, message: '活动不存在' }
+  }
+
+  let isJoined = false
+  if (userId) {
+    try {
+      const joinResult = await db.collection('community_activity_participants').where({
+        activity_id: activityId,
+        user_id: userId
+      }).count()
+      isJoined = joinResult.total > 0
+    } catch (e) {
+      console.log('查询参与状态失败:', e.message)
+    }
+  }
+
+  // 获取最近参与者
+  let recentParticipants = []
+  try {
+    const pResult = await db.collection('community_activity_participants')
+      .where({ activity_id: activityId })
+      .orderBy('joined_at', 'desc')
+      .limit(10)
+      .get()
+    recentParticipants = pResult.data
+  } catch (e) {
+    console.log('查询参与者失败:', e.message)
+  }
+
+  return {
+    success: true,
+    data: { ...activity, isJoined, recentParticipants }
+  }
+}
+
+async function updateActivity(event) {
+  const { activityId, data } = event
+
+  if (!activityId) {
+    return { success: false, message: '活动 ID 不能为空' }
+  }
+
+  const updateData = { updated_at: new Date() }
+  if (data.title !== undefined) updateData.title = data.title.trim()
+  if (data.description !== undefined) updateData.description = data.description
+  if (data.coverImage !== undefined) updateData.cover_image = data.coverImage
+  if (data.startTime !== undefined) updateData.start_time = new Date(data.startTime)
+  if (data.endTime !== undefined) updateData.end_time = data.endTime ? new Date(data.endTime) : null
+  if (data.type !== undefined) updateData.type = data.type
+  if (data.topicId !== undefined) updateData.topic_id = data.topicId
+  if (data.maxParticipants !== undefined) updateData.max_participants = data.maxParticipants
+  if (data.status !== undefined) updateData.status = data.status
+
+  await db.collection('community_activities').doc(activityId).update({ data: updateData })
+
+  return { success: true, message: '更新成功' }
+}
+
+async function joinActivity(event) {
+  const { activityId, userId } = event
+
+  if (!activityId || !userId) {
+    return { success: false, message: '参数不完整' }
+  }
+
+  const activityResult = await db.collection('community_activities').doc(activityId).get()
+  const activity = activityResult.data
+
+  if (!activity || activity.status !== 'active') {
+    return { success: false, message: '活动不存在或已结束' }
+  }
+
+  if (activity.max_participants > 0 && activity.participant_count >= activity.max_participants) {
+    return { success: false, message: '活动参与人数已满' }
+  }
+
+  // 检查是否已参与
+  const existingResult = await db.collection('community_activity_participants').where({
+    activity_id: activityId,
+    user_id: userId
+  }).count()
+
+  if (existingResult.total > 0) {
+    return { success: false, message: '您已参与该活动' }
+  }
+
+  const { displayName, avatarUrl } = await resolveUserDisplayInfo(userId, '', '')
+
+  await db.collection('community_activity_participants').add({
+    data: {
+      activity_id: activityId,
+      user_id: userId,
+      nick_name: displayName,
+      avatar_url: avatarUrl,
+      joined_at: new Date()
+    }
+  })
+
+  await db.collection('community_activities').doc(activityId).update({
+    data: { participant_count: _.inc(1), updated_at: new Date() }
+  })
+
+  return {
+    success: true,
+    message: '参与成功',
+    data: { isJoined: true }
   }
 }
 

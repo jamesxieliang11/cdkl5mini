@@ -58,7 +58,7 @@
 
 /* 页面标题 */
 .page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   padding: 60rpx 30rpx 30rpx;
   color: white;
   display: flex;
@@ -127,10 +127,10 @@
 
 /* 编辑按钮 — 适老化放大 */
 .edit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
   border: none;
-  border-radius: 50rpx;
+  border-radius: var(--radius-pill);
   padding: 14rpx 28rpx;
   font-size: 28rpx;
 }
@@ -299,7 +299,7 @@
 }
 
 .tab-item.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
   font-weight: 600;
 }

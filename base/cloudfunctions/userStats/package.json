@@ -1,0 +1,9 @@
+{
+  "name": "userStats",
+  "version": "1.0.0",
+  "description": "用户统计云函数 - 打卡天数/连续天数/记录统计/成就",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

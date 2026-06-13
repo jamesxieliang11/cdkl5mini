@@ -1,8 +1,6 @@
 <!-- 自定义导航栏 -->
 <van-nav-bar
-  title="{{isEdit ? '编辑用户信息' : '完善用户信息'}}"
-  left-arrow
-  bind:click-left="onBack"
+  title="我的"
   custom-class="custom-nav-bar"
 />
 
@@ -296,7 +294,7 @@
       >
         {{loading ? '保存中...' : '保存信息'}}
       </van-button>
-      
+
       <van-button
         wx:if="{{!isEdit}}"
         type="default"
@@ -308,4 +306,83 @@
       </van-button>
     </view>
   </form>
+
+  <!-- 我的数据 -->
+  <view class="stats-card" wx:if="{{statsLoaded}}">
+    <view class="stats-row">
+      <view class="stats-item">
+        <text class="stats-value">{{statsTotalDays}}</text>
+        <text class="stats-label">记录天数</text>
+      </view>
+      <view class="stats-divider"></view>
+      <view class="stats-item">
+        <text class="stats-value">{{statsStreak}}</text>
+        <text class="stats-label">连续打卡</text>
+      </view>
+      <view class="stats-divider"></view>
+      <view class="stats-item">
+        <text class="stats-value">{{statsTotalRecords}}</text>
+        <text class="stats-label">总记录</text>
+      </view>
+    </view>
+    <view class="stats-achievements" wx:if="{{statsAchievements.length > 0}}">
+      <view class="achievement-tag" wx:for="{{statsAchievements}}" wx:key="key">
+        <text>{{item.icon}}</text>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+    <view class="stats-share-btn">
+      <van-button size="small" plain color="#34BFA3" icon="share-o" bindtap="onShareStats">分享我的数据</van-button>
+    </view>
+  </view>
+
+  <!-- 功能入口 -->
+  <view class="menu-section">
+    <view class="section-title">
+      <van-icon name="apps-o" />
+      <text>功能入口</text>
+    </view>
+    <view class="menu-card" bindtap="goToReports">
+      <view class="ds-icon-wrap" style="background:linear-gradient(135deg,#9C27B0,#BA68C8)">
+        <van-icon name="bar-chart-o" size="24px" color="#fff" />
+      </view>
+      <view class="menu-info">
+        <text class="menu-name">我的报告</text>
+        <text class="menu-desc">查看记录统计与趋势</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+    <view class="menu-card" bindtap="goToFeedback">
+      <view class="ds-icon-wrap" style="background:linear-gradient(135deg,#FF9800,#FFB74D)">
+        <van-icon name="smile-comment-o" size="24px" color="#fff" />
+      </view>
+      <view class="menu-info">
+        <text class="menu-name">反馈意见</text>
+        <text class="menu-desc">帮助我们改进产品</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+    <view wx:if="{{isAdmin}}" class="menu-card" bindtap="goToAdmin">
+      <view class="ds-icon-wrap" style="background:linear-gradient(135deg,#FF5722,#FF8A65)">
+        <van-icon name="setting-o" size="24px" color="#fff" />
+      </view>
+      <view class="menu-info">
+        <text class="menu-name">管理面板</text>
+        <text class="menu-desc">数据统计与系统配置</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+  </view>
 </view>
+
+<!-- 统计海报 -->
+<share-poster
+  wx:if="{{showStatsPoster}}"
+  type="stats"
+  post-data="{{statsPosterData}}"
+  bind:close="onStatsPosterClose"
+  bind:saved="onStatsPosterSaved"
+/>
+
+<!-- 自定义tabbar -->
+<custom-tabbar id="tabbar" />

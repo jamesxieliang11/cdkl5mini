@@ -188,4 +188,110 @@
       </view>
     </view>
   </van-tab>
+  <!-- ========== 活动管理 ========== -->
+  <van-tab title="活动">
+    <view class="tab-content">
+      <!-- 新建活动入口 -->
+      <view class="form-card" wx:if="{{!showActivityForm}}">
+        <van-button type="primary" round color="#34BFA3" size="small" bind:click="toggleActivityForm" block>
+          + 新建活动
+        </van-button>
+      </view>
+
+      <!-- 新建活动表单 -->
+      <view class="form-card" wx:if="{{showActivityForm}}">
+        <view class="form-card-title">新建活动</view>
+        <view class="form-row">
+          <van-field
+            value="{{activityTitle}}"
+            placeholder="活动标题（必填）"
+            bind:change="onActivityTitleInput"
+            border="{{false}}"
+            custom-class="form-input"
+          />
+        </view>
+        <view class="form-row">
+          <van-field
+            value="{{activityDesc}}"
+            type="textarea"
+            placeholder="活动描述（选填）"
+            bind:change="onActivityDescInput"
+            border="{{false}}"
+            custom-class="form-input"
+            autosize
+          />
+        </view>
+        <view class="form-row">
+          <view class="form-label">活动类型</view>
+          <view class="type-tags">
+            <view
+              wx:for="{{activityTypes}}"
+              wx:key="value"
+              class="type-tag {{activityType === item.value ? 'active' : ''}}"
+              bindtap="onActivityTypeChange"
+              data-detail="{{item.value}}"
+            >{{item.label}}</view>
+          </view>
+        </view>
+        <view class="form-row">
+          <view class="form-label">开始日期</view>
+          <picker mode="date" value="{{activityStartDate}}" bindchange="onActivityStartDateChange">
+            <view class="date-pick-display">{{activityStartDate || '请选择'}}</view>
+          </picker>
+        </view>
+        <view class="form-row">
+          <view class="form-label">结束日期（不选则为长期活动）</view>
+          <picker mode="date" value="{{activityEndDate}}" bindchange="onActivityEndDateChange">
+            <view class="date-pick-display">{{activityEndDate || '不限（长期活动）'}}</view>
+          </picker>
+        </view>
+        <view class="form-row-inline" style="margin-top: 24rpx;">
+          <van-button size="small" round bind:click="toggleActivityForm">取消</van-button>
+          <van-button
+            type="primary"
+            size="small"
+            round
+            color="#34BFA3"
+            disabled="{{!activityTitle}}"
+            loading="{{activitySubmitting}}"
+            bind:click="submitNewActivity"
+          >
+            发布活动
+          </van-button>
+        </view>
+      </view>
+
+      <!-- 活动列表 -->
+      <view class="list-card">
+        <view class="list-card-title">已有活动 ({{activities.length}})</view>
+        <view wx:if="{{activityListLoading && activities.length === 0}}" class="loading-box">
+          <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+        </view>
+        <view wx:elif="{{activities.length === 0}}" class="empty-text">暂无活动</view>
+        <view wx:else>
+          <view class="activity-item" wx:for="{{activities}}" wx:key="_id">
+            <view class="activity-item-header">
+              <view class="activity-item-title">{{item.title}}</view>
+              <van-tag wx:if="{{item.status === 'active'}}" type="success" size="small">进行中</van-tag>
+              <van-tag wx:elif="{{item.status === 'ended'}}" type="default" size="small">已结束</van-tag>
+              <van-tag wx:elif="{{item.status === 'draft'}}" type="warning" size="small">草稿</van-tag>
+            </view>
+            <view class="activity-item-desc" wx:if="{{item.description}}">{{item.description}}</view>
+            <view class="activity-item-meta">
+              <text>{{item.displayStart}} ~ {{item.displayEnd}}</text>
+              <text>{{item.participant_count || 0}} 人参与</text>
+            </view>
+            <view class="post-actions-bar">
+              <view wx:if="{{item.status === 'active'}}" class="action-btn danger" bindtap="onEndActivity" data-id="{{item._id}}" data-index="{{index}}">
+                结束活动
+              </view>
+              <view wx:if="{{item.status === 'ended'}}" class="action-btn" bindtap="onReactivateActivity" data-id="{{item._id}}" data-index="{{index}}">
+                重新开启
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </van-tab>
 </van-tabs>

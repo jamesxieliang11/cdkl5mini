@@ -4,11 +4,8 @@
 <!-- 页面标题 -->
 <view class="page-header">
   <view class="header-title-row">
+    <van-icon name="arrow-left" size="20" color="#fff" bind:click="onBack" />
     <text class="header-title">月度汇报</text>
-    <button class="home-btn" bindtap="onBack">
-      <text class="home-icon">🏠</text>
-      <text class="home-text">主页</text>
-    </button>
   </view>
   <view class="header-subtitle">每月记录用药、发作和发育情况</view>
 </view>

@@ -1,7 +1,7 @@
 /* 状态栏区域 */
 .status-bar {
   height: var(--status-bar-height);
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
 }
 
 /* ========== 添加记录页 - 适老化样式 ========== */
@@ -16,7 +16,7 @@
 /* 页面头部 */
 .page-header {
   padding: 48rpx 40rpx 32rpx;
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
 }
 
 .page-title {

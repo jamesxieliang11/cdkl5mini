@@ -7,7 +7,10 @@ const {
   togglePinCommunityPost,
   hideCommunityPost,
   listCommunityComments,
-  deleteCommunityComment
+  deleteCommunityComment,
+  createCommunityActivity,
+  listCommunityActivities,
+  updateCommunityActivity
 } = require('../../utils/database.js')
 
 Page({
@@ -34,12 +37,34 @@ Page({
     comments: [],
     commentPageIndex: 0,
     commentListLoading: false,
-    hasMoreComments: false
+    hasMoreComments: false,
+
+    // ===== 活动管理 =====
+    activities: [],
+    activityListLoading: false,
+    hasMoreActivities: false,
+    activityPageIndex: 0,
+    showActivityForm: false,
+    activityTitle: '',
+    activityDesc: '',
+    activityType: 'general',
+    activityStartDate: '',
+    activityEndDate: '',
+    activitySubmitting: false,
+    activityTypes: [
+      { value: 'general', label: '通用活动' },
+      { value: 'checkin', label: '打卡挑战' },
+      { value: 'topic', label: '话题活动' },
+      { value: 'share', label: '分享活动' }
+    ]
   },
 
   onLoad() {
+    const today = this.formatDate(new Date())
+    this.setData({ activityStartDate: today })
     this.loadTopics()
     this.loadPosts()
+    this.loadActivities()
   },
 
   goBack() {
@@ -192,7 +217,7 @@ Page({
       success: async (res) => {
         if (!res.confirm) return
         try {
-          await deleteCommunityPost(postId, true)
+          await deleteCommunityPost(postId)
           const posts = [...this.data.posts]
           posts.splice(index, 1)
           this.setData({ posts })
@@ -268,7 +293,7 @@ Page({
       success: async (res) => {
         if (!res.confirm) return
         try {
-          await deleteCommunityComment(commentId, postId, true)
+          await deleteCommunityComment(commentId, postId)
           const comments = [...this.data.comments]
           comments.splice(index, 1)
           this.setData({ comments })
@@ -279,6 +304,135 @@ Page({
         }
       }
     })
+  },
+
+  // ==================== 活动管理 ====================
+
+  async loadActivities() {
+    this.setData({ activityListLoading: true })
+    try {
+      const result = await listCommunityActivities({
+        includeAll: true,
+        pageSize: 20,
+        pageIndex: this.data.activityPageIndex
+      })
+      if (result.data) {
+        const records = (result.data.records || []).map(a => ({
+          ...a,
+          displayStart: this.formatDate(new Date(a.start_time)),
+          displayEnd: a.end_time ? this.formatDate(new Date(a.end_time)) : '长期'
+        }))
+        const activities = this.data.activityPageIndex === 0
+          ? records
+          : [...this.data.activities, ...records]
+        this.setData({
+          activities,
+          hasMoreActivities: result.data.hasMore
+        })
+      }
+    } catch (error) {
+      console.error('加载活动失败:', error)
+    } finally {
+      this.setData({ activityListLoading: false })
+    }
+  },
+
+  toggleActivityForm() {
+    this.setData({ showActivityForm: !this.data.showActivityForm })
+  },
+
+  onActivityTitleInput(event) {
+    this.setData({ activityTitle: event.detail })
+  },
+
+  onActivityDescInput(event) {
+    this.setData({ activityDesc: event.detail })
+  },
+
+  onActivityTypeChange(event) {
+    this.setData({ activityType: event.currentTarget.dataset.detail })
+  },
+
+  onActivityStartDateChange(event) {
+    this.setData({ activityStartDate: event.detail.value })
+  },
+
+  onActivityEndDateChange(event) {
+    this.setData({ activityEndDate: event.detail.value })
+  },
+
+  async submitNewActivity() {
+    if (!this.data.activityTitle) {
+      wx.showToast({ title: '请输入活动标题', icon: 'none' })
+      return
+    }
+
+    this.setData({ activitySubmitting: true })
+    try {
+      await createCommunityActivity({
+        title: this.data.activityTitle,
+        description: this.data.activityDesc,
+        type: this.data.activityType,
+        startTime: this.data.activityStartDate,
+        endTime: this.data.activityEndDate || null,
+        status: 'active'
+      })
+      wx.showToast({ title: '活动创建成功', icon: 'success' })
+      this.setData({
+        activityTitle: '',
+        activityDesc: '',
+        activityType: 'general',
+        activityEndDate: '',
+        showActivityForm: false,
+        activityPageIndex: 0
+      })
+      this.loadActivities()
+    } catch (error) {
+      console.error('创建活动失败:', error)
+      wx.showToast({ title: '创建失败', icon: 'none' })
+    } finally {
+      this.setData({ activitySubmitting: false })
+    }
+  },
+
+  async onEndActivity(event) {
+    const activityId = event.currentTarget.dataset.id
+    const index = event.currentTarget.dataset.index
+    wx.showModal({
+      title: '确认结束',
+      content: '结束后活动将不再显示在社区首页',
+      success: async (res) => {
+        if (!res.confirm) return
+        try {
+          await updateCommunityActivity(activityId, { status: 'ended' })
+          this.setData({ [`activities[${index}].status`]: 'ended' })
+          wx.showToast({ title: '已结束', icon: 'success' })
+        } catch (error) {
+          console.error('结束活动失败:', error)
+          wx.showToast({ title: '操作失败', icon: 'none' })
+        }
+      }
+    })
+  },
+
+  async onReactivateActivity(event) {
+    const activityId = event.currentTarget.dataset.id
+    const index = event.currentTarget.dataset.index
+    try {
+      await updateCommunityActivity(activityId, { status: 'active' })
+      this.setData({ [`activities[${index}].status`]: 'active' })
+      wx.showToast({ title: '已重新开启', icon: 'success' })
+    } catch (error) {
+      console.error('重新开启失败:', error)
+      wx.showToast({ title: '操作失败', icon: 'none' })
+    }
+  },
+
+  formatDate(date) {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
   },
 
   // ==================== 工具方法 ====================

@@ -6,7 +6,7 @@
 
 /* 页面头部 */
 .page-header {
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
   padding: 60rpx 40rpx 60rpx;
   color: white;
   text-align: center;
@@ -21,7 +21,7 @@
 }
 
 .header-title {
-  font-size: 44rpx;
+  font-size: var(--font-h1);
   font-weight: 700;
   margin: 0;
 }
@@ -66,7 +66,7 @@
 .medication-title {
   font-size: 34rpx;
   font-weight: 600;
-  color: #1976d2;
+  color: var(--color-primary);
 }
 
 .dosage-container {
@@ -78,8 +78,8 @@
 .add-medication-btn {
   width: 100%;
   margin-top: 20rpx;
-  border-radius: 12rpx;
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+  border-radius: var(--radius-pill);
+  background: var(--gradient-primary);
   color: white;
   border: none;
 }
@@ -99,9 +99,9 @@
 
 /* 适老化 - 提交按钮放大 */
 .submit-container .van-button {
-  border-radius: 50rpx;
+  border-radius: var(--radius-pill);
   height: 96rpx;
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
   border: none;
   font-size: 36rpx;
   font-weight: 600;
@@ -150,14 +150,14 @@
 
 /* 快捷选择样式 */
 .quick-select-cell {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  background: var(--color-primary-light);
   border-radius: 12rpx;
   margin: 16rpx 0;
-  border: 2rpx solid #1976d2;
+  border: 2rpx solid var(--color-primary);
 }
 
 .quick-select-cell .van-cell__title {
-  color: #1976d2;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -167,12 +167,12 @@
 }
 
 .quick-select-cell .van-icon {
-  color: #1976d2;
+  color: var(--color-primary);
 }
 
 /* 药物选择器样式增强 */
 .van-action-sheet__header {
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
   color: white;
 }
 
@@ -217,9 +217,9 @@
 }
 
 .side-effect-tag.selected {
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
   color: white;
-  border-color: #1976d2;
+  border-color: var(--color-primary);
   font-weight: 500;
 }
 

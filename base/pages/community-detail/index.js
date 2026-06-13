@@ -1,5 +1,14 @@
 const { getCommunityPost, listCommunityComments, createCommunityComment, toggleCommunityLike, deleteCommunityPost, deleteCommunityComment, getCommunityShareData } = require('../../utils/database.js')
 
+const AVATAR_COLORS = ['#34BFA3', '#FF6B6B', '#4ECDC4', '#A78BFA', '#F97316', '#06B6D4', '#EC4899', '#8B5CF6']
+
+function getAvatarMeta(nickName, userId) {
+  const name = nickName || '希'
+  const char = name[0]
+  const hash = (userId || name).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+  return { avatarChar: char, avatarColor: AVATAR_COLORS[hash % AVATAR_COLORS.length] }
+}
+
 Page({
   data: {
     post: null,               // 帖子数据
@@ -57,6 +66,11 @@ Page({
       const result = await getCommunityPost(this._postId)
       if (result.data) {
         const post = result.data
+        const meta = post.is_anonymous
+          ? { avatarChar: '匿', avatarColor: '#ccc' }
+          : getAvatarMeta(post.nick_name, post.user_id)
+        post.avatarChar = meta.avatarChar
+        post.avatarColor = meta.avatarColor
         this.setData({
           post,
           displayTime: this.formatTime(post.created_at),
@@ -77,10 +91,10 @@ Page({
     try {
       const result = await listCommunityComments(this._postId, 20, 0)
       if (result.data) {
-        const comments = result.data.records.map(comment => ({
-          ...comment,
-          displayTime: this.formatTime(comment.created_at)
-        }))
+        const comments = result.data.records.map(comment => {
+          const meta = getAvatarMeta(comment.nick_name, comment.user_id)
+          return { ...comment, displayTime: this.formatTime(comment.created_at), avatarChar: meta.avatarChar, avatarColor: meta.avatarColor }
+        })
         this.setData({
           comments,
           hasMoreComments: result.data.hasMore,
@@ -100,10 +114,10 @@ Page({
     try {
       const result = await listCommunityComments(this._postId, 20, nextPage)
       if (result.data) {
-        const newComments = result.data.records.map(comment => ({
-          ...comment,
-          displayTime: this.formatTime(comment.created_at)
-        }))
+        const newComments = result.data.records.map(comment => {
+          const meta = getAvatarMeta(comment.nick_name, comment.user_id)
+          return { ...comment, displayTime: this.formatTime(comment.created_at), avatarChar: meta.avatarChar, avatarColor: meta.avatarColor }
+        })
         this.setData({
           comments: [...this.data.comments, ...newComments],
           hasMoreComments: result.data.hasMore,
@@ -202,11 +216,13 @@ Page({
 
       const result = await createCommunityComment(this._postId, commentData)
 
-      // 将新评论添加到列表
+      const newMeta = getAvatarMeta(commentData.nickName, this.data.currentUserId)
       const newComment = {
         ...result.data,
         displayTime: '刚刚',
-        isLiked: false
+        isLiked: false,
+        avatarChar: newMeta.avatarChar,
+        avatarColor: newMeta.avatarColor
       }
       const comments = [...this.data.comments, newComment]
 
@@ -240,7 +256,7 @@ Page({
       success: async (res) => {
         if (res.confirm) {
           try {
-            await deleteCommunityComment(commentId, this._postId, this.data.isAdmin)
+            await deleteCommunityComment(commentId, this._postId)
             const comments = [...this.data.comments]
             comments.splice(index, 1)
             const post = { ...this.data.post }
@@ -282,7 +298,7 @@ Page({
       success: async (res) => {
         if (res.confirm) {
           try {
-            await deleteCommunityPost(this._postId, this.data.isAdmin)
+            await deleteCommunityPost(this._postId)
             wx.showToast({ title: '已删除', icon: 'success' })
             setTimeout(() => wx.navigateBack(), 1000)
           } catch (error) {

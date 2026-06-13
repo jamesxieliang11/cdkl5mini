@@ -8,7 +8,7 @@
 
 /* 页面标题 */
 .page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   padding: 60rpx 30rpx 40rpx;
   color: white;
   display: flex;
@@ -99,7 +99,7 @@
   left: 0;
   right: 0;
   height: 4rpx;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: var(--gradient-primary);
   border-radius: 20rpx 20rpx 0 0;
 }
 
@@ -141,7 +141,7 @@
 }
 
 .tab-item.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
   transform: translateY(-2rpx);
   box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
@@ -187,7 +187,7 @@
 }
 
 .picker-display:active {
-  border-color: #667eea;
+  border-color: var(--color-primary);
   background: #f0f2ff;
   transform: scale(0.98);
 }
@@ -218,7 +218,7 @@
 
 .search-btn {
   flex: 2;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: 16rpx;
@@ -259,7 +259,7 @@
 
 .reset-btn:active {
   background: #f8f9fa;
-  border-color: #667eea;
+  border-color: var(--color-primary);
   transform: scale(0.98);
 }
 
@@ -283,7 +283,7 @@
   border-radius: 16rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-  border-left: 6rpx solid #667eea;
+  border-left: 6rpx solid var(--color-primary);
 }
 
 .stats-content {
@@ -326,7 +326,7 @@
   left: 0;
   right: 0;
   height: 4rpx;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: var(--gradient-primary);
 }
 
 .record-item:active {
@@ -538,7 +538,7 @@
 }
 
 .empty-action-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: 50rpx;
@@ -562,8 +562,8 @@
 
 .load-more-btn {
   background: white;
-  color: #667eea;
-  border: 2rpx solid #667eea;
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-primary);
   border-radius: 50rpx;
   padding: 20rpx 60rpx;
   font-size: 26rpx;
@@ -671,7 +671,7 @@
   align-items: center;
   gap: 8rpx;
   padding: 16rpx 24rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: 50rpx;
@@ -796,7 +796,7 @@
 }
 
 .edit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: var(--gradient-primary) !important;
   color: white !important;
   border: none !important;
 }

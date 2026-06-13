@@ -8,10 +8,33 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function resolveCurrentUser() {
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+  if (!openid) throw new Error('AUTH_FAIL')
+  const res = await db.collection('users').where({ openid }).field({ _id: true, adminRole: true }).limit(1).get()
+  if (!res.data || !res.data.length) throw new Error('USER_NOT_FOUND')
+  return { userId: res.data[0]._id, openid, adminRole: res.data[0].adminRole || '' }
+}
+
+function requireAdmin(currentUser) {
+  if (!['admin', 'superadmin'].includes(currentUser.adminRole)) {
+    throw new Error('权限不足')
+  }
+}
+
 exports.main = async (event, context) => {
-  const { action, data, feedbackId, userId, pageSize = 10, pageIndex = 0 } = event
+  const { action, data, feedbackId, pageSize = 10, pageIndex = 0 } = event
 
   try {
+    // getAppConfig 不需要登录
+    if (action === 'getAppConfig') {
+      return await getAppConfig()
+    }
+
+    const currentUser = await resolveCurrentUser()
+    const userId = currentUser.userId
+
     switch (action) {
       case 'create':
         return await createFeedback(data, userId)
@@ -20,13 +43,14 @@ exports.main = async (event, context) => {
       case 'get':
         return await getFeedback(feedbackId, userId)
       case 'adminList':
+        requireAdmin(currentUser)
         return await adminListFeedbacks(pageSize, pageIndex)
       case 'reply':
+        requireAdmin(currentUser)
         return await replyFeedback(feedbackId, data)
-      case 'getAppConfig':
-        return await getAppConfig()
       case 'updateAppConfig':
-        return await updateAppConfig(data, context)
+        requireAdmin(currentUser)
+        return await updateAppConfig(data)
       default:
         return {
           success: false,
@@ -183,8 +207,7 @@ async function getAppConfig() {
   }
 }
 
-// 管理员更新应用全局配置（需管理员权限，由前端传入 adminRole 校验）
-async function updateAppConfig(data, context) {
+async function updateAppConfig(data) {
   const validKeys = ['features_enabled']
   const updateData = {}
 

@@ -1,7 +1,6 @@
 {
   "navigationBarTitleText": "月度汇报",
   "usingComponents": {
-    "van-steps": "/miniprogram_npm/@vant/weapp/steps/index",
     "van-field": "/miniprogram_npm/@vant/weapp/field/index",
     "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
     "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
@@ -11,7 +10,6 @@
     "van-picker": "/miniprogram_npm/@vant/weapp/picker/index",
     "van-action-sheet": "/miniprogram_npm/@vant/weapp/action-sheet/index",
     "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
-    "van-notice-bar": "/miniprogram_npm/@vant/weapp/notice-bar/index",
     "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
     "van-checkbox": "/miniprogram_npm/@vant/weapp/checkbox/index",
     "van-checkbox-group": "/miniprogram_npm/@vant/weapp/checkbox-group/index"

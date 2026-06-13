@@ -212,6 +212,16 @@
     </view>
   </view>
 
+  <!-- ========== 反馈管理入口 ========== -->
+  <view class="section-card" wx:if="{{isAdmin}}">
+    <view class="section-card-title">📋 反馈管理</view>
+    <view class="detail-btn-wrapper" style="border-top: none; margin-top: 0; padding-top: 0;">
+      <van-button plain type="primary" size="small" bind:tap="goToFeedbackAdmin" custom-style="border-color: #34BFA3; color: #34BFA3;">
+        📋 查看用户反馈与回复
+      </van-button>
+    </view>
+  </view>
+
   <!-- 用户管理（仅超管可见） -->
   <view class="db-section" wx:if="{{isSuperAdmin}}">
     <view class="section-title" bindtap="toggleUserManagement">

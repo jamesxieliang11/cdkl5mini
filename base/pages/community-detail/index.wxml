@@ -14,10 +14,12 @@
     <!-- 用户信息 -->
     <view class="post-header">
       <image
+        wx:if="{{!post.is_anonymous && post.avatar_url}}"
         class="post-avatar"
-        src="{{post.is_anonymous ? '/images/anonymous-avatar.png' : post.avatar_url}}"
+        src="{{post.avatar_url}}"
         mode="aspectFill"
       />
+      <view wx:else class="post-avatar-fallback" style="background:{{post.avatarColor}}">{{post.avatarChar}}</view>
       <view class="post-user-info">
         <text class="post-nickname">{{post.is_anonymous ? '匿名希舞宝宝' : post.nick_name}}</text>
         <text class="post-time">{{displayTime}}</text>
@@ -68,7 +70,8 @@
     <!-- 评论列表 -->
     <view class="comment-list" wx:if="{{comments.length > 0}}">
       <view wx:for="{{comments}}" wx:key="_id" class="comment-item">
-        <image class="comment-avatar" src="{{item.avatar_url || '/images/anonymous-avatar.png'}}" mode="aspectFill" />
+        <image wx:if="{{item.avatar_url}}" class="comment-avatar" src="{{item.avatar_url}}" mode="aspectFill" />
+        <view wx:else class="comment-avatar-fallback" style="background:{{item.avatarColor}}">{{item.avatarChar}}</view>
         <view class="comment-body">
           <view class="comment-user-row">
             <text class="comment-name">{{item.nick_name}}</text>

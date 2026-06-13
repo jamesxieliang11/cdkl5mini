@@ -3,13 +3,14 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 130rpx; /* 适老化：增加导航栏高度 */
+  height: 130rpx;
   background: #ffffff;
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  border-top: 1rpx solid #eee;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
   z-index: 9999;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .tabbar-item {
@@ -19,69 +20,239 @@
   justify-content: flex-end;
   flex: 1;
   position: relative;
-  padding-bottom: 20rpx;
-  min-height: 110rpx; /* 适老化：增加最小高度，扩大点击区域 */
+  padding-bottom: 14rpx;
+  min-height: 110rpx;
 }
 
+.tabbar-item:active {
+  opacity: 0.7;
+}
+
+/* 药丸形指示器 */
+.tab-pill {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.is-active .tab-pill {
+  width: 112rpx;
+  background: rgba(52, 191, 163, 0.12);
+}
+
+.is-active .tabbar-text {
+  color: #34BFA3;
+  font-weight: 600;
+}
+
+/* 中间 FAB */
 .center-item {
   position: relative;
   z-index: 10;
 }
 
-.tabbar-icon {
-  width: 60rpx; /* 适老化：图标放大 */
-  height: 60rpx;
-  margin-bottom: 8rpx;
-}
-
 .center-button {
-  width: 130rpx; /* 适老化：中央按钮放大 */
-  height: 130rpx;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  width: 108rpx;
+  height: 108rpx;
+  background: linear-gradient(135deg, #34BFA3 0%, #2da88e 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    0 8rpx 24rpx rgba(99, 102, 241, 0.4),
-    0 4rpx 12rpx rgba(99, 102, 241, 0.3),
-    0 0 0 6rpx rgba(255, 255, 255, 1);
-  margin-bottom: 12rpx;
+  box-shadow:
+    0 8rpx 24rpx rgba(52, 191, 163, 0.4),
+    0 0 0 6rpx #ffffff;
+  margin-bottom: 8rpx;
   border: 4rpx solid #ffffff;
 }
 
-.center-icon {
-  width: 60rpx;
-  height: 60rpx;
-  filter: brightness(0) invert(1);
+.center-button:active {
+  transform: scale(0.9);
 }
 
-.center-icon-text {
-  font-size: 68rpx; /* 适老化：中央图标放大 */
-  color: #ffffff;
-  font-weight: bold;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+/* 文字 */
 .tabbar-text {
-  font-size: 26rpx; /* 适老化：文字放大 */
-  color: #999;
+  font-size: 22rpx;
+  color: #b0b0b0;
   line-height: 1;
+  margin-top: 6rpx;
 }
 
 .center-text {
-  margin-top: 12rpx;
-  font-size: 26rpx; /* 适老化：文字放大 */
+  margin-top: 8rpx;
+  color: #666;
 }
 
-.tabbar-text.active {
-  color: #4338ca; /* 适老化：活跃态颜色加深，增强对比度 */
+/* ========== 快速记录面板 ========== */
+.quick-panel {
+  padding: 0 32rpx 32rpx;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
+.quick-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 0 20rpx;
+}
+
+.quick-panel-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.quick-section {
+  margin-bottom: 28rpx;
+}
+
+.quick-section-label {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+/* 一键快记卡片 */
+.quick-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.quick-action-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  transition: all 0.2s;
+}
+
+.quick-action-card:active {
+  transform: scale(0.96);
+  background: #f0f0f0;
+}
+
+.quick-action-card.disabled {
+  opacity: 0.5;
+}
+
+.quick-action-card.disabled:active {
+  transform: none;
+}
+
+.quick-action-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-action-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  min-width: 0;
+}
+
+.quick-action-name {
+  font-size: 28rpx;
   font-weight: 600;
+  color: #333;
 }
 
-.center-item .tabbar-text.active {
-  color: #4338ca; /* 适老化：活跃态颜色加深 */
+.quick-action-desc {
+  font-size: 22rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 随手记 */
+.quick-note-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.quick-cat-tag {
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #f5f5f5;
+}
+
+.quick-cat-tag.active {
+  background: #34BFA3;
+  color: #fff;
+}
+
+.quick-note-input {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: #f5f5f5;
+  border-radius: 16rpx;
+  padding-right: 12rpx;
+}
+
+.quick-input {
+  flex: 1;
+  background: transparent !important;
+}
+
+.quick-note-submit {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.quick-note-submit.active {
+  background: #34BFA3;
+}
+
+.quick-note-submit:active {
+  transform: scale(0.9);
+}
+
+/* 详细记录网格 */
+.detail-record-grid {
+  display: flex;
+  gap: 12rpx;
+}
+
+.detail-record-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 20rpx 8rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  color: #666;
+}
+
+.detail-record-item:active {
+  background: #f0f0f0;
+  transform: scale(0.96);
 }

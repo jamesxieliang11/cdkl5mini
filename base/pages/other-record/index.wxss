@@ -8,7 +8,7 @@
 
 /* 页面标题 */
 .page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   padding: 60rpx 40rpx 40rpx;
   color: white;
 }
@@ -22,7 +22,7 @@
 }
 
 .header-title {
-  font-size: 48rpx;
+  font-size: var(--font-h1);
   font-weight: bold;
   margin: 0;
 }
@@ -61,7 +61,9 @@
   height: 96rpx !important;
   font-size: 36rpx !important;
   font-weight: 600;
-  border-radius: 50rpx;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-primary);
+  border: none;
 }
 
 /* 适老化 - Vant 组件字号放大 */

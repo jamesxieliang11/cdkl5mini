@@ -1,6 +1,6 @@
 // 用户信息完善页面
 const app = getApp()
-const { getMyBoundQuestionnaires, unbindQuestionnaire, searchQuestionnaireByPhone, claimQuestionnaire } = require('../../utils/database.js')
+const { getMyBoundQuestionnaires, unbindQuestionnaire, searchQuestionnaireByPhone, claimQuestionnaire, getUserStats } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -21,7 +21,8 @@ Page({
     loading: false,
     isEdit: false, // 是否为编辑模式
     currentDate: '', // 当前日期，用于限制生日选择
-    isProd: false, // 是否为生产环境
+    isProd: false,
+    isAdmin: false,
 
     // 我的宝宝管理
     boundList: [],
@@ -34,7 +35,16 @@ Page({
     claimSelectedId: '',
     claimSelectedName: '',
     claimSelectedBirth: '',
-    claimBinding: false
+    claimBinding: false,
+
+    // 统计数据
+    statsLoaded: false,
+    statsTotalDays: 0,
+    statsStreak: 0,
+    statsTotalRecords: 0,
+    statsAchievements: [],
+    showStatsPoster: false,
+    statsPosterData: null
   },
 
   onLoad: function (options) {
@@ -53,18 +63,90 @@ Page({
     
     this.loadUserProfile()
     this.loadBoundBabies()
+    this.loadStats()
   },
 
   onShow() {
-    // 每次进入页面刷新绑定列表
+    this.updateTabBarState()
+    this.checkAdminRole()
     this.loadBoundBabies()
   },
 
-  // 返回按钮点击处理
-  onBack: function() {
-    wx.switchTab({
-      url: '/pages/home/index'
+  updateTabBarState() {
+    if (typeof this.getTabBar === 'function') {
+      const tabBar = this.getTabBar()
+      if (tabBar && typeof tabBar.updateState === 'function') {
+        tabBar.updateState()
+      }
+    }
+  },
+
+  checkAdminRole() {
+    const adminRole = wx.getStorageSync('adminRole') || ''
+    this.setData({ isAdmin: adminRole === 'admin' || adminRole === 'superadmin' })
+  },
+
+  async loadStats() {
+    try {
+      const result = await getUserStats()
+      if (result && result.data) {
+        const d = result.data
+        const achievementIcons = {
+          newcomer: '🌱', streak_7: '🔥', streak_30: '💪',
+          recorder_50: '📝', recorder_100: '🏆',
+          community_first: '💬', community_10: '⭐', helper: '🤝'
+        }
+        const achievements = (d.achievements || []).map(a => ({
+          key: a.key,
+          name: a.name,
+          icon: achievementIcons[a.key] || '🏅'
+        }))
+        this.setData({
+          statsLoaded: true,
+          statsTotalDays: d.totalDays || 0,
+          statsStreak: d.streak || 0,
+          statsTotalRecords: (d.medicationCount || 0) + (d.seizureCount || 0) + (d.otherCount || 0),
+          statsAchievements: achievements
+        })
+      }
+    } catch (e) {
+      console.warn('加载统计数据失败:', e)
+    }
+  },
+
+  onShareStats() {
+    const userInfo = wx.getStorageSync('userInfo') || {}
+    this.setData({
+      showStatsPoster: true,
+      statsPosterData: {
+        nickName: userInfo.nickName || '希舞家长',
+        totalDays: this.data.statsTotalDays,
+        streak: this.data.statsStreak,
+        totalRecords: this.data.statsTotalRecords,
+        achievements: this.data.statsAchievements
+      }
     })
+  },
+
+  onStatsPosterClose() {
+    this.setData({ showStatsPoster: false })
+  },
+
+  onStatsPosterSaved() {
+    wx.showToast({ title: '已保存到相册', icon: 'success' })
+    this.setData({ showStatsPoster: false })
+  },
+
+  goToReports() {
+    wx.navigateTo({ url: '/pages/reports/index' })
+  },
+
+  goToFeedback() {
+    wx.navigateTo({ url: '/pages/feedback/index' })
+  },
+
+  goToAdmin() {
+    wx.navigateTo({ url: '/pages/admin/admin' })
   },
 
   // 格式化文件大小

@@ -1,380 +1,176 @@
 <!-- 状态栏区域 -->
 <view class="status-bar"></view>
 
-<!-- 用户角色标识 -->
-<view class="role-header">
+<!-- 顶部标题 -->
+<view class="header">
   <view class="app-title">希舞之家</view>
+  <view class="header-subtitle">{{currentDate}}</view>
 </view>
-
-<!-- 重要通知 -->
-<van-notice-bar
-  left-icon="volume-o"
-  text="{{noticeText}}"
-  mode="closeable"
-  background="#fff7cc"
-  color="#ed6a0c"
-/>
 
 <view class="home-container">
-  <!-- 欢迎信息 -->
-  <view class="welcome-section">
-    <view class="greeting">
-      <text class="subtitle">记录健康每一天</text>
+
+  <!-- 今日概览卡片 -->
+  <view class="overview-card">
+    <view class="overview-row">
+      <view class="overview-item" bindtap="goToMyRecords">
+        <view class="overview-value {{todayMedCount > 0 ? 'has-data' : ''}}">{{todayMedCount}}</view>
+        <view class="overview-label">今日用药(条)</view>
+      </view>
+      <view class="overview-divider"></view>
+      <view class="overview-item" bindtap="goToMyRecords">
+        <view class="overview-value {{weekSeizureCount > 0 ? 'warning' : 'safe'}}">{{weekSeizureCount}}</view>
+        <view class="overview-label">近7日发作</view>
+      </view>
+      <view class="overview-divider"></view>
+      <view class="overview-item" bindtap="goToMonthlyReport">
+        <view class="overview-value {{showMonthlyReminder ? 'warning' : 'safe'}}">{{showMonthlyReminder ? '待提交' : '已提交'}}</view>
+        <view class="overview-label">月度汇报</view>
+      </view>
     </view>
-    <view class="today-date">{{currentDate}}</view>
   </view>
 
-  <!-- 问卷填写提醒（功能总开关开启时显示） -->
-  <view class="questionnaire-reminder" wx:if="{{featuresEnabled && showQuestionnaireReminder}}" bindtap="goToQuestionnaire">
-    <view class="reminder-content">
-      <van-icon name="edit" size="20" color="#34BFA3" />
-      <text class="reminder-text">📝 家庭基础信息问卷尚未填写，点击填写</text>
-    </view>
-    <van-icon name="arrow" size="16" color="#999" />
+  <!-- 连续打卡 -->
+  <view wx:if="{{streak > 0}}" class="streak-badge" bindtap="goToMyRecords">
+    <view class="streak-icon-wrap">🔥</view>
+    <text class="streak-text">已连续记录 {{streak}} 天</text>
+    <text class="streak-total">累计 {{totalDays}} 天</text>
   </view>
 
-  <!-- 月度汇报提醒 -->
-  <view class="monthly-reminder" wx:if="{{showMonthlyReminder}}" bindtap="goToMonthlyReport">
-    <view class="reminder-content">
-      <van-icon name="todo-list-o" size="20" color="#FF9800" />
-      <text class="reminder-text">📋 本月汇报尚未提交，点击填写</text>
+  <!-- 快速记录 -->
+  <view class="quick-actions">
+    <view class="quick-action-btn" bindtap="addMedicationRecord">
+      <view class="quick-icon-wrap" style="background:linear-gradient(135deg,#FF9800,#FFB74D)">
+        <van-icon name="notes-o" size="24px" color="#fff" />
+      </view>
+      <text>记用药</text>
     </view>
-    <van-icon name="arrow" size="16" color="#999" />
+    <view class="quick-action-btn" bindtap="addSeizureRecord">
+      <view class="quick-icon-wrap" style="background:linear-gradient(135deg,#ee4d4d,#ff7675)">
+        <van-icon name="warning-o" size="24px" color="#fff" />
+      </view>
+      <text>记发作</text>
+    </view>
+    <view class="quick-action-btn" bindtap="addOtherRecord">
+      <view class="quick-icon-wrap" style="background:linear-gradient(135deg,#1989fa,#36a3ff)">
+        <van-icon name="edit" size="24px" color="#fff" />
+      </view>
+      <text>记其他</text>
+    </view>
   </view>
 
-  <!-- 常用功能模块 -->
-  <view class="common-functions section-card">
-    <view class="section-title">
-      <van-icon name="apps-o" size="18" color="#34BFA3" />
-      <text>常用功能</text>
-    </view>
-    <van-grid column-num="4" border="{{false}}" gutter="16">
-      <van-grid-item 
-        icon="notes-o" 
-        text="我的记录"
-        bind:click="goToMyRecords"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        icon="todo-list-o" 
-        text="月度汇报"
-        bind:click="goToMonthlyReport"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        icon="chart-trending-o" 
-        text="我的报告"
-        bind:click="goToReports"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        icon="comment-o" 
-        text="反馈意见"
-        bind:click="goToFeedback"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        wx:if="{{featuresEnabled}}"
-        icon="edit" 
-        text="家庭问卷"
-        bind:click="goToQuestionnaire"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        wx:if="{{featuresEnabled}}"
-        icon="friends-o" 
-        text="希舞社区"
-        bind:click="goToCommunity"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        wx:if="{{featuresEnabled}}"
-        icon="description" 
-        text="希舞手册"
-        bind:click="goToBrochure"
-        custom-class="function-item"
-      />
-      <van-grid-item 
-        wx:if="{{featuresEnabled}}"
-        icon="smile-comment-o" 
-        text="AI 助手"
-        bind:click="showAIMenu"
-        custom-class="function-item ai-function-item"
-      />
-      <van-grid-item 
-        wx:if="{{isAdmin}}"
-        icon="manager-o" 
-        text="管理面板"
-        bind:click="goToAdmin"
-        custom-class="function-item"
-      />
-    </van-grid>
-  </view>
+  <!-- 待办提醒 -->
+  <view wx:if="{{showMonthlyReminder || (featuresEnabled && showQuestionnaireReminder)}}" class="reminders-section">
+    <view class="section-label">待办事项</view>
 
-  <!-- 今日用药模块 -->
-  <view class="medication-today section-card">
-    <view class="section-title">
-      <van-icon name="paimai" size="18" color="#FF9800" />
-      <text>今日用药</text>
-      <van-icon 
-        name="plus" 
-        size="20" 
-        color="#FF9800"
-        bind:click="addMedicationRecord"
-        style="padding: 4px; cursor: pointer;"
-      />
-    </view>
-    <van-cell-group wx:if="{{todayMedications.length > 0}}">
-      <van-cell 
-        wx:for="{{todayMedications}}" 
-        wx:key="id"
-        title="{{item.name}}"
-        label="用量：{{item.dosage}}{{item.unit}}｜服用时间：{{item.takeTime}}｜记录时间：{{item.recordTime}}"
-        icon="{{item.isToday ? 'passed' : 'clock-o'}}"
-        border="{{false}}"
-      />
-    </van-cell-group>
-    <van-empty 
-      wx:else
-      image="error" 
-      description="暂无用药记录"
-      bind:click="addMedicationRecord"
-    >
-      <van-button slot="button" type="primary" size="small">添加用药记录</van-button>
-    </van-empty>
-  </view>
-
-  <!-- 发作记录模块 -->
-  <view class="seizure-records section-card">
-    <view class="section-title">
-      <van-icon name="warning-o" size="18" color="#EE6363" />
-      <text>发作记录</text>
-      <van-icon 
-        name="arrow" 
-        size="20" 
-        color="#EE6363"
-        bind:click="addSeizureRecord"
-        style="padding: 4px; cursor: pointer;"
-      />
-    </view>
-    <van-cell-group wx:if="{{recentSeizures.length > 0}}">
-      <van-cell 
-        wx:for="{{recentSeizures}}" 
-        wx:key="id"
-        title="{{item.type}}发作"
-        label="时间：{{item.datetime}}｜时长：{{item.duration}}分钟"
-        icon="fire-o"
-        border="{{false}}"
-      />
-    </van-cell-group>
-    <van-empty 
-      wx:else
-      image="error" 
-      description="暂无发作记录"
-    />
-  </view>
-
-  <!-- 其他记录模块 -->
-  <view class="other-records section-card">
-    <view class="section-title">
-      <van-icon name="orders-o" size="18" color="#2196F3" />
-      <text>其他记录</text>
-      <van-icon 
-        name="arrow" 
-        size="20" 
-        color="#2196F3"
-        bind:click="addOtherRecord"
-        style="padding: 4px; cursor: pointer;"
-      />
-    </view>
-    <van-cell-group wx:if="{{recentOthers.length > 0}}">
-      <van-cell 
-        wx:for="{{recentOthers}}" 
-        wx:key="id"
-        title="{{item.category}}"
-        label="时间：{{item.datetime}}｜备注：{{item.note}}"
-        icon="label-o"
-        border="{{false}}"
-      />
-    </van-cell-group>
-    <van-empty 
-      wx:else
-      image="error" 
-      description="暂无其他记录"
-    />
-  </view>
-
-  <!-- 病友家庭专用功能 -->
-  <view wx:if="{{userRole === 'patient'}}" class="patient-section">
-    <view class="section-title">
-      <van-icon name="medical-o" size="20" color="#1989fa" />
-      <text>病友服务</text>
-    </view>
-    
-    <!-- 紧急联系 -->
-    <van-cell-group>
-      <van-cell 
-        title="紧急联系" 
-        label="24小时医疗咨询热线"
-        icon="phone-o"
-        is-link
-        bind:click="emergencyCall"
-        border="{{false}}"
-        custom-class="emergency-cell"
-      />
-    </van-cell-group>
-
-    <!-- 核心功能网格 -->
-    <van-grid column-num="2" border="{{false}}" gutter="20">
-      <van-grid-item 
-        icon="calendar-o" 
-        text="义诊预约"
-        bind:click="goToAppointment"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="records" 
-        text="医保备案"
-        bind:click="goToInsurance"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="clock-o" 
-        text="排队状态"
-        bind:click="goToQueue"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="service-o" 
-        text="社工服务"
-        bind:click="goToSocialWork"
-        custom-class="grid-item"
-      />
-    </van-grid>
-
-    <!-- 义诊时间信息 -->
-    <van-cell-group title="今日义诊安排" custom-class="schedule-group">
-      <van-cell 
-        wx:for="{{patientSchedule}}" 
-        wx:key="id"
-        title="{{item.department}}"
-        label="{{item.time}} | {{item.doctor}}"
-        value="{{item.status}}"
-        icon="{{item.icon}}"
-      />
-    </van-cell-group>
-  </view>
-
-  <!-- 科研人员专用功能 -->
-  <view wx:if="{{userRole === 'researcher'}}" class="researcher-section">
-    <view class="section-title">
-      <van-icon name="manager-o" size="20" color="#1989fa" />
-      <text>科研服务</text>
+    <view class="reminder-card monthly" wx:if="{{showMonthlyReminder}}" bindtap="goToMonthlyReport">
+      <view class="reminder-icon-wrap" style="background:rgba(255,152,0,0.12)">
+        <van-icon name="todo-list-o" size="20px" color="#FF9800" />
+      </view>
+      <text class="reminder-text">本月汇报尚未提交</text>
+      <van-icon name="arrow" size="14px" color="#ccc" />
     </view>
 
-    <van-grid column-num="2" border="{{false}}" gutter="20">
-      <van-grid-item 
-        icon="description" 
-        text="会议资料"
-        bind:click="goToMaterials"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="contact" 
-        text="专家通讯录"
-        bind:click="goToExperts"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="calendar-o" 
-        text="学术议程"
-        bind:click="goToSchedule"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="chat-o" 
-        text="学术交流"
-        bind:click="goToDiscussion"
-        custom-class="grid-item"
-      />
-    </van-grid>
-
-    <!-- 重点关注 -->
-    <van-cell-group title="重点关注" custom-class="focus-group">
-      <van-cell 
-        wx:for="{{researcherFocus}}" 
-        wx:key="id"
-        title="{{item.title}}"
-        label="{{item.speaker}} | {{item.time}}"
-        icon="star-o"
-        is-link
-        bind:click="goToScheduleDetail"
-        data-id="{{item.id}}"
-      />
-    </van-cell-group>
-  </view>
-
-  <!-- 工作人员专用功能 -->
-  <view wx:if="{{userRole === 'staff'}}" class="staff-section">
-    <view class="section-title">
-      <van-icon name="service-o" size="20" color="#1989fa" />
-      <text>工作台</text>
+    <view class="reminder-card questionnaire" wx:if="{{featuresEnabled && showQuestionnaireReminder}}" bindtap="goToQuestionnaire">
+      <view class="reminder-icon-wrap" style="background:rgba(52,191,163,0.12)">
+        <van-icon name="edit" size="20px" color="#34BFA3" />
+      </view>
+      <text class="reminder-text">家庭基础信息问卷尚未填写</text>
+      <van-icon name="arrow" size="14px" color="#ccc" />
     </view>
-
-    <van-grid column-num="2" border="{{false}}" gutter="20">
-      <van-grid-item 
-        icon="records" 
-        text="签到管理"
-        bind:click="goToCheckin"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="todo-list-o" 
-        text="任务分配"
-        bind:click="goToTasks"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="chart-trending-o" 
-        text="数据统计"
-        bind:click="goToStats"
-        custom-class="grid-item"
-      />
-      <van-grid-item 
-        icon="setting-o" 
-        text="系统设置"
-        bind:click="goToSettings"
-        custom-class="grid-item"
-      />
-    </van-grid>
-
-    <!-- 今日任务 -->
-    <van-cell-group title="今日任务" custom-class="task-group">
-      <van-cell 
-        wx:for="{{staffTasks}}" 
-        wx:key="id"
-        title="{{item.task}}"
-        label="{{item.deadline}}"
-        value="{{item.status}}"
-        icon="{{item.priority === 'high' ? 'warning-o' : 'todo-list-o'}}"
-        bind:click="goToTaskDetail"
-        data-id="{{item.id}}"
-      />
-    </van-cell-group>
   </view>
+
+  <!-- AI 智能助手 (gated) -->
+  <view wx:if="{{featuresEnabled}}" class="ai-section">
+    <view class="section-label">AI 智能助手</view>
+    <view class="ai-grid">
+      <view class="ai-card" bindtap="goToAI" data-scene="gene_report">
+        <view class="ai-icon-wrap" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+          <text class="ai-icon">🧬</text>
+        </view>
+        <text class="ai-name">基因解读</text>
+      </view>
+      <view class="ai-card" bindtap="goToAI" data-scene="medical_record">
+        <view class="ai-icon-wrap" style="background:linear-gradient(135deg,#f093fb,#f5576c)">
+          <text class="ai-icon">📋</text>
+        </view>
+        <text class="ai-name">生成病历</text>
+      </view>
+      <view class="ai-card" bindtap="goToAI" data-scene="drug_adjustment">
+        <view class="ai-icon-wrap" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+          <text class="ai-icon">💊</text>
+        </view>
+        <text class="ai-name">调药参考</text>
+      </view>
+      <view class="ai-card" bindtap="goToAI" data-scene="knowledge_qa">
+        <view class="ai-icon-wrap" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">
+          <text class="ai-icon">💡</text>
+        </view>
+        <text class="ai-name">知识问答</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 工具入口 (gated) -->
+  <view wx:if="{{featuresEnabled}}" class="tools-section">
+    <view class="section-label">工具与资源</view>
+    <view class="tool-card" bindtap="goToQuestionnaire">
+      <view class="tool-icon-wrap" style="background:linear-gradient(135deg,#34BFA3,#2dd4a8)">
+        <van-icon name="orders-o" size="24px" color="#fff" />
+      </view>
+      <view class="tool-info">
+        <text class="tool-name">家庭问卷</text>
+        <text class="tool-desc">完善宝宝基础信息</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+    <view class="tool-card" bindtap="goToBrochure">
+      <view class="tool-icon-wrap" style="background:linear-gradient(135deg,#1989fa,#36a3ff)">
+        <van-icon name="bookmark-o" size="24px" color="#fff" />
+      </view>
+      <view class="tool-info">
+        <text class="tool-name">希舞手册</text>
+        <text class="tool-desc">CDKL5 疾病知识科普</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+  </view>
+
+  <!-- 更多功能 -->
+  <view class="more-section">
+    <view class="section-label">更多</view>
+    <view class="tool-card" bindtap="goToReports">
+      <view class="tool-icon-wrap" style="background:linear-gradient(135deg,#9C27B0,#BA68C8)">
+        <van-icon name="bar-chart-o" size="24px" color="#fff" />
+      </view>
+      <view class="tool-info">
+        <text class="tool-name">我的报告</text>
+        <text class="tool-desc">查看记录统计与趋势</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+    <view class="tool-card" bindtap="goToFeedback">
+      <view class="tool-icon-wrap" style="background:linear-gradient(135deg,#FF9800,#FFB74D)">
+        <van-icon name="smile-comment-o" size="24px" color="#fff" />
+      </view>
+      <view class="tool-info">
+        <text class="tool-name">反馈意见</text>
+        <text class="tool-desc">帮助我们改进产品</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+    <view wx:if="{{isAdmin}}" class="tool-card" bindtap="goToAdmin">
+      <view class="tool-icon-wrap" style="background:linear-gradient(135deg,#FF5722,#FF8A65)">
+        <van-icon name="setting-o" size="24px" color="#fff" />
+      </view>
+      <view class="tool-info">
+        <text class="tool-name">管理面板</text>
+        <text class="tool-desc">数据统计与系统配置</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
+  </view>
+
 </view>
-
-<!-- AI 功能选择面板 -->
-<van-action-sheet
-  show="{{showAIActionSheet}}"
-  title="🤖 AI 智能助手"
-  actions="{{aiActions}}"
-  bind:close="onAIActionSheetClose"
-  bind:select="onAIActionSelect"
-  cancel-text="取消"
-  bind:cancel="onAIActionSheetClose"
-  description="选择您需要的 AI 功能"
-/>
 
 <!-- 自定义tabbar -->
 <custom-tabbar id="tabbar" />

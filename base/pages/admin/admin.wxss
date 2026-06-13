@@ -1,20 +1,20 @@
 /* 状态栏区域 */
 .status-bar {
   height: var(--status-bar-height);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
 }
 
 /* 管理员面板样式 */
 .container {
   padding: 0 32rpx 200rpx;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg);
   min-height: 100vh;
 }
 
 .header {
   text-align: center;
   padding: 40rpx 0 60rpx;
-  background: linear-gradient(135deg, #1989fa 0%, #1976d2 100%);
+  background: var(--gradient-primary);
   margin: 0 -32rpx 40rpx;
   color: white;
 }

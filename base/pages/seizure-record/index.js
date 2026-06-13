@@ -1,5 +1,5 @@
 const app = getApp()
-const { createSeizureRecord, getSeizureRecord, updateSeizureRecord } = require('../../utils/database.js')
+const { createSeizureRecord, getSeizureRecord, updateSeizureRecord, getTodayStats } = require('../../utils/database.js')
 
 Page({
   data: {
@@ -36,14 +36,20 @@ Page({
     uploadedImages: [],
     maxImageCount: 5,
     
-    submitting: false
+    submitting: false,
+
+    // 打卡成功相关
+    showCheckin: false,
+    checkinStreak: 0,
+    checkinTodayCount: 0,
+    checkinTotalDays: 0,
+    showCheckinPoster: false,
+    checkinPosterData: null
   },
 
   // 返回按钮点击处理
-  onBack: function() {
-    wx.switchTab({
-      url: '/pages/home/index'
-    })
+  onBack() {
+    wx.navigateBack()
   },
 
   onLoad(options) {
@@ -573,44 +579,33 @@ Page({
       }
       
       if (result.success) {
-        // 只有新建模式才保存到本地存储作为备份
         if (!this.data.isEditMode) {
           this.saveToLocalStorage()
         }
-        
-        // 重置提交状态
         this.setData({ submitting: false })
-        
-        wx.showToast({
-          title: this.data.isEditMode ? '更新成功' : '保存成功',
-          icon: 'success',
-          duration: 1500,
-          success: () => {
-            // Toast显示后立即返回上一页
-            setTimeout(() => {
-              wx.navigateBack({
-                delta: 1,
-                success: () => {
-                  console.log('成功返回上一页')
-                },
-                fail: (error) => {
-                  console.error('返回上一页失败:', error)
-                  // 如果返回失败，尝试跳转到首页
-                  wx.switchTab({
-                    url: '/pages/index/index'
-                  })
-                }
-              })
-            }, 500)
+
+        if (this.data.isEditMode) {
+          wx.showToast({ title: '更新成功', icon: 'success' })
+          setTimeout(() => wx.navigateBack(), 1500)
+        } else {
+          try {
+            const statsResult = await getTodayStats()
+            this.setData({
+              showCheckin: true,
+              checkinStreak: statsResult.data.streak || 0,
+              checkinTodayCount: statsResult.data.todayCount || 0,
+              checkinTotalDays: statsResult.data.totalDays || 0
+            })
+          } catch (e) {
+            this.setData({ showCheckin: true, checkinStreak: 0, checkinTodayCount: 1, checkinTotalDays: 0 })
           }
-        })
+        }
       } else {
         throw new Error(result.message || '保存失败')
       }
     } catch (error) {
       console.error('提交发作记录失败:', error)
       this.setData({ submitting: false })
-      
       wx.showModal({
         title: '保存失败',
         content: error.message || '网络错误，请重试',
@@ -678,5 +673,37 @@ Page({
     
     seizureRecords.unshift(newRecord)
     wx.setStorageSync('epilepsyDiary_seizureRecords', seizureRecords)
+  },
+
+  onCheckinClose() {
+    this.setData({ showCheckin: false })
+    wx.navigateBack()
+  },
+
+  onCheckinShare() {
+    const userInfo = wx.getStorageSync('userInfo') || {}
+    this.setData({
+      showCheckin: false,
+      showCheckinPoster: true,
+      checkinPosterData: {
+        nickName: userInfo.nickName || '希舞宝宝',
+        streak: this.data.checkinStreak,
+        todayCount: this.data.checkinTodayCount,
+        totalDays: this.data.checkinTotalDays,
+        recordType: 'seizure',
+        date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+      }
+    })
+  },
+
+  onCheckinPosterClose() {
+    this.setData({ showCheckinPoster: false })
+    wx.navigateBack()
+  },
+
+  onCheckinPosterSaved() {
+    wx.showToast({ title: '已保存到相册', icon: 'success' })
+    this.setData({ showCheckinPoster: false })
+    setTimeout(() => wx.navigateBack(), 1500)
   }
 })

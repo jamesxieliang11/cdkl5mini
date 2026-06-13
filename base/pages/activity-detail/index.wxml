@@ -1,0 +1,104 @@
+<!-- 状态栏 -->
+<view class="status-bar"></view>
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <van-icon name="arrow-left" color="#fff" size="20px" />
+  </view>
+  <text class="nav-title">活动详情</text>
+  <view class="nav-placeholder"></view>
+</view>
+
+<!-- 功能未开放 -->
+<view wx:if="{{locked}}" class="locked-container">
+  <van-empty description="功能即将开放，敬请期待" image="search" />
+</view>
+
+<!-- 加载中 -->
+<view wx:elif="{{loading}}" class="loading-container">
+  <van-loading size="24px" color="#34BFA3">加载中...</van-loading>
+</view>
+
+<!-- 活动不存在 -->
+<view wx:elif="{{!activity}}" class="locked-container">
+  <van-empty description="活动不存在" image="error" />
+</view>
+
+<!-- 活动详情 -->
+<view wx:else class="page-container">
+  <!-- 头部卡片 -->
+  <view class="hero-card">
+    <view class="hero-status">
+      <van-tag wx:if="{{activity.isActive}}" type="success" size="medium">进行中</van-tag>
+      <van-tag wx:else type="default" size="medium">已结束</van-tag>
+    </view>
+    <view class="hero-title">{{activity.title}}</view>
+    <view class="hero-time">
+      <van-icon name="clock-o" size="14px" color="#fff" />
+      <text>{{activity.displayStart}} ~ {{activity.displayEnd}}</text>
+    </view>
+    <view class="hero-stats">
+      <view class="hero-stat">
+        <text class="hero-stat-value">{{activity.participant_count || 0}}</text>
+        <text class="hero-stat-label">参与人数</text>
+      </view>
+      <view wx:if="{{activity.max_participants > 0}}" class="hero-stat">
+        <text class="hero-stat-value">{{activity.max_participants}}</text>
+        <text class="hero-stat-label">名额上限</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 活动描述 -->
+  <view class="section-card" wx:if="{{activity.description}}">
+    <view class="section-title">活动介绍</view>
+    <view class="section-content">{{activity.description}}</view>
+  </view>
+
+  <!-- 参与者 -->
+  <view class="section-card" wx:if="{{recentParticipants.length > 0}}">
+    <view class="section-title">最近参与</view>
+    <view class="participants-list">
+      <view class="participant-item" wx:for="{{recentParticipants}}" wx:key="_id">
+        <view class="participant-avatar">{{item.nick_name[0] || '希'}}</view>
+        <text class="participant-name">{{item.nick_name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="bottom-action">
+    <van-button
+      wx:if="{{activity.isActive && !isJoined}}"
+      type="primary"
+      round
+      block
+      color="#34BFA3"
+      loading="{{joining}}"
+      bind:click="onJoinActivity"
+      custom-class="join-btn"
+    >
+      参与活动
+    </van-button>
+    <van-button
+      wx:elif="{{isJoined}}"
+      round
+      block
+      disabled
+      custom-class="join-btn"
+    >
+      已参与
+    </van-button>
+    <van-button
+      wx:else
+      round
+      block
+      disabled
+      custom-class="join-btn"
+    >
+      活动已结束
+    </van-button>
+    <button class="share-btn" open-type="share">
+      <van-icon name="share-o" size="16px" /> 分享给好友
+    </button>
+  </view>
+</view>

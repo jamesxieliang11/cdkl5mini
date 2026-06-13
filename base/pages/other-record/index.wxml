@@ -2,7 +2,7 @@
   <!-- 页面标题 -->
   <view class="page-header">
     <view class="header-title-row">
-      <van-icon name="wap-home-o" size="20" color="#34BFA3" bind:click="onBack" />
+      <van-icon name="arrow-left" size="20" color="#fff" bind:click="onBack" />
       <text class="header-title">{{isEditMode ? '编辑其他记录' : '其他记录'}}</text>
     </view>
     <view class="header-subtitle">{{isEditMode ? '修改其他记录的详细信息' : '记录日常观察和特殊事件'}}</view>
@@ -176,4 +176,24 @@
   bind:select="onHistorySelect"
   bind:close="onHistoryCancel"
   title="选择历史记录"
+/>
+
+<!-- 打卡成功弹窗 -->
+<checkin-success
+  show="{{showCheckin}}"
+  record-type="other"
+  streak="{{checkinStreak}}"
+  today-count="{{checkinTodayCount}}"
+  total-days="{{checkinTotalDays}}"
+  bind:close="onCheckinClose"
+  bind:share="onCheckinShare"
+/>
+
+<!-- 打卡海报 -->
+<share-poster
+  wx:if="{{showCheckinPoster}}"
+  type="checkin"
+  post-data="{{checkinPosterData}}"
+  bind:close="onCheckinPosterClose"
+  bind:saved="onCheckinPosterSaved"
 />

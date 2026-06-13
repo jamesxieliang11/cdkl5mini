@@ -7,6 +7,7 @@ const {
   getTrackedMedications,
   updateTrackedMedications
 } = require('../../utils/database.js')
+const { MILESTONE_CATEGORIES } = require('../../utils/milestone-config.js')
 
 Page({
   data: {
@@ -85,51 +86,11 @@ Page({
       { name: '增加', value: 'worse' }
     ],
 
-    // Step 3: 发育里程碑
-    milestoneCategories: [
-      {
-        name: '大运动',
-        items: [
-          { id: 'gross_head_control', label: '能抬头', checked: false },
-          { id: 'gross_roll_over', label: '能翻身', checked: false },
-          { id: 'gross_sit', label: '能独坐', checked: false },
-          { id: 'gross_crawl', label: '能爬行', checked: false },
-          { id: 'gross_stand_support', label: '能扶站', checked: false },
-          { id: 'gross_stand_alone', label: '能独站', checked: false },
-          { id: 'gross_walk_support', label: '能扶走', checked: false },
-          { id: 'gross_walk_alone', label: '能独走', checked: false }
-        ]
-      },
-      {
-        name: '精细运动',
-        items: [
-          { id: 'fine_grasp', label: '能抓握物品', checked: false },
-          { id: 'fine_transfer', label: '能传递物品', checked: false },
-          { id: 'fine_pincer', label: '能用拇食指捏', checked: false },
-          { id: 'fine_spoon', label: '能用勺子', checked: false }
-        ]
-      },
-      {
-        name: '语言认知',
-        items: [
-          { id: 'lang_eye_contact', label: '有眼神交流', checked: false },
-          { id: 'lang_vocalize', label: '能发出声音', checked: false },
-          { id: 'lang_single_word', label: '能说单字', checked: false },
-          { id: 'lang_phrases', label: '能说词组', checked: false },
-          { id: 'lang_understand', label: '能理解简单指令', checked: false },
-          { id: 'lang_recognize_family', label: '能认识家人', checked: false }
-        ]
-      },
-      {
-        name: '社交情感',
-        items: [
-          { id: 'social_smile', label: '有社交微笑', checked: false },
-          { id: 'social_stranger_anxiety', label: '能认生', checked: false },
-          { id: 'social_separation_anxiety', label: '有分离焦虑', checked: false },
-          { id: 'social_imitate', label: '能模仿动作', checked: false }
-        ]
-      }
-    ],
+    // Step 3: 发育里程碑（从共享配置初始化，添加 checked 状态）
+    milestoneCategories: MILESTONE_CATEGORIES.map(category => ({
+      ...category,
+      items: category.items.map(item => ({ ...item, checked: false }))
+    })),
     newAchievements: '',
     developmentConcerns: '',
     additionalNotes: '',
@@ -146,7 +107,7 @@ Page({
 
   // 返回首页
   onBack() {
-    wx.switchTab({ url: '/pages/home/index' })
+    wx.navigateBack()
   },
 
   // 初始化汇报月份（支持 URL 参数指定月份，默认当月）

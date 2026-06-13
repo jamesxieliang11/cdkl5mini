@@ -56,6 +56,19 @@
   flex-shrink: 0;
 }
 
+.post-avatar-fallback {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
 .post-user-info {
   margin-left: 16rpx;
   flex: 1;
@@ -162,6 +175,19 @@
   height: 60rpx;
   border-radius: 50%;
   background: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.comment-avatar-fallback {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
   flex-shrink: 0;
 }
 

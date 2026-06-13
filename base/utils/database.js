@@ -2,227 +2,6 @@
 // 封装云函数调用和数据库操作
 
 /**
- * 初始化数据库
- * @returns {Promise} 返回初始化结果
- */
-function initDatabase() {
-  return new Promise((resolve, reject) => {
-    wx.showLoading({
-      title: '正在初始化数据库...',
-      mask: true
-    })
-
-    wx.cloud.callFunction({
-      name: 'initDatabase',
-      data: {},
-      success: (res) => {
-        wx.hideLoading()
-        console.log('数据库初始化结果:', res)
-        
-        if (res.result && res.result.success) {
-          wx.showToast({
-            title: '数据库初始化成功',
-            icon: 'success',
-            duration: 2000
-          })
-          resolve(res.result)
-        } else {
-          const errorMsg = res.result ? res.result.message : '初始化失败'
-          wx.showToast({
-            title: errorMsg,
-            icon: 'error',
-            duration: 3000
-          })
-          reject(new Error(errorMsg))
-        }
-      },
-      fail: (error) => {
-        wx.hideLoading()
-        console.error('调用云函数失败:', error)
-        wx.showToast({
-          title: '网络错误，请重试',
-          icon: 'error',
-          duration: 3000
-        })
-        reject(error)
-      }
-    })
-  })
-}
-
-/**
- * 检查数据库是否已初始化
- * @returns {Promise} 返回检查结果
- */
-function checkDatabaseStatus() {
-  return new Promise((resolve, reject) => {
-    const db = wx.cloud.database()
-    
-    // 检查departments集合是否有数据
-    db.collection('departments').count({
-      success: (res) => {
-        resolve({
-          initialized: res.total > 0,
-          recordCount: res.total
-        })
-      },
-      fail: (error) => {
-        console.error('检查数据库状态失败:', error)
-        reject(error)
-      }
-    })
-  })
-}
-
-/**
- * 获取义诊科室列表
- * @returns {Promise} 返回科室列表
- */
-function getDepartments() {
-  const db = wx.cloud.database()
-  return db.collection('departments')
-    .where({
-      is_active: true
-    })
-    .orderBy('created_at', 'asc')
-    .get()
-}
-
-/**
- * 获取专家列表
- * @returns {Promise} 返回专家列表
- */
-function getExperts() {
-  const db = wx.cloud.database()
-  return db.collection('experts')
-    .orderBy('created_at', 'asc')
-    .get()
-}
-
-/**
- * 获取会议议程
- * @returns {Promise} 返回议程列表
- */
-function getSchedules() {
-  const db = wx.cloud.database()
-  return db.collection('schedules')
-    .orderBy('start_time', 'asc')
-    .get()
-}
-
-/**
- * 获取系统配置
- * @param {string} configKey 配置键名
- * @returns {Promise} 返回配置值
- */
-function getSystemConfig(configKey) {
-  const db = wx.cloud.database()
-  return db.collection('system_configs')
-    .where({
-      config_key: configKey
-    })
-    .get()
-}
-
-/**
- * 获取资源文件列表
- * @param {string} category 资源分类
- * @returns {Promise} 返回资源列表
- */
-function getResources(category = null) {
-  const db = wx.cloud.database()
-  let query = db.collection('resources').where({
-    is_public: true
-  })
-  
-  if (category) {
-    query = query.where({
-      category: category
-    })
-  }
-  
-  return query.orderBy('created_at', 'desc').get()
-}
-
-/**
- * 初始化患者记录数据库
- * @returns {Promise} 返回初始化结果
- */
-function initRecordsDatabase() {
-  return new Promise((resolve, reject) => {
-    wx.showLoading({
-      title: '正在初始化记录数据库...',
-      mask: true
-    })
-
-    wx.cloud.callFunction({
-      name: 'initRecordsDatabase',
-      data: {},
-      success: (res) => {
-        wx.hideLoading()
-        console.log('记录数据库初始化结果:', res)
-        
-        if (res.result && res.result.success) {
-          wx.showToast({
-            title: '记录数据库初始化成功',
-            icon: 'success',
-            duration: 2000
-          })
-          resolve(res.result)
-        } else {
-          const errorMsg = res.result ? res.result.message : '初始化失败'
-          wx.showToast({
-            title: errorMsg,
-            icon: 'error',
-            duration: 3000
-          })
-          reject(new Error(errorMsg))
-        }
-      },
-      fail: (error) => {
-        wx.hideLoading()
-        console.error('调用云函数失败:', error)
-        wx.showToast({
-          title: '网络错误，请重试',
-          icon: 'error',
-          duration: 3000
-        })
-        reject(error)
-      }
-    })
-  })
-}
-
-/**
- * 检查记录数据库状态
- * @returns {Promise} 返回检查结果
- */
-function checkRecordsStatus() {
-  return new Promise((resolve, reject) => {
-    const db = wx.cloud.database()
-    
-    Promise.all([
-      db.collection('medication_records').count(),
-      db.collection('seizure_records').count(),
-      db.collection('other_records').count(),
-      db.collection('record_statistics').count()
-    ]).then(results => {
-      resolve({
-        medication_records: results[0].total,
-        seizure_records: results[1].total,
-        other_records: results[2].total,
-        record_statistics: results[3].total,
-        total: results.reduce((sum, result) => sum + result.total, 0),
-        initialized: results.some(result => result.total > 0)
-      })
-    }).catch(error => {
-      console.error('检查记录数据库状态失败:', error)
-      reject(error)
-    })
-  })
-}
-
-/**
  * 调用调药记录云函数
  * @param {string} action 操作类型：create, update, delete, get, list, search
  * @param {Object} params 参数对象
@@ -260,8 +39,7 @@ function callMedicationRecordFunction(action, params = {}) {
  */
 function createMedicationRecord(recordData) {
   return callMedicationRecordFunction('create', {
-    data: recordData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: recordData
   })
 }
 
@@ -274,8 +52,7 @@ function createMedicationRecord(recordData) {
 function updateMedicationRecord(recordId, recordData) {
   return callMedicationRecordFunction('update', {
     recordId: recordId,
-    data: recordData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: recordData
   })
 }
 
@@ -286,8 +63,7 @@ function updateMedicationRecord(recordId, recordData) {
  */
 function deleteMedicationRecord(recordId) {
   return callMedicationRecordFunction('delete', {
-    recordId: recordId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    recordId: recordId
   })
 }
 
@@ -298,8 +74,7 @@ function deleteMedicationRecord(recordId) {
  */
 function getMedicationRecord(recordId) {
   return callMedicationRecordFunction('get', {
-    recordId: recordId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    recordId: recordId
   })
 }
 
@@ -311,7 +86,6 @@ function getMedicationRecord(recordId) {
  */
 function listMedicationRecords(pageSize = 10, pageIndex = 0) {
   return callMedicationRecordFunction('list', {
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -327,7 +101,6 @@ function listMedicationRecords(pageSize = 10, pageIndex = 0) {
 function searchMedicationRecords(searchParams, pageSize = 10, pageIndex = 0) {
   return callMedicationRecordFunction('search', {
     data: searchParams,
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -371,8 +144,7 @@ function callSeizureRecordFunction(action, params = {}) {
  */
 function createSeizureRecord(recordData) {
   return callSeizureRecordFunction('create', {
-    data: recordData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: recordData
   })
 }
 
@@ -385,8 +157,7 @@ function createSeizureRecord(recordData) {
 function updateSeizureRecord(recordId, recordData) {
   return callSeizureRecordFunction('update', {
     recordId: recordId,
-    data: recordData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: recordData
   })
 }
 
@@ -397,8 +168,7 @@ function updateSeizureRecord(recordId, recordData) {
  */
 function deleteSeizureRecord(recordId) {
   return callSeizureRecordFunction('delete', {
-    recordId: recordId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    recordId: recordId
   })
 }
 
@@ -409,8 +179,7 @@ function deleteSeizureRecord(recordId) {
  */
 function getSeizureRecord(recordId) {
   return callSeizureRecordFunction('get', {
-    recordId: recordId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    recordId: recordId
   })
 }
 
@@ -422,7 +191,6 @@ function getSeizureRecord(recordId) {
  */
 function listSeizureRecords(pageSize = 10, pageIndex = 0) {
   return callSeizureRecordFunction('list', {
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -438,7 +206,6 @@ function listSeizureRecords(pageSize = 10, pageIndex = 0) {
 function searchSeizureRecords(searchParams, pageSize = 10, pageIndex = 0) {
   return callSeizureRecordFunction('search', {
     data: searchParams,
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -482,8 +249,7 @@ function callOtherRecordFunction(action, params = {}) {
  */
 function createOtherRecord(recordData) {
   return callOtherRecordFunction('create', {
-    data: recordData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: recordData
   })
 }
 
@@ -496,8 +262,7 @@ function createOtherRecord(recordData) {
 function updateOtherRecord(recordId, recordData) {
   return callOtherRecordFunction('update', {
     recordId: recordId,
-    data: recordData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: recordData
   })
 }
 
@@ -508,8 +273,7 @@ function updateOtherRecord(recordId, recordData) {
  */
 function deleteOtherRecord(recordId) {
   return callOtherRecordFunction('delete', {
-    recordId: recordId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    recordId: recordId
   })
 }
 
@@ -520,8 +284,7 @@ function deleteOtherRecord(recordId) {
  */
 function getOtherRecord(recordId) {
   return callOtherRecordFunction('get', {
-    recordId: recordId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    recordId: recordId
   })
 }
 
@@ -533,7 +296,6 @@ function getOtherRecord(recordId) {
  */
 function listOtherRecords(pageSize = 10, pageIndex = 0) {
   return callOtherRecordFunction('list', {
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -549,7 +311,6 @@ function listOtherRecords(pageSize = 10, pageIndex = 0) {
 function searchOtherRecords(searchParams, pageSize = 10, pageIndex = 0) {
   return callOtherRecordFunction('search', {
     data: searchParams,
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -592,8 +353,7 @@ function callMonthlyReportFunction(action, params = {}) {
  */
 function createMonthlyReport(reportData) {
   return callMonthlyReportFunction('create', {
-    data: reportData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: reportData
   })
 }
 
@@ -607,7 +367,6 @@ function updateMonthlyReport(reportId, reportData) {
   return callMonthlyReportFunction('update', {
     reportId: reportId,
     data: reportData,
-    userId: wx.getStorageSync('userId') || 'default_user'
   })
 }
 
@@ -618,8 +377,7 @@ function updateMonthlyReport(reportId, reportData) {
  */
 function getMonthlyReport(month) {
   return callMonthlyReportFunction('get', {
-    month: month,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    month: month
   })
 }
 
@@ -631,7 +389,6 @@ function getMonthlyReport(month) {
  */
 function listMonthlyReports(pageSize = 10, pageIndex = 0) {
   return callMonthlyReportFunction('list', {
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -642,9 +399,7 @@ function listMonthlyReports(pageSize = 10, pageIndex = 0) {
  * @returns {Promise} 返回上月汇报数据
  */
 function getLastMonthReport() {
-  return callMonthlyReportFunction('getLastReport', {
-    userId: wx.getStorageSync('userId') || 'default_user'
-  })
+  return callMonthlyReportFunction('getLastReport', {})
 }
 
 /**
@@ -652,9 +407,7 @@ function getLastMonthReport() {
  * @returns {Promise} 返回追踪药物列表
  */
 function getTrackedMedications() {
-  return callMonthlyReportFunction('getTrackedMedications', {
-    userId: wx.getStorageSync('userId') || 'default_user'
-  })
+  return callMonthlyReportFunction('getTrackedMedications', {})
 }
 
 /**
@@ -664,8 +417,7 @@ function getTrackedMedications() {
  */
 function updateTrackedMedications(medications) {
   return callMonthlyReportFunction('updateTrackedMedications', {
-    data: { medications: medications },
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: { medications: medications }
   })
 }
 
@@ -676,8 +428,7 @@ function updateTrackedMedications(medications) {
  */
 function checkMonthlyReportSubmitted(month) {
   return callMonthlyReportFunction('checkMonthSubmitted', {
-    month: month,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    month: month
   })
 }
 
@@ -739,8 +490,7 @@ function callFeedbackFunction(action, params = {}) {
  */
 function createFeedback(feedbackData) {
   return callFeedbackFunction('create', {
-    data: feedbackData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: feedbackData
   })
 }
 
@@ -752,7 +502,6 @@ function createFeedback(feedbackData) {
  */
 function listFeedbacks(pageSize = 10, pageIndex = 0) {
   return callFeedbackFunction('list', {
-    userId: wx.getStorageSync('userId') || 'default_user',
     pageSize: pageSize,
     pageIndex: pageIndex
   })
@@ -765,8 +514,21 @@ function listFeedbacks(pageSize = 10, pageIndex = 0) {
  */
 function getFeedback(feedbackId) {
   return callFeedbackFunction('get', {
-    feedbackId: feedbackId,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    feedbackId: feedbackId
+  })
+}
+
+function adminListFeedbacks(pageSize = 20, pageIndex = 0) {
+  return callFeedbackFunction('adminList', {
+    pageSize,
+    pageIndex
+  })
+}
+
+function replyFeedback(feedbackId, reply) {
+  return callFeedbackFunction('reply', {
+    feedbackId,
+    data: { reply }
   })
 }
 
@@ -812,8 +574,7 @@ function callQuestionnaireFunction(action, params = {}) {
 function submitQuestionnaire(formData, status = 'submitted') {
   return callQuestionnaireFunction('submit', {
     data: formData,
-    status: status,
-    userId: wx.getStorageSync('userId') || ''
+    status: status
   })
 }
 
@@ -871,8 +632,7 @@ function claimQuestionnaire(questionnaireId, childName, birthDate) {
   return callQuestionnaireFunction('claim', {
     questionnaireId,
     childName,
-    birthDate,
-    userId: wx.getStorageSync('userId') || ''
+    birthDate
   })
 }
 
@@ -956,8 +716,7 @@ function callCommunityFunction(action, params = {}) {
  */
 function createCommunityPost(postData) {
   return callCommunityFunction('createPost', {
-    data: postData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: postData
   })
 }
 
@@ -968,8 +727,7 @@ function createCommunityPost(postData) {
  */
 function getCommunityPost(postId) {
   return callCommunityFunction('getPost', {
-    postId: postId,
-    userId: wx.getStorageSync('userId') || ''
+    postId: postId
   })
 }
 
@@ -982,22 +740,18 @@ function listCommunityPosts(options = {}) {
   return callCommunityFunction('listPosts', {
     topicId: options.topicId || '',
     pageSize: options.pageSize || 10,
-    pageIndex: options.pageIndex || 0,
-    userId: wx.getStorageSync('userId') || ''
+    pageIndex: options.pageIndex || 0
   })
 }
 
 /**
  * 删除帖子
  * @param {string} postId 帖子ID
- * @param {boolean} isAdmin 是否管理员
  * @returns {Promise} 返回删除结果
  */
-function deleteCommunityPost(postId, isAdmin = false) {
+function deleteCommunityPost(postId) {
   return callCommunityFunction('deletePost', {
-    postId: postId,
-    userId: wx.getStorageSync('userId') || '',
-    isAdmin: isAdmin
+    postId: postId
   })
 }
 
@@ -1028,8 +782,7 @@ function hideCommunityPost(postId) {
 function createCommunityComment(postId, commentData) {
   return callCommunityFunction('createComment', {
     postId: postId,
-    data: commentData,
-    userId: wx.getStorageSync('userId') || 'default_user'
+    data: commentData
   })
 }
 
@@ -1044,8 +797,7 @@ function listCommunityComments(postId, pageSize = 20, pageIndex = 0) {
   return callCommunityFunction('listComments', {
     postId: postId,
     pageSize: pageSize,
-    pageIndex: pageIndex,
-    userId: wx.getStorageSync('userId') || ''
+    pageIndex: pageIndex
   })
 }
 
@@ -1053,15 +805,12 @@ function listCommunityComments(postId, pageSize = 20, pageIndex = 0) {
  * 删除评论
  * @param {string} commentId 评论ID
  * @param {string} postId 帖子ID
- * @param {boolean} isAdmin 是否管理员
  * @returns {Promise} 返回删除结果
  */
-function deleteCommunityComment(commentId, postId, isAdmin = false) {
+function deleteCommunityComment(commentId, postId) {
   return callCommunityFunction('deleteComment', {
     commentId: commentId,
-    postId: postId,
-    userId: wx.getStorageSync('userId') || '',
-    isAdmin: isAdmin
+    postId: postId
   })
 }
 
@@ -1074,8 +823,7 @@ function deleteCommunityComment(commentId, postId, isAdmin = false) {
 function toggleCommunityLike(itemId, itemType) {
   return callCommunityFunction('toggleLike', {
     itemId: itemId,
-    itemType: itemType,
-    userId: wx.getStorageSync('userId') || ''
+    itemType: itemType
   })
 }
 
@@ -1086,8 +834,7 @@ function toggleCommunityLike(itemId, itemType) {
  */
 function createCommunityTopic(topicData) {
   return callCommunityFunction('createTopic', {
-    data: topicData,
-    userId: wx.getStorageSync('userId') || ''
+    data: topicData
   })
 }
 
@@ -1134,17 +881,38 @@ function getCommunityShareData(postId) {
   return callCommunityFunction('getShareData', { postId: postId })
 }
 
+// ==================== 社区活动 ====================
+
+function createCommunityActivity(activityData) {
+  return callCommunityFunction('createActivity', { data: activityData })
+}
+
+function listCommunityActivities(options = {}) {
+  return callCommunityFunction('listActivities', {
+    status: options.status || '',
+    pageSize: options.pageSize || 10,
+    pageIndex: options.pageIndex || 0,
+    includeAll: options.includeAll || false
+  })
+}
+
+function getCommunityActivity(activityId) {
+  return callCommunityFunction('getActivity', { activityId })
+}
+
+function updateCommunityActivity(activityId, activityData) {
+  return callCommunityFunction('updateActivity', {
+    activityId,
+    data: activityData
+  })
+}
+
+function joinCommunityActivity(activityId) {
+  return callCommunityFunction('joinActivity', { activityId })
+}
+
 // 使用 CommonJS 语法导出函数
 module.exports = {
-  initDatabase,
-  checkDatabaseStatus,
-  getDepartments,
-  getExperts,
-  getSchedules,
-  getSystemConfig,
-  getResources,
-  initRecordsDatabase,
-  checkRecordsStatus,
   // 调药记录相关函数
   createMedicationRecord,
   updateMedicationRecord,
@@ -1182,6 +950,8 @@ module.exports = {
   createFeedback,
   listFeedbacks,
   getFeedback,
+  adminListFeedbacks,
+  replyFeedback,
   // 问卷相关函数
   submitQuestionnaire,
   getQuestionnaire,
@@ -1212,9 +982,58 @@ module.exports = {
   updateCommunityTopic,
   adminListCommunityPosts,
   getCommunityShareData,
+  // 社区活动相关函数
+  createCommunityActivity,
+  listCommunityActivities,
+  getCommunityActivity,
+  updateCommunityActivity,
+  joinCommunityActivity,
+  // 用户统计相关函数
+  getUserStats,
+  getTodayStats,
   // 应用配置相关函数
   getAppConfig,
   updateAppConfig
+}
+
+// ==================== 用户统计 ====================
+
+function getUserStats() {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'userStats',
+      data: {
+        action: 'getStats'
+      },
+      success: (res) => {
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          reject(new Error(res.result ? res.result.message : '获取统计失败'))
+        }
+      },
+      fail: reject
+    })
+  })
+}
+
+function getTodayStats() {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'userStats',
+      data: {
+        action: 'getTodayStats'
+      },
+      success: (res) => {
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          reject(new Error(res.result ? res.result.message : '获取今日统计失败'))
+        }
+      },
+      fail: reject
+    })
+  })
 }
 
 // ==================== 应用配置 ====================

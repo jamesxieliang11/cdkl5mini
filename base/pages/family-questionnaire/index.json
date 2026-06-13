@@ -8,7 +8,9 @@
     "van-checkbox-group": "/miniprogram_npm/@vant/weapp/checkbox-group/index",
     "van-checkbox": "/miniprogram_npm/@vant/weapp/checkbox/index",
     "van-uploader": "/miniprogram_npm/@vant/weapp/uploader/index",
-    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index",
-    "van-notice-bar": "/miniprogram_npm/@vant/weapp/notice-bar/index"
+    "van-cell": "/miniprogram_npm/@vant/weapp/cell/index",
+    "van-cell-group": "/miniprogram_npm/@vant/weapp/cell-group/index",
+    "van-field": "/miniprogram_npm/@vant/weapp/field/index",
+    "van-tag": "/miniprogram_npm/@vant/weapp/tag/index"
   }
 }

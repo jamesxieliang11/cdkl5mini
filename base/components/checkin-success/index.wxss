@@ -1,0 +1,84 @@
+.checkin-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.checkin-card {
+  width: 580rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.checkin-icon {
+  margin-bottom: 24rpx;
+}
+
+.checkin-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 32rpx;
+}
+
+.checkin-streak {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 16rpx;
+}
+
+.streak-fire {
+  font-size: 36rpx;
+  margin-right: 8rpx;
+}
+
+.streak-text {
+  font-size: 30rpx;
+  color: #666;
+}
+
+.streak-number {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #FF6B6B;
+  margin: 0 4rpx;
+}
+
+.checkin-today {
+  margin-bottom: 8rpx;
+}
+
+.today-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.checkin-total {
+  margin-bottom: 40rpx;
+}
+
+.total-text {
+  font-size: 26rpx;
+  color: #bbb;
+}
+
+.checkin-actions {
+  display: flex;
+  gap: 20rpx;
+  width: 100%;
+}
+
+.action-btn {
+  flex: 1;
+}
