@@ -263,6 +263,26 @@
   transform: scale(0.98);
 }
 
+.import-btn {
+  flex: 1;
+  background: white;
+  color: #667eea;
+  border: 2rpx solid #667eea;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  transition: all 0.3s ease;
+}
+
+.import-btn:active {
+  background: #f0f0ff;
+  transform: scale(0.98);
+}
+
 .btn-icon {
   font-size: 24rpx;
 }

@@ -993,7 +993,10 @@ module.exports = {
   getTodayStats,
   // 应用配置相关函数
   getAppConfig,
-  updateAppConfig
+  updateAppConfig,
+  // Excel导入相关函数
+  parseExcelFile,
+  batchImportRecords
 }
 
 // ==================== 用户统计 ====================
@@ -1060,4 +1063,31 @@ function getAppConfig() {
  */
 function updateAppConfig(config) {
   return callFeedbackFunction('updateAppConfig', { data: config })
+}
+
+// ==================== Excel导入 ====================
+
+function callImportRecordFunction(action, params = {}) {
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: 'importRecords',
+      data: { action, ...params },
+      success: (res) => {
+        if (res.result && res.result.success) {
+          resolve(res.result)
+        } else {
+          reject(new Error(res.result ? res.result.message : '操作失败'))
+        }
+      },
+      fail: reject
+    })
+  })
+}
+
+function parseExcelFile(fileID) {
+  return callImportRecordFunction('parseExcel', { fileID })
+}
+
+function batchImportRecords(recordType, records) {
+  return callImportRecordFunction('batchImport', { recordType, records })
 }

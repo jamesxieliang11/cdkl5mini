@@ -586,6 +586,10 @@ Page({
   /**
    * 预览图片
    */
+  goToImportRecords() {
+    wx.navigateTo({ url: '/pages/import-records/index' })
+  },
+
   previewImage(e) {
     const index = e.currentTarget.dataset.index
     const images = this.data.detailData.record.images

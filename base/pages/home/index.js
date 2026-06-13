@@ -159,5 +159,8 @@ Page({
   goToAI(event) {
     const scene = event.currentTarget.dataset.scene
     wx.navigateTo({ url: `/pages/ai-assistant/index?scene=${scene}` })
+  },
+  goToImportRecords() {
+    wx.navigateTo({ url: '/pages/import-records/index' })
   }
 })

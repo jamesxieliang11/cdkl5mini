@@ -22,7 +22,8 @@
     "pages/community-detail/index",
     "pages/community-admin/index",
     "pages/activity-detail/index",
-    "pages/admin-feedback/index"
+    "pages/admin-feedback/index",
+    "pages/import-records/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -71,6 +71,10 @@
         <text class="btn-icon">🔄</text>
         <text class="btn-text">重置</text>
       </button>
+      <button class="import-btn" bindtap="goToImportRecords">
+        <text class="btn-icon">📥</text>
+        <text class="btn-text">导入</text>
+      </button>
     </view>
   </view>
 

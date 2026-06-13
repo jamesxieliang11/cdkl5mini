@@ -133,6 +133,16 @@
       </view>
       <van-icon name="arrow" size="14px" color="#ccc" />
     </view>
+    <view class="tool-card" bindtap="goToImportRecords">
+      <view class="tool-icon-wrap" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+        <van-icon name="description" size="24px" color="#fff" />
+      </view>
+      <view class="tool-info">
+        <text class="tool-name">导入记录</text>
+        <text class="tool-desc">从 Excel 文件批量导入历史记录</text>
+      </view>
+      <van-icon name="arrow" size="14px" color="#ccc" />
+    </view>
   </view>
 
   <!-- 更多功能 -->

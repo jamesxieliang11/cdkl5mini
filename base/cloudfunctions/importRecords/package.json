@@ -1,0 +1,10 @@
+{
+  "name": "importRecords",
+  "version": "1.0.0",
+  "description": "Excel导入记录云函数 - 解析Excel文件并批量导入",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "xlsx": "^0.18.5"
+  }
+}

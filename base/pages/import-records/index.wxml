@@ -1,0 +1,228 @@
+<view class="page-container">
+  <!-- 状态栏占位 -->
+  <view class="status-bar"></view>
+
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <van-icon name="arrow-left" size="20" color="#333" />
+    </view>
+    <view class="nav-title">导入记录</view>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <!-- 步骤指示器 -->
+  <view class="steps-bar">
+    <view class="step-item {{currentStep >= 0 ? 'active' : ''}} {{currentStep > 0 ? 'done' : ''}}">
+      <view class="step-dot">{{currentStep > 0 ? '✓' : '1'}}</view>
+      <text class="step-label">选择文件</text>
+    </view>
+    <view class="step-line {{currentStep > 0 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 1 ? 'active' : ''}} {{currentStep > 1 ? 'done' : ''}}">
+      <view class="step-dot">{{currentStep > 1 ? '✓' : '2'}}</view>
+      <text class="step-label">AI 分析</text>
+    </view>
+    <view class="step-line {{currentStep > 1 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 2 ? 'active' : ''}} {{currentStep > 2 ? 'done' : ''}}">
+      <view class="step-dot">{{currentStep > 2 ? '✓' : '3'}}</view>
+      <text class="step-label">预览确认</text>
+    </view>
+    <view class="step-line {{currentStep > 2 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 3 ? 'active' : ''}}">
+      <view class="step-dot">4</view>
+      <text class="step-label">导入结果</text>
+    </view>
+  </view>
+
+  <!-- Step 0: 选择文件 -->
+  <view wx:if="{{currentStep === 0}}" class="step-container">
+    <view class="upload-area" bindtap="chooseFile">
+      <view wx:if="{{!selectedFile}}" class="upload-placeholder">
+        <van-icon name="description" size="48" color="#34BFA3" />
+        <text class="upload-text">点击选择 Excel 文件</text>
+        <text class="upload-hint">支持 .xlsx、.xls、.csv 格式</text>
+      </view>
+      <view wx:else class="file-info-card">
+        <view class="file-icon">
+          <van-icon name="description" size="32" color="#34BFA3" />
+        </view>
+        <view class="file-detail">
+          <text class="file-name">{{selectedFile.name}}</text>
+          <text class="file-size">{{selectedFile.size}}</text>
+        </view>
+        <view class="file-change">
+          <text>更换</text>
+        </view>
+      </view>
+    </view>
+
+    <van-notice-bar
+      text="从微信聊天记录中选择 Excel 文件，AI 将智能识别表格格式并映射到系统记录字段"
+      left-icon="info-o"
+      wrapable
+    />
+
+    <view class="action-bottom">
+      <van-button
+        type="primary"
+        block
+        round
+        disabled="{{!selectedFile || uploading}}"
+        loading="{{uploading}}"
+        loading-text="上传解析中..."
+        color="#34BFA3"
+        bindtap="startAnalysis"
+      >开始智能分析</van-button>
+    </view>
+  </view>
+
+  <!-- Step 1: AI 分析中 -->
+  <view wx:if="{{currentStep === 1}}" class="step-container">
+    <view class="ai-analysis-card">
+      <view class="ai-header">
+        <van-loading size="20" color="#34BFA3" />
+        <text class="ai-title">AI 正在分析表格结构...</text>
+      </view>
+      <view class="ai-progress-text" wx:if="{{aiProgress}}">
+        <text>{{aiProgress}}</text>
+      </view>
+      <view class="ai-tips">
+        <text>正在识别列名、数据类型和记录类别</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Step 2: 预览确认 -->
+  <view wx:if="{{currentStep === 2}}" class="step-container">
+    <!-- 记录类型 -->
+    <view class="section-card">
+      <view class="section-title">记录类型</view>
+      <view class="type-tags">
+        <view
+          class="type-tag {{recordType === 'medication' ? 'active' : ''}}"
+          bindtap="selectRecordType"
+          data-type="medication"
+        >调药记录</view>
+        <view
+          class="type-tag {{recordType === 'seizure' ? 'active' : ''}}"
+          bindtap="selectRecordType"
+          data-type="seizure"
+        >发作记录</view>
+        <view
+          class="type-tag {{recordType === 'other' ? 'active' : ''}}"
+          bindtap="selectRecordType"
+          data-type="other"
+        >其他记录</view>
+      </view>
+      <view class="confidence-row" wx:if="{{confidence}}">
+        <van-tag type="{{confidence === 'high' ? 'success' : confidence === 'medium' ? 'warning' : 'danger'}}" round>
+          AI 置信度: {{confidence === 'high' ? '高' : confidence === 'medium' ? '中' : '低'}}
+        </van-tag>
+        <text class="ai-note" wx:if="{{aiNote}}">{{aiNote}}</text>
+      </view>
+    </view>
+
+    <!-- 列映射 -->
+    <view class="section-card">
+      <view class="section-title">列映射关系</view>
+      <view class="mapping-list">
+        <view
+          class="mapping-item"
+          wx:for="{{mappingList}}"
+          wx:key="excelCol"
+          bindtap="editMapping"
+          data-index="{{index}}"
+        >
+          <view class="mapping-from">
+            <text class="mapping-label">{{item.excelCol}}</text>
+            <text class="mapping-sample">{{item.sample}}</text>
+          </view>
+          <van-icon name="arrow" size="14" color="#ccc" />
+          <view class="mapping-to {{item.targetField ? '' : 'unmapped'}}">
+            <text>{{item.targetLabel || '未映射（跳过）'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 数据预览 -->
+    <view class="section-card">
+      <view class="section-title">数据预览（前5条）</view>
+      <scroll-view scroll-x class="preview-scroll">
+        <view class="preview-table">
+          <view class="preview-row preview-header">
+            <view class="preview-cell" wx:for="{{previewHeaders}}" wx:key="*this">{{item}}</view>
+          </view>
+          <view class="preview-row" wx:for="{{previewRows}}" wx:key="index" wx:for-index="rowIdx">
+            <view class="preview-cell" wx:for="{{item}}" wx:key="index" wx:for-item="cell">{{cell}}</view>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="preview-summary">
+        <text>共 {{totalRows}} 条数据{{truncated ? '（仅导入前500条）' : ''}}</text>
+      </view>
+    </view>
+
+    <!-- 药物模式说明（仅调药记录） -->
+    <view class="section-card" wx:if="{{recordType === 'medication' && medicationMode}}">
+      <view class="section-title">药物数据模式</view>
+      <view class="mode-info">
+        <van-tag type="primary" round>{{medicationMode === 'single_row' ? '每行一种药物' : '每行多种药物'}}</van-tag>
+        <text class="mode-desc" wx:if="{{medicationMode === 'single_row'}}">相同日期/体重的行将合并为一条用药记录</text>
+        <text class="mode-desc" wx:else>每行包含多种药物信息，直接作为一条用药记录</text>
+      </view>
+    </view>
+
+    <view class="action-bottom">
+      <van-button
+        type="default"
+        round
+        custom-style="margin-right: 16rpx; flex: 1;"
+        bindtap="reAnalyze"
+      >重新分析</van-button>
+      <van-button
+        type="primary"
+        round
+        color="#34BFA3"
+        custom-style="flex: 2;"
+        disabled="{{!recordType}}"
+        bindtap="startImport"
+      >确认导入 {{totalRows}} 条</van-button>
+    </view>
+  </view>
+
+  <!-- Step 3: 导入结果 -->
+  <view wx:if="{{currentStep === 3}}" class="step-container">
+    <view wx:if="{{importing}}" class="importing-card">
+      <van-loading size="24" color="#34BFA3" />
+      <text class="importing-text">正在导入...</text>
+      <van-progress percentage="{{importProgress}}" color="#34BFA3" stroke-width="8" show-pivot />
+      <text class="importing-detail">{{importedCount}} / {{importTotal}}</text>
+    </view>
+
+    <view wx:else class="result-card">
+      <view class="result-icon {{importResult.failed > 0 ? 'partial' : 'success'}}">
+        <van-icon name="{{importResult.failed > 0 ? 'warning-o' : 'checked'}}" size="48" color="{{importResult.failed > 0 ? '#FF9800' : '#34BFA3'}}" />
+      </view>
+      <text class="result-title">{{importResult.failed > 0 ? '部分导入成功' : '导入完成'}}</text>
+      <text class="result-detail">成功导入 {{importResult.imported}} 条记录</text>
+      <text class="result-detail error" wx:if="{{importResult.failed > 0}}">{{importResult.failed}} 条导入失败</text>
+
+      <view class="result-actions">
+        <van-button type="primary" round block color="#34BFA3" bindtap="goToRecords">查看我的记录</van-button>
+        <van-button type="default" round block custom-style="margin-top: 16rpx;" bindtap="importMore">继续导入</van-button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 映射编辑弹窗 -->
+  <van-action-sheet
+    show="{{showMappingSheet}}"
+    actions="{{mappingFieldOptions}}"
+    cancel-text="取消"
+    bind:select="onMappingSelect"
+    bind:close="closeMappingSheet"
+    bind:cancel="closeMappingSheet"
+    description="选择「{{editingColumnName}}」对应的字段"
+  />
+</view>

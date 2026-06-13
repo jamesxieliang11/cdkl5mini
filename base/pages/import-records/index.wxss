@@ -1,0 +1,466 @@
+.page-container {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.status-bar {
+  height: env(safe-area-inset-top);
+  background: #fff;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  padding: 0 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.nav-back {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.nav-placeholder {
+  width: 60rpx;
+}
+
+/* 步骤指示器 */
+.steps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 32rpx 20rpx;
+  background: #fff;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.step-dot {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.step-item.active .step-dot {
+  background: #34BFA3;
+  color: #fff;
+}
+
+.step-item.done .step-dot {
+  background: #34BFA3;
+  color: #fff;
+  font-size: 20rpx;
+}
+
+.step-label {
+  font-size: 22rpx;
+  color: #999;
+  white-space: nowrap;
+}
+
+.step-item.active .step-label {
+  color: #34BFA3;
+  font-weight: 500;
+}
+
+.step-line {
+  width: 60rpx;
+  height: 4rpx;
+  background: #e0e0e0;
+  margin: 0 8rpx;
+  margin-bottom: 28rpx;
+  border-radius: 2rpx;
+  transition: background 0.3s;
+}
+
+.step-line.active {
+  background: #34BFA3;
+}
+
+/* 通用步骤容器 */
+.step-container {
+  padding: 24rpx;
+}
+
+/* Step 0: 文件选择 */
+.upload-area {
+  background: #fff;
+  border-radius: 16rpx;
+  border: 3rpx dashed #d0d0d0;
+  padding: 60rpx 32rpx;
+  margin-bottom: 24rpx;
+  transition: border-color 0.3s;
+}
+
+.upload-area:active {
+  border-color: #34BFA3;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.upload-text {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  margin-top: 8rpx;
+}
+
+.upload-hint {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.file-info-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.file-icon {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(52, 191, 163, 0.1);
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.file-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.file-change {
+  padding: 8rpx 20rpx;
+  background: rgba(52, 191, 163, 0.1);
+  border-radius: 20rpx;
+}
+
+.file-change text {
+  font-size: 24rpx;
+  color: #34BFA3;
+}
+
+.action-bottom {
+  display: flex;
+  padding: 32rpx 0;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
+/* Step 1: AI 分析 */
+.ai-analysis-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 48rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.ai-title {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.ai-progress-text {
+  width: 100%;
+  max-height: 400rpx;
+  overflow-y: auto;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+}
+
+.ai-progress-text text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.ai-tips {
+  padding: 8rpx 0;
+}
+
+.ai-tips text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* Step 2: 预览 */
+.section-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.type-tags {
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.type-tag {
+  padding: 12rpx 32rpx;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  background: #f5f6fa;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.type-tag.active {
+  background: linear-gradient(135deg, #34BFA3 0%, #2da88e 100%);
+  color: #fff;
+  font-weight: 500;
+}
+
+.confidence-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.ai-note {
+  font-size: 22rpx;
+  color: #999;
+  flex: 1;
+}
+
+/* 列映射 */
+.mapping-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.mapping-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.mapping-item:active {
+  background: #f0f0f0;
+}
+
+.mapping-from {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.mapping-label {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.mapping-sample {
+  font-size: 22rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240rpx;
+}
+
+.mapping-to {
+  flex: 1;
+  text-align: right;
+}
+
+.mapping-to text {
+  font-size: 26rpx;
+  color: #34BFA3;
+  font-weight: 500;
+}
+
+.mapping-to.unmapped text {
+  color: #ccc;
+  font-weight: 400;
+}
+
+/* 数据预览表格 */
+.preview-scroll {
+  margin: 0 -12rpx;
+  white-space: nowrap;
+}
+
+.preview-table {
+  display: inline-block;
+  min-width: 100%;
+}
+
+.preview-row {
+  display: flex;
+}
+
+.preview-row.preview-header {
+  background: #f0f8f6;
+}
+
+.preview-cell {
+  min-width: 180rpx;
+  max-width: 280rpx;
+  padding: 12rpx 16rpx;
+  font-size: 24rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f0f0f0;
+  border-right: 1rpx solid #f0f0f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-header .preview-cell {
+  font-weight: 600;
+  color: #34BFA3;
+  font-size: 22rpx;
+}
+
+.preview-summary {
+  padding: 16rpx 0 0;
+  text-align: center;
+}
+
+.preview-summary text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 药物模式 */
+.mode-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.mode-desc {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* Step 3: 导入中 / 结果 */
+.importing-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 60rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.importing-text {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.importing-detail {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.result-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 60rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.result-icon {
+  margin-bottom: 12rpx;
+}
+
+.result-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.result-detail {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.result-detail.error {
+  color: #ee0a24;
+}
+
+.result-actions {
+  width: 100%;
+  margin-top: 32rpx;
+}
