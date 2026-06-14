@@ -12,43 +12,55 @@
 </view>
 
 <!-- 加载状态 -->
-<view wx:if="{{loading}}" class="loading-container">
+<view wx:if="{{loading}}" class="center-container">
   <van-loading size="24px" type="spinner" color="#34BFA3">正在加载手册...</van-loading>
 </view>
 
-<!-- 无页面图片时的兜底 -->
-<view wx:elif="{{errorMsg}}" class="fallback-container">
+<!-- 转换中 -->
+<view wx:elif="{{converting}}" class="center-container">
+  <view class="converting-card">
+    <van-loading size="24px" type="spinner" color="#34BFA3" />
+    <text class="converting-title">首次打开，正在生成预览...</text>
+    <text class="converting-hint">PDF 转换为图片中，仅需等待一次</text>
+  </view>
+</view>
+
+<!-- 错误/兜底 -->
+<view wx:elif="{{errorMsg}}" class="center-container">
   <view class="fallback-card">
     <view class="fallback-icon">📖</view>
     <view class="fallback-title">CDKL5 宣教手册</view>
-    <view class="fallback-desc">全面了解 CDKL5 缺陷症的科普知识、康复指导和日常护理要点</view>
 
-    <van-button
-      type="primary"
-      size="large"
-      round
-      icon="eye-o"
-      color="#34BFA3"
-      custom-style="margin-top: 48rpx;"
-      bindtap="openPDFDirect"
-    >打开手册预览</van-button>
+    <view wx:if="{{errorMsg === 'convert_failed'}}">
+      <view class="fallback-desc">预览生成失败，可能是首次加载超时</view>
+      <van-button
+        type="primary" round block
+        color="#34BFA3"
+        custom-style="margin-top: 32rpx;"
+        bindtap="retryConvert"
+      >重试生成预览</van-button>
+      <van-button
+        type="default" round block
+        custom-style="margin-top: 16rpx;"
+        bindtap="openPDFDirect"
+      >直接打开 PDF</van-button>
+    </view>
 
-    <view class="fallback-tip">
-      <van-icon name="info-o" size="14" color="#999" />
-      <text>将使用系统阅读器打开 PDF 文件</text>
+    <view wx:else>
+      <view class="fallback-desc">加载失败，请检查网络后重试</view>
+      <van-button
+        type="primary" round block
+        color="#34BFA3"
+        custom-style="margin-top: 32rpx;"
+        bindtap="openPDFDirect"
+      >打开 PDF 手册</van-button>
     </view>
   </view>
 </view>
 
 <!-- 图片预览模式 -->
 <view wx:else class="viewer-container">
-  <!-- 页面图片列表 -->
-  <scroll-view
-    scroll-y
-    class="pages-scroll"
-    enhanced
-    show-scrollbar="{{false}}"
-  >
+  <scroll-view scroll-y class="pages-scroll" enhanced show-scrollbar="{{false}}">
     <view
       class="page-item"
       wx:for="{{pages}}"
@@ -66,17 +78,16 @@
         show-menu-by-longpress
       />
     </view>
-    <!-- 底部留白 -->
     <view class="bottom-spacer"></view>
   </scroll-view>
 
-  <!-- 页码指示器 -->
-  <view class="page-indicator" wx:if="{{showToolbar}}">
+  <!-- 页码 -->
+  <view class="page-indicator">
     <text>{{currentPage}} / {{totalPages}}</text>
   </view>
 
-  <!-- 底部工具栏 -->
-  <view class="bottom-toolbar" wx:if="{{showToolbar}}">
+  <!-- 底部栏 -->
+  <view class="bottom-toolbar">
     <view class="toolbar-btn" bindtap="downloadPDF">
       <van-icon name="down" size="20" color="#666" />
       <text>下载PDF</text>

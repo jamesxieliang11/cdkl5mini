@@ -1,0 +1,11 @@
+{
+  "name": "pdfConvert",
+  "version": "1.0.0",
+  "description": "PDF转图片云函数 - 用于手册页内预览",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "pdfjs-dist": "3.11.174",
+    "canvas": "^2.11.2"
+  }
+}

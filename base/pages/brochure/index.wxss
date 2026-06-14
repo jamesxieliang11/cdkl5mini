@@ -40,24 +40,41 @@
   padding: 10rpx;
 }
 
-/* 加载状态 */
-.loading-container {
+/* 居中容器 */
+.center-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60vh;
-}
-
-/* 兜底模式（无页面图片时） */
-.fallback-container {
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 60vh;
   padding: 40rpx;
-  background: linear-gradient(180deg, #f7f8fa 0%, #fff 100%);
 }
 
+/* 转换中 */
+.converting-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  width: 100%;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.converting-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  margin-top: 8rpx;
+}
+
+.converting-hint {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 兜底卡片 */
 .fallback-card {
   background: #fff;
   border-radius: 24rpx;
@@ -95,24 +112,14 @@
   font-size: 28rpx;
   color: #666;
   line-height: 1.6;
-  padding: 0 20rpx;
+  margin-bottom: 8rpx;
 }
 
-.fallback-tip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  margin-top: 24rpx;
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 图片预览模式 */
+/* 图片预览 */
 .viewer-container {
   position: relative;
   height: calc(100vh - 88rpx - env(safe-area-inset-top));
-  background: #f0f0f0;
+  background: #e8e8e8;
 }
 
 .pages-scroll {
@@ -120,8 +127,8 @@
 }
 
 .page-item {
-  padding: 4rpx 0;
-  background: #e8e8e8;
+  padding: 2rpx 0;
+  background: #d0d0d0;
 }
 
 .page-image {
@@ -133,7 +140,7 @@
   height: 120rpx;
 }
 
-/* 页码指示器 */
+/* 页码 */
 .page-indicator {
   position: fixed;
   top: calc(88rpx + env(safe-area-inset-top) + 16rpx);
