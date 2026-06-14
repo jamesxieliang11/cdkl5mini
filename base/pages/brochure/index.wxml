@@ -4,47 +4,87 @@
   <view class="nav-back" bindtap="goBack">
     <van-icon name="arrow-left" size="20" color="#333" />
   </view>
-  <view class="nav-title">📖 CDKL5 宣教手册</view>
-  <view class="nav-placeholder"></view>
+  <view class="nav-title">CDKL5 宣教手册</view>
+  <view class="nav-right" wx:if="{{pages.length > 0}}" bindtap="downloadPDF">
+    <van-icon name="down" size="18" color="#34BFA3" />
+  </view>
+  <view class="nav-placeholder" wx:else></view>
 </view>
 
-<view class="page-container">
-  <!-- 手册封面信息 -->
-  <view class="brochure-card">
-    <view class="brochure-icon">📖</view>
-    <view class="brochure-title">CDKL5 宣教手册</view>
-    <view class="brochure-desc">全面了解 CDKL5 缺陷症的科普知识、康复指导和日常护理要点</view>
-  </view>
+<!-- 加载状态 -->
+<view wx:if="{{loading}}" class="loading-container">
+  <van-loading size="24px" type="spinner" color="#34BFA3">正在加载手册...</van-loading>
+</view>
 
-  <!-- 加载状态 -->
-  <view class="loading-section" wx:if="{{loading}}">
-    <van-loading size="24px" type="spinner" color="#34BFA3">正在加载手册...</van-loading>
-  </view>
+<!-- 无页面图片时的兜底 -->
+<view wx:elif="{{errorMsg}}" class="fallback-container">
+  <view class="fallback-card">
+    <view class="fallback-icon">📖</view>
+    <view class="fallback-title">CDKL5 宣教手册</view>
+    <view class="fallback-desc">全面了解 CDKL5 缺陷症的科普知识、康复指导和日常护理要点</view>
 
-  <!-- 打开手册按钮 -->
-  <view class="action-section" wx:if="{{!loading}}">
-    <van-button 
-      type="primary" 
-      size="large" 
-      round 
-      icon="description"
-      bind:click="openBrochure"
-      custom-class="open-button"
+    <van-button
+      type="primary"
+      size="large"
+      round
+      icon="eye-o"
       color="#34BFA3"
-    >
-      打开宣教手册
-    </van-button>
+      custom-style="margin-top: 48rpx;"
+      bindtap="openPDFDirect"
+    >打开手册预览</van-button>
 
-    <view class="tip-text">
+    <view class="fallback-tip">
       <van-icon name="info-o" size="14" color="#999" />
-      <text>点击按钮将下载并打开 PDF 手册</text>
+      <text>将使用系统阅读器打开 PDF 文件</text>
     </view>
   </view>
+</view>
 
-  <!-- 错误提示 -->
-  <view wx:if="{{errorMsg}}" class="error-section">
-    <van-empty description="{{errorMsg}}">
-      <van-button slot="button" type="primary" size="small" bind:click="openBrochure" color="#34BFA3">重试</van-button>
-    </van-empty>
+<!-- 图片预览模式 -->
+<view wx:else class="viewer-container">
+  <!-- 页面图片列表 -->
+  <scroll-view
+    scroll-y
+    class="pages-scroll"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view
+      class="page-item"
+      wx:for="{{pages}}"
+      wx:key="pageNum"
+      data-index="{{index}}"
+      bindtap="previewPage"
+    >
+      <image
+        class="page-image"
+        src="{{item.url}}"
+        mode="widthFix"
+        lazy-load
+        data-index="{{index}}"
+        bindload="onPageImageLoad"
+        show-menu-by-longpress
+      />
+    </view>
+    <!-- 底部留白 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 页码指示器 -->
+  <view class="page-indicator" wx:if="{{showToolbar}}">
+    <text>{{currentPage}} / {{totalPages}}</text>
+  </view>
+
+  <!-- 底部工具栏 -->
+  <view class="bottom-toolbar" wx:if="{{showToolbar}}">
+    <view class="toolbar-btn" bindtap="downloadPDF">
+      <van-icon name="down" size="20" color="#666" />
+      <text>下载PDF</text>
+    </view>
+    <view class="toolbar-divider"></view>
+    <view class="toolbar-hint">
+      <van-icon name="enlarge" size="16" color="#999" />
+      <text>点击图片可放大查看</text>
+    </view>
   </view>
 </view>

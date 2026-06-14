@@ -1,17 +1,17 @@
-/* 状态栏区域 */
+/* 状态栏 */
 .status-bar {
-  height: var(--status-bar-height);
-  background: #ffffff;
+  height: env(safe-area-inset-top);
+  background: #fff;
 }
 
-/* 自定义导航栏 - 与 feedback 等页面一致 */
+/* 导航栏 */
 .nav-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 88rpx;
   padding: 0 20rpx;
-  background: #ffffff;
+  background: #fff;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
@@ -32,26 +32,44 @@
   width: 80rpx;
 }
 
-/* 页面容器 */
-.page-container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 100%);
-  padding: 40rpx 30rpx 140rpx;
+.nav-right {
+  width: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10rpx;
 }
 
-/* 手册卡片 */
-.brochure-card {
-  background: #ffffff;
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
+
+/* 兜底模式（无页面图片时） */
+.fallback-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  background: linear-gradient(180deg, #f7f8fa 0%, #fff 100%);
+}
+
+.fallback-card {
+  background: #fff;
   border-radius: 24rpx;
   padding: 60rpx 40rpx;
   text-align: center;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-  margin-bottom: 50rpx;
+  width: 100%;
   position: relative;
   overflow: hidden;
 }
 
-.brochure-card::before {
+.fallback-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -61,51 +79,121 @@
   background: linear-gradient(90deg, #34BFA3, #5dd5b8);
 }
 
-.brochure-icon {
+.fallback-icon {
   font-size: 100rpx;
   margin-bottom: 30rpx;
 }
 
-.brochure-title {
+.fallback-title {
   font-size: 40rpx;
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 20rpx;
 }
 
-.brochure-desc {
+.fallback-desc {
   font-size: 28rpx;
   color: #666;
   line-height: 1.6;
   padding: 0 20rpx;
 }
 
-/* 加载区域 */
-.loading-section {
-  display: flex;
-  justify-content: center;
-  padding: 60rpx 0;
-}
-
-/* 操作区域 */
-.action-section {
-  padding: 20rpx 0;
-}
-
-.open-button {
-  margin-bottom: 30rpx;
-}
-
-.tip-text {
+.fallback-tip {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8rpx;
+  margin-top: 24rpx;
   font-size: 24rpx;
   color: #999;
 }
 
-/* 错误提示 */
-.error-section {
-  padding: 40rpx 0;
+/* 图片预览模式 */
+.viewer-container {
+  position: relative;
+  height: calc(100vh - 88rpx - env(safe-area-inset-top));
+  background: #f0f0f0;
+}
+
+.pages-scroll {
+  height: 100%;
+}
+
+.page-item {
+  padding: 4rpx 0;
+  background: #e8e8e8;
+}
+
+.page-image {
+  width: 100%;
+  display: block;
+}
+
+.bottom-spacer {
+  height: 120rpx;
+}
+
+/* 页码指示器 */
+.page-indicator {
+  position: fixed;
+  top: calc(88rpx + env(safe-area-inset-top) + 16rpx);
+  right: 24rpx;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  z-index: 10;
+}
+
+/* 底部工具栏 */
+.bottom-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 90rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1rpx solid #e8e8e8;
+  z-index: 10;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 0 32rpx;
+  height: 100%;
+}
+
+.toolbar-btn text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.toolbar-btn:active {
+  opacity: 0.7;
+}
+
+.toolbar-divider {
+  width: 1rpx;
+  height: 36rpx;
+  background: #e0e0e0;
+}
+
+.toolbar-hint {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.toolbar-hint text {
+  font-size: 24rpx;
+  color: #999;
 }
